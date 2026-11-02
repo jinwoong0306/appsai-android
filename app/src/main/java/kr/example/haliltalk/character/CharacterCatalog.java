@@ -143,14 +143,14 @@ public final class CharacterCatalog {
     // Source origin is (0, 0) for every layer.
     static String[] layerPaths(String characterId, String hatId, String faceId,
             String bodyId, String backId, String propId) {
-        String base = "characters/base/" + rowOrDefault(CHARACTERS, characterId)[2] + "/";
+        String base = "characters/latest/" + rowOrDefault(CHARACTERS, characterId)[2] + ".png";
         return new String[] {
                 accessoryPath(rowOrDefault(BACKS, backId)),
-                base + "몸체.png",
+                base,
                 accessoryPath(rowOrDefault(BODIES, bodyId)),
-                base + "표정_기본.png",
+                null,
                 accessoryPath(rowOrDefault(FACES, faceId)),
-                base + "손.png",
+                null,
                 accessoryPath(rowOrDefault(HATS, hatId)),
                 accessoryPath(rowOrDefault(PROPS, propId))
         };

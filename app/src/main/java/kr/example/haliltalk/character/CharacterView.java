@@ -12,9 +12,9 @@ import android.view.View;
 import java.io.IOException;
 import java.io.InputStream;
 
-/** Transparent 64 px source layers rendered at an integer physical-pixel scale. */
+/** Latest 128px character artwork with legacy accessories scaled to the same canvas. */
 public final class CharacterView extends View {
-    private static final int SOURCE_SIZE = 64;
+    private static final int SOURCE_SIZE = 128;
 
     private final Paint pixelPaint = new Paint();
     private final Rect destination = new Rect();
@@ -67,9 +67,10 @@ public final class CharacterView extends View {
         options.inPreferredConfig = Bitmap.Config.ARGB_8888;
         try (InputStream stream = getContext().getAssets().open(path)) {
             Bitmap bitmap = BitmapFactory.decodeStream(stream, null, options);
-            if (bitmap == null || bitmap.getWidth() != SOURCE_SIZE
-                    || bitmap.getHeight() != SOURCE_SIZE) {
-                throw new IllegalStateException("Expected a 64x64 PNG asset: " + path);
+            int expected = path.startsWith("characters/latest/") ? SOURCE_SIZE : 64;
+            if (bitmap == null || bitmap.getWidth() != expected
+                    || bitmap.getHeight() != expected) {
+                throw new IllegalStateException("Unexpected PNG dimensions: " + path);
             }
             bitmap.setDensity(Bitmap.DENSITY_NONE);
             return bitmap;
@@ -80,7 +81,7 @@ public final class CharacterView extends View {
 
     @Override
     protected void onMeasure(int widthMeasureSpec, int heightMeasureSpec) {
-        int side = SOURCE_SIZE * Math.max(1, Math.round(2 * getResources().getDisplayMetrics().density));
+        int side = Math.round(SOURCE_SIZE * getResources().getDisplayMetrics().density);
         int width = Math.max(getSuggestedMinimumWidth(), side + getPaddingLeft() + getPaddingRight());
         int height = Math.max(getSuggestedMinimumHeight(), side + getPaddingTop() + getPaddingBottom());
         setMeasuredDimension(resolveSize(width, widthMeasureSpec), resolveSize(height, heightMeasureSpec));
@@ -93,8 +94,8 @@ public final class CharacterView extends View {
         int height = getHeight() - getPaddingTop() - getPaddingBottom();
         if (width <= 0 || height <= 0) return;
 
-        int scale = Math.max(1, Math.min(width, height) / SOURCE_SIZE);
-        int side = SOURCE_SIZE * scale;
+        int side = Math.min(width, height);
+        if (side >= SOURCE_SIZE) side = SOURCE_SIZE * (side / SOURCE_SIZE);
         int left = getPaddingLeft() + (width - side) / 2;
         int top = getPaddingTop() + (height - side) / 2;
         destination.set(left, top, left + side, top + side);
