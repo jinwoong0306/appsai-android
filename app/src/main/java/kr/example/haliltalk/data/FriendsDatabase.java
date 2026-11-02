@@ -3,10 +3,11 @@ package kr.example.haliltalk.data;
 import android.content.Context;
 import android.database.sqlite.SQLiteDatabase;
 import android.database.sqlite.SQLiteOpenHelper;
+import kr.example.haliltalk.shop.DemoShopStore;
 
 /** Additive migrations preserve existing friends, messages, experience, and appearance. */
 public final class FriendsDatabase extends SQLiteOpenHelper {
-    public FriendsDatabase(Context context) { super(context, "friends.db", null, 4); }
+    public FriendsDatabase(Context context) { super(context, "friends.db", null, 5); }
     @Override public void onConfigure(SQLiteDatabase db) { db.setForeignKeyConstraintsEnabled(true); }
     @Override public void onCreate(SQLiteDatabase db) {
         db.execSQL("CREATE TABLE friends(id INTEGER PRIMARY KEY, package TEXT UNIQUE, name TEXT, personality TEXT, xp INTEGER DEFAULT 0)");
@@ -14,6 +15,7 @@ public final class FriendsDatabase extends SQLiteOpenHelper {
         createAppearance(db);
         createChatRequests(db);
         addAppearanceSlots(db);
+        DemoShopStore.createTables(db);
     }
     private void createAppearance(SQLiteDatabase db) {
         db.execSQL("CREATE TABLE appearance(friend INTEGER PRIMARY KEY REFERENCES friends(id) ON DELETE CASCADE, character TEXT NOT NULL, hat TEXT NOT NULL, face TEXT NOT NULL, prop TEXT NOT NULL)");
@@ -22,6 +24,7 @@ public final class FriendsDatabase extends SQLiteOpenHelper {
         if (oldVersion < 2 && newVersion >= 2) createAppearance(db);
         if (oldVersion < 3 && newVersion >= 3) createChatRequests(db);
         if (oldVersion < 4 && newVersion >= 4) addAppearanceSlots(db);
+        if (oldVersion < 5 && newVersion >= 5) DemoShopStore.createTables(db);
     }
     private void addAppearanceSlots(SQLiteDatabase db) {
         db.execSQL("ALTER TABLE appearance ADD COLUMN body TEXT NOT NULL DEFAULT 'none'");

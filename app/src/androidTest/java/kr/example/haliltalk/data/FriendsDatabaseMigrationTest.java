@@ -5,6 +5,21 @@ import android.database.sqlite.SQLiteDatabase;
 import android.test.InstrumentationTestCase;
 
 public class FriendsDatabaseMigrationTest extends InstrumentationTestCase {
+    public void testVersionFourSeedsDemoWalletAndKeepsEquippedItems() {
+        try(SQLiteDatabase database=SQLiteDatabase.create(null);
+                FriendsDatabase helper=new FriendsDatabase(getInstrumentation().getTargetContext())){
+            database.execSQL("CREATE TABLE appearance(friend INTEGER PRIMARY KEY,character TEXT,hat TEXT,face TEXT,prop TEXT,body TEXT,back TEXT)");
+            database.execSQL("INSERT INTO appearance VALUES(7,'chat','crown','round_glasses','gamepad','red_scarf','angel_wings')");
+            helper.onUpgrade(database,4,5);
+            kr.example.haliltalk.shop.DemoShopStore store=new kr.example.haliltalk.shop.DemoShopStore(database);
+            assertEquals(500,store.balance());
+            assertTrue(store.owns("crown"));assertTrue(store.owns("red_scarf"));assertTrue(store.owns("angel_wings"));
+            try(Cursor cursor=database.rawQuery("SELECT character,hat,body,back FROM appearance WHERE friend=7",null)){
+                assertTrue(cursor.moveToFirst());assertEquals("chat",cursor.getString(0));assertEquals("crown",cursor.getString(1));
+                assertEquals("red_scarf",cursor.getString(2));assertEquals("angel_wings",cursor.getString(3));
+            }
+        }
+    }
     public void testVersionThreeAddsEmptyBodyAndBackWithoutReplacingAppearance() {
         try(SQLiteDatabase database=SQLiteDatabase.create(null);
                 FriendsDatabase helper=new FriendsDatabase(getInstrumentation().getTargetContext())){

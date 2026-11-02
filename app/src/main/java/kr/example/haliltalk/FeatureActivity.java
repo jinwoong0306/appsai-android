@@ -43,4 +43,9 @@ public abstract class FeatureActivity extends Activity {
     }
 
     void openSettings() { startActivity(new Intent(this,SettingsActivity.class)); }
+    void navigateFeature(int destination) {
+        if(destination==R.id.nav_shop){startActivity(new Intent(this,ShopActivity.class));finish();}
+        else if(destination==R.id.nav_customize){startActivity(new Intent(this,CustomizationActivity.class));finish();}
+        else openMain(destination==R.id.nav_apps);
+    }
 }

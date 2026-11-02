@@ -18,6 +18,7 @@ import kr.example.haliltalk.data.FriendsDatabase;
 import kr.example.haliltalk.character.CharacterCatalog;
 import kr.example.haliltalk.character.CharacterView;
 import kr.example.haliltalk.ai.ChatController;
+import kr.example.haliltalk.shop.DemoShopStore;
 
 public class MainActivity extends Activity {
     SQLiteDatabase db; LinearLayout root, body; int friendId; String friendName; boolean showingHome, showingApps;
@@ -28,6 +29,7 @@ public class MainActivity extends Activity {
     String selectedPackage="",selectedLabel="",query="",nickname="",character="chat",hat="none",face="none",prop="none";
     int personality=0,accessoryTab=0;
     ChatController chatController;
+    DemoShopStore shopStore;
     final Runnable chatChanged=()->{if(!showingHome&&!showingApps&&!showingCharacter)refreshChat();};
     AlertDialog consentDialog;
     final String[] personalities={"다정한 친구","장난기 많은 친구","차분한 친구"};
@@ -35,6 +37,7 @@ public class MainActivity extends Activity {
         setTheme(R.style.AppTheme);super.onCreate(b);
         if(android.os.Build.VERSION.SDK_INT>=30)getWindow().setDecorFitsSystemWindows(false);
         db=new FriendsDatabase(this).getWritableDatabase();
+        shopStore=new DemoShopStore(db);
         chatController=((ChatApplication)getApplication()).chat();
         if(b!=null){
             selectedPackage=b.getString("selected_package","");selectedLabel=b.getString("selected_label","");
@@ -180,6 +183,7 @@ public class MainActivity extends Activity {
         if(destination==R.id.nav_friends)home();
         else if(destination==R.id.nav_apps)apps();
         else if(destination==R.id.nav_customize)startActivity(new Intent(this,CustomizationActivity.class));
+        else if(destination==R.id.nav_shop)startActivity(new Intent(this,ShopActivity.class));
     }
     void startNewFriend(){selectedPackage="";selectedLabel="";query="";apps();}
     @Override protected void onNewIntent(Intent intent){
@@ -250,14 +254,23 @@ public class MainActivity extends Activity {
         View row=getLayoutInflater().inflate(R.layout.row_choice,parent,false);
         row.setTag(id);row.setSelected(selected);row.setContentDescription(label+(selected?" 선택됨":""));
         ((CharacterView)row.findViewById(R.id.choice_character)).setAppearance(base,h,f,p);
-        ((TextView)row.findViewById(R.id.choice_label)).setText(label);
+        boolean owned=CharacterCatalog.slotFor(id)==null||shopStore.owns(id);
+        ((TextView)row.findViewById(R.id.choice_label)).setText(owned?label:getString(R.string.shop_locked,label,shopStore.price(id)));
         row.findViewById(R.id.choice_check).setVisibility(selected?View.VISIBLE:View.INVISIBLE);
-        row.setOnClickListener(v->action.run());parent.addView(row);
+        row.setOnClickListener(v->{
+            if(CharacterCatalog.slotFor(id)==null||shopStore.owns(id))action.run();
+            else new AlertDialog.Builder(this).setMessage(getString(R.string.shop_locked,label,shopStore.price(id)))
+                    .setPositiveButton(R.string.shop_open,(dialog,which)->startActivity(new Intent(this,ShopActivity.class).putExtra("item_id",id)))
+                    .setNegativeButton(android.R.string.cancel,null).show();
+        });parent.addView(row);
     }
     void createFriend(){
         EditText field=findViewById(R.id.friend_name);String name=field.getText().toString().trim();
         if(name.isEmpty()){field.setError("친구 이름을 입력해 주세요.");field.requestFocus();return;}
         if(name.codePointCount(0,name.length())>20){field.setError("이름은 20자까지 입력해 주세요.");return;}
+        if(!shopStore.owns(hat)||!shopStore.owns(face)||!shopStore.owns(prop)){
+            Toast.makeText(this,R.string.shop_ownership_needed,Toast.LENGTH_SHORT).show();return;
+        }
         try(Cursor existing=db.rawQuery("SELECT id,name FROM friends WHERE package=?",new String[]{selectedPackage})){
             if(existing.moveToFirst()){chat(existing.getInt(0),existing.getString(1));return;}
         }
@@ -380,6 +393,7 @@ public class MainActivity extends Activity {
     @Override protected void onStart(){
         super.onStart();
         if(showingHome)home();
+        else if(showingCharacter)renderChoices();
         else if(!showingApps&&!showingCharacter)showAppearance(findViewById(R.id.chat_character),friendId);
         chatController.addListener(chatChanged);chatChanged.run();
     }

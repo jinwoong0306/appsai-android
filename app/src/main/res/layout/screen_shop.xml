@@ -1,0 +1,22 @@
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android" style="@style/Page" android:orientation="vertical">
+    <LinearLayout android:layout_width="match_parent" android:layout_height="wrap_content" android:orientation="horizontal" android:gravity="center_vertical">
+        <TextView style="@style/SectionTitle" android:layout_width="0dp" android:layout_weight="1" android:text="@string/shop_title"/>
+        <ImageButton android:id="@+id/open_settings" style="@style/IconButton" android:src="@drawable/ic_settings" android:contentDescription="@string/settings_title"/>
+    </LinearLayout>
+    <TextView android:id="@+id/shop_balance" style="@style/BodyText" android:textStyle="bold" android:gravity="end"/>
+    <TextView style="@style/SecondaryText" android:text="@string/shop_demo_notice" android:layout_marginBottom="8dp"/>
+    <LinearLayout android:layout_width="match_parent" android:layout_height="144dp" android:orientation="horizontal" android:gravity="center_vertical" android:background="@drawable/bg_hero" android:padding="8dp">
+        <kr.example.haliltalk.character.CharacterView android:id="@+id/shop_preview" android:layout_width="144dp" android:layout_height="match_parent"/>
+        <LinearLayout android:layout_width="0dp" android:layout_weight="1" android:layout_height="wrap_content" android:orientation="vertical">
+            <TextView android:id="@+id/shop_selected_name" style="@style/SectionTitle" android:layout_marginTop="0dp"/>
+            <Button android:id="@+id/shop_character" style="@style/SecondaryButton"/>
+        </LinearLayout>
+    </LinearLayout>
+    <HorizontalScrollView android:layout_width="match_parent" android:layout_height="wrap_content" android:scrollbars="none">
+        <LinearLayout android:id="@+id/shop_categories" android:layout_width="wrap_content" android:layout_height="wrap_content" android:orientation="horizontal"/>
+    </HorizontalScrollView>
+    <ListView android:id="@+id/shop_list" android:layout_width="match_parent" android:layout_height="0dp" android:layout_weight="1" android:divider="@android:color/transparent" android:dividerHeight="8dp"/>
+    <TextView android:id="@+id/shop_message" style="@style/SecondaryText" android:accessibilityLiveRegion="polite" android:gravity="center"/>
+    <Button android:id="@+id/shop_buy" style="@style/PrimaryButton"/>
+    <include layout="@layout/bottom_navigation"/>
+</LinearLayout>

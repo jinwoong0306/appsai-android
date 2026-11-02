@@ -15,9 +15,11 @@ import java.util.Arrays;
 import kr.example.haliltalk.character.CharacterCatalog;
 import kr.example.haliltalk.character.CharacterView;
 import kr.example.haliltalk.data.FriendsDatabase;
+import kr.example.haliltalk.shop.DemoShopStore;
 
 public final class CustomizationActivity extends FeatureActivity {
     SQLiteDatabase db;
+    DemoShopStore store;
     int friendId, slot;
     String friendName="";
     String[] appearance={"chat","none","none","none","none","none"};
@@ -28,12 +30,13 @@ public final class CustomizationActivity extends FeatureActivity {
     @Override public void onCreate(Bundle state) {
         super.onCreate(state);
         db=new FriendsDatabase(this).getWritableDatabase();
+        store=new DemoShopStore(db);
         setContentView(R.layout.screen_customization);
         findViewById(R.id.open_settings).setOnClickListener(v->confirmDiscard(this::openSettings));
         findViewById(R.id.wardrobe_friend).setOnClickListener(v->chooseFriend());
         findViewById(R.id.wardrobe_save).setOnClickListener(v->saveAppearance());
         findViewById(R.id.wardrobe_cancel).setOnClickListener(v->{appearance=saved.clone();render();});
-        BottomNavigation.bind(this,R.id.nav_customize,destination->confirmDiscard(()->openMain(destination==R.id.nav_apps)));
+        BottomNavigation.bind(this,R.id.nav_customize,destination->confirmDiscard(()->navigateFeature(destination)));
         try(Cursor cursor=db.rawQuery("SELECT id,name FROM friends ORDER BY id DESC",null)){
             while(cursor.moveToNext()){friendIds.add(cursor.getInt(0));friendNames.add(cursor.getString(1));}
         }
@@ -101,14 +104,24 @@ public final class CustomizationActivity extends FeatureActivity {
         row.setTag(id);boolean selected=id.equals(appearance[part]);row.setSelected(selected);
         String[] preview=appearance.clone();preview[part]=id;
         ((CharacterView)row.findViewById(R.id.choice_character)).setAppearance(preview[0],preview[1],preview[2],preview[3],preview[4],preview[5]);
-        ((TextView)row.findViewById(R.id.choice_label)).setText(label);
+        boolean owned=part==0||store.owns(id);
+        ((TextView)row.findViewById(R.id.choice_label)).setText(owned?label:getString(R.string.shop_locked,label,store.price(id)));
         row.findViewById(R.id.choice_check).setVisibility(selected?View.VISIBLE:View.INVISIBLE);
         row.setContentDescription(selected?getString(R.string.selected_choice_format,label):label);
-        row.setOnClickListener(v->{appearance[part]=id;render();});
+        row.setOnClickListener(v->{
+            if(owned){appearance[part]=id;render();}
+            else new AlertDialog.Builder(this).setMessage(getString(R.string.shop_locked,label,store.price(id)))
+                    .setPositiveButton(R.string.shop_open,(dialog,which)->
+                            startActivity(new android.content.Intent(this,ShopActivity.class).putExtra("item_id",id)))
+                    .setNegativeButton(android.R.string.cancel,null).show();
+        });
         parent.addView(row);
     }
 
     void saveAppearance() {
+        for(int i=1;i<appearance.length;i++)if(!store.owns(appearance[i])){
+            Toast.makeText(this,R.string.shop_ownership_needed,Toast.LENGTH_SHORT).show();return;
+        }
         ContentValues values=new ContentValues();values.put("friend",friendId);
         String[] columns={"character","hat","face","body","back","prop"};
         for(int i=0;i<columns.length;i++)values.put(columns[i],appearance[i]);
@@ -130,5 +143,6 @@ public final class CustomizationActivity extends FeatureActivity {
         super.onSaveInstanceState(state);
     }
     @Override public void onBackPressed(){confirmDiscard(this::finish);}
+    @Override protected void onResume(){super.onResume();if(friendId>0)render();}
     @Override protected void onDestroy(){db.close();super.onDestroy();}
 }
