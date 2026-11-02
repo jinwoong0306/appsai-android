@@ -1,0 +1,8 @@
+<resources>
+    <item type="id" name="nav_friends"/>
+    <item type="id" name="nav_apps"/>
+    <item type="id" name="nav_customize"/>
+    <string name="nav_customize_label">꾸미기</string>
+    <string name="nav_friends_label">친구</string>
+    <string name="nav_apps_label">앱 찾기</string>
+</resources>
