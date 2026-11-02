@@ -36,6 +36,8 @@ appsai-android/
 │  ├─ STATUS.md        # 실제 구현·검증 상태
 │  └─ SOURCES.md       # 오픈소스·리소스 출처 기록
 ├─ scripts/verify_mvp.py  # 에뮬레이터 UI 검증, 실행 전 주의사항 확인
+├─ .github/            # 이슈·PR 양식, CODEOWNERS, Android 빌드 작업
+├─ CONTRIBUTING.md     # 3인 팀 협업과 관리자 확인 목록
 ├─ GUIDE.md            # 수업 요건·평가·제출 안내
 ├─ AGENTS.md           # 프로젝트 작업 지침
 ├─ gradle/ 및 gradlew  # Gradle Wrapper
@@ -48,6 +50,7 @@ appsai-android/
 
 - [수업 기준 및 발표 체크리스트](GUIDE.md)
 - [개발 계획과 완료 기준](docs/ROADMAP.md)
+- [3인 팀 협업 가이드](CONTRIBUTING.md)
 - [현재 상태와 미확인 사항](docs/STATUS.md)
 - [오픈소스와 리소스 출처](docs/SOURCES.md)
 

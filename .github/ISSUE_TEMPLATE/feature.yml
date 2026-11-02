@@ -1,0 +1,30 @@
+name: 기능 개발
+description: 개발할 기능과 완료 기준을 정합니다.
+title: "[기능] "
+body:
+  - type: textarea
+    id: problem
+    attributes:
+      label: 목적과 배경
+      description: 누가 어떤 상황에서 필요한 기능인지 작성해 주세요.
+    validations:
+      required: true
+  - type: textarea
+    id: tasks
+    attributes:
+      label: 작업 범위
+      placeholder: "예: 채팅 목록 XML 작성, 어댑터 연결"
+    validations:
+      required: true
+  - type: textarea
+    id: acceptance
+    attributes:
+      label: 완료 기준과 검증 방법
+      description: 직접 확인 가능한 결과와 테스트 환경을 적어 주세요.
+    validations:
+      required: true
+  - type: textarea
+    id: dependency
+    attributes:
+      label: 관련 파일 및 선행 작업
+      description: 다른 팀원과 충돌할 수 있는 파일이나 의존 작업을 적어 주세요.

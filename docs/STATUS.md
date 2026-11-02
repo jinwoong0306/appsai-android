@@ -32,4 +32,4 @@
 
 ## 협업 현황
 
-원격 저장소: https://github.com/jinwoong0306/appsai-android . 팀원 명단과 역할은 아직 확인되지 않았다. 실제 담당자가 확인되면 작업을 배정한다. 가상 이름이나 인위적인 커밋을 만들지 않는다.
+원격 저장소: https://github.com/jinwoong0306/appsai-android . 최종 관리자: @jinwoong0306. 팀원: @Creepc, @jaezero. 초대는 사용자가 진행했으며 초대 수락·접근 권한은 미확인이다. 기능별 담당은 협의 후 이슈에 배정한다. 가상 이름이나 인위적인 커밋을 만들지 않는다.
