@@ -1,5 +1,36 @@
 # 진행 상태와 작업 목록
 
+## 2026-11-02 앱 선택 독립 검증 모듈
+
+- `app-picker-probe`를 별도 Java/XML Android application 모듈로 추가했다.
+  기존 앱과 다른 applicationId를 사용하며 기존 SQLite를 읽거나 변경하지 않는다.
+  공통 설정 변경은 `settings.gradle`의 모듈 include 추가다.
+- 사용량·인터넷·`QUERY_ALL_PACKAGES` 권한을 선언하지 않고
+  `MAIN`/`LAUNCHER` queries로 실행 앱을 조회한다. 실제 이름·아이콘·패키지명,
+  검색과 단일 선택 결과를 표시한다. 전체 설치 패키지 조회는 아니다.
+- Pixel 7 AVD (`sdk_gphone64_x86_64`, Android 17/API 37, target 35)에서
+  23개 조회와 Chrome·Calendar·Camera 등의 아이콘 표시를 확인했다.
+  사용량 app-op은 `No operations / Default mode: default`였다.
+  실제 화면에서 Chrome 행을 눌러 `선택됨: com.android.chrome` 표시와
+  행 강조를 확인했다. 시스템 바 여백도 실제 캡처로 수정·확인했다.
+- `:app:assembleDebug`, `:app-picker-probe:assembleDebug` 빌드 성공.
+  `:app-picker-probe:connectedDebugAndroidTest` 실제 기기 테스트 1건 통과
+  (실제 조회, 중복 제거, 이름·아이콘, 패키지 검색, 선택, 빈 결과, 검색 초기화).
+  테스트 결과는 failures=0, errors=0, skipped=0이다.
+- `:app-picker-probe:lintDebug` 성공, 오류 0건/경고 3건.
+  기존 앱과 동일한 target 35 안내, 구버전 백업 설정 안내,
+  행 선택 배경의 overdraw 추정 경고를 남겼다. 경고 억제는 하지 않았다.
+  SDK 내장 legacy 테스트 runner와 시스템 바 API의 deprecated 안내가 있다.
+  Java LSP는 미설치이므로 Javac와 lint로 검사했다.
+- 최초 오프라인 lint·기기 테스트는 검사 도구 캐시가 없어 실패했다.
+  온라인으로 필요한 도구를 받은 뒤 최종 오프라인 빌드·lint·기기 테스트가 성공했다.
+- 실행법과 재현 절차는 `app-picker-probe/README.md`, 로컬 화면·테스트 증거는
+  해당 모듈의 Git 제외 `build/` 아래에 있다. 기존 공유 작업은 보존했으며
+  검증 변경은 `feature/app-picker-probe` 브랜치로 분리해 공유한다.
+- 남은 검증: 실제 휴대폰과 Android 15/16, YouTube/Instagram 설치 환경,
+  회전 시 선택 복원, 업무·비공개 프로필, Google Play 정책 심사.
+  캐릭터 이미지·사용량 수집·영구 저장 기능은 이 검증 모듈의 범위가 아니다.
+
 기준: 2026-11-02. 작업명은 앱사이(AppSai)이며 상표 검토는 미완료다. 발표 일정은 공지 기준이며 후속 공지를 확인해야 한다.
 
 ## 확인됨
