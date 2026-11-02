@@ -53,6 +53,12 @@ save/cancel. New friend and usage permission actions moved off home into a
 top-right settings screen. Thirty compatible production accessories are available.
 Currency/shop remains a subsequent demo increment; ranking is still future work.
 
+v0.3.0: shop is the fourth real destination. The fixed preview uses the same
+character renderer; a scrollable item list and slot filters show all 30 items.
+A visible demo wallet, temporary prices, purchase confirmation and owned/insufficient
+states distinguish this mock economy from real rewards/payments. Unowned wardrobe
+choices open the shop and cannot be saved. Existing equipped items survive migration.
+
 ## 5. Reusable primitives and states
 
 Primary button: purple fill, white medium type, pressed ripple, disabled muted

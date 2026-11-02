@@ -10,7 +10,8 @@ final class BottomNavigation {
     private static final int[][] ITEMS = {
             {R.id.nav_friends, R.string.nav_friends_label, R.drawable.ic_friends},
             {R.id.nav_apps, R.string.nav_apps_label, R.drawable.ic_search},
-            {R.id.nav_customize, R.string.nav_customize_label, R.drawable.ic_customize}
+            {R.id.nav_customize, R.string.nav_customize_label, R.drawable.ic_customize},
+            {R.id.nav_shop, R.string.shop_title, R.drawable.ic_shop}
     };
 
     interface OnDestinationSelected { void select(int destination); }
