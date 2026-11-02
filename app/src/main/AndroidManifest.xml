@@ -1,7 +1,11 @@
 <manifest xmlns:android="http://schemas.android.com/apk/res/android">
     <uses-permission android:name="android.permission.PACKAGE_USAGE_STATS" />
+    <uses-permission android:name="android.permission.INTERNET" />
     <queries><intent><action android:name="android.intent.action.MAIN"/><category android:name="android.intent.category.LAUNCHER"/></intent></queries>
-    <application android:theme="@android:style/Theme.Material.Light.NoActionBar" android:label="할 일톡 MVP" android:usesCleartextTraffic="false" android:allowBackup="false">
+    <application android:name=".ChatApplication" android:theme="@android:style/Theme.Material.Light.NoActionBar" android:label="앱사이" android:usesCleartextTraffic="false" android:allowBackup="false">
+        <activity android:name=".SettingsActivity" android:exported="false" />
+        <activity android:name=".CustomizationActivity" android:exported="false" />
+        <activity android:name=".ShopActivity" android:exported="false" />
         <activity android:name=".MainActivity" android:exported="true" android:windowSoftInputMode="adjustResize"><intent-filter><action android:name="android.intent.action.MAIN"/><category android:name="android.intent.category.LAUNCHER"/></intent-filter></activity>
     </application>
 </manifest>

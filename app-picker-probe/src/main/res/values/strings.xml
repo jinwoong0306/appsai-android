@@ -1,0 +1,11 @@
+<resources>
+    <string name="app_name">앱 선택 검증</string>
+    <string name="title">앱 선택 기술 검증</string>
+    <string name="scope">현재 프로필에서 조회 가능한 실행 앱입니다. 전체 설치 앱 목록이 아닙니다. 사용량·인터넷 권한을 요청하지 않습니다.</string>
+    <string name="search_hint">앱 이름 또는 패키지명 검색</string>
+    <string name="none_selected">선택한 앱 없음</string>
+    <string name="empty">조회 또는 검색 결과가 없습니다.</string>
+    <string name="environment">%1$s / Android %2$s / API %3$d / target %4$d</string>
+    <string name="count">조회 %1$d개 / 검색 결과 %2$d개</string>
+    <string name="selected">선택됨: %1$s\n앱 연결값만 선택했습니다. 사용량 접근은 허용되지 않습니다.</string>
+</resources>
