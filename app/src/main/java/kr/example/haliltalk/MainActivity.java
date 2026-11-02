@@ -1,0 +1,30 @@
+package kr.example.haliltalk;
+
+import android.app.*;
+import android.app.usage.*;
+import android.content.*;
+import android.content.pm.*;
+import android.database.Cursor;
+import android.database.sqlite.*;
+import android.graphics.Color;
+import android.os.Bundle;
+import android.provider.Settings;
+import android.view.*;
+import android.widget.*;
+import java.util.*;
+
+public class MainActivity extends Activity {
+    SQLiteDatabase db; LinearLayout root, body; int friendId; String friendName;
+    final int ink=Color.rgb(72,43,57), accent=Color.rgb(237,116,112);
+    @Override public void onCreate(Bundle b){ super.onCreate(b); db=new SQLiteOpenHelper(this,"friends.db",null,1){public void onCreate(SQLiteDatabase d){d.execSQL("CREATE TABLE friends(id INTEGER PRIMARY KEY, package TEXT UNIQUE, name TEXT, personality TEXT, xp INTEGER DEFAULT 0)"); d.execSQL("CREATE TABLE messages(id INTEGER PRIMARY KEY, friend INTEGER, content TEXT, is_user INTEGER, created INTEGER)");}public void onUpgrade(SQLiteDatabase d,int o,int n){}}.getWritableDatabase(); home(); }
+    TextView text(String s,int size){ TextView t=new TextView(this);t.setText(s);t.setTextSize(size);t.setTextColor(ink);t.setPadding(8,10,8,10);return t; }
+    Button button(String s,Runnable r){Button b=new Button(this);b.setText(s);b.setOnClickListener(v->r.run());return b;}
+    void screen(String title){setContentView(R.layout.activity_main);root=findViewById(R.id.screen_root);body=findViewById(R.id.screen_body);TextView heading=findViewById(R.id.screen_title);heading.setText(title);}
+    void home(){screen("💬 할 일톡");body.addView(text("앱을 친구로 만들고 대화해봐요!\n이 버전의 답장은 미리 준비된 예시예요.",15));body.addView(button("＋ 대화 상대 추가",()->apps()));Cursor c=db.rawQuery("SELECT id,name,personality,xp FROM friends ORDER BY id DESC",null);while(c.moveToNext()){int id=c.getInt(0);String name=c.getString(1),person=c.getString(2);int xp=c.getInt(3);body.addView(button("💬 "+name+"   ·   "+person+"   ·   경험치 "+xp,()->chat(id,name)));}c.close();body.addView(button("사용 정보 접근 권한 설정",()->startActivity(new Intent(Settings.ACTION_USAGE_ACCESS_SETTINGS))));body.addView(text("사용 시간은 폰 안에서만 조회해요. 권한이 없어도 채팅은 가능해요.",13));}
+    void apps(){screen("친구로 만들 앱 선택");body.addView(button("← 돌아가기",()->home())); Intent intent=new Intent(Intent.ACTION_MAIN);intent.addCategory(Intent.CATEGORY_LAUNCHER);List<ResolveInfo> list=getPackageManager().queryIntentActivities(intent,0);list.sort(Comparator.comparing(x->x.loadLabel(getPackageManager()).toString(),String.CASE_INSENSITIVE_ORDER));Set<String> seen=new HashSet<>(); for(ResolveInfo info:list){String pkg=info.activityInfo.packageName;if(pkg.equals(getPackageName())||!seen.add(pkg))continue;String name=info.loadLabel(getPackageManager()).toString();LinearLayout row=new LinearLayout(this);row.setGravity(Gravity.CENTER_VERTICAL);ImageView icon=new ImageView(this);icon.setImageDrawable(info.loadIcon(getPackageManager()));row.addView(icon,new LinearLayout.LayoutParams(75,75));TextView label=text(name,16);row.addView(label,new LinearLayout.LayoutParams(0,-2,1));row.addView(button("＋",()->choose(pkg,name)));body.addView(row);} }
+    void choose(String pkg,String name){String[] options={"다정한 친구","장난기 많은 친구","쿨한 친구"};new AlertDialog.Builder(this).setTitle(name+"의 성격을 골라줘").setItems(options,(d,i)->{Cursor c=db.rawQuery("SELECT id FROM friends WHERE package=?",new String[]{pkg});if(c.moveToFirst()){int id=c.getInt(0);c.close();chat(id,name);return;}c.close();ContentValues v=new ContentValues();v.put("package",pkg);v.put("name",name);v.put("personality",options[i]);int id=(int)db.insertOrThrow("friends",null,v);save(id,"안녕! 이제 우리 친구야. 오늘 뭐 하고 있었어?",false);chat(id,name);}).setNegativeButton("취소",null).show();}
+    void save(int id,String s,boolean user){ContentValues v=new ContentValues();v.put("friend",id);v.put("content",s);v.put("is_user",user?1:0);v.put("created",System.currentTimeMillis());db.insert("messages",null,v);}
+    boolean hasUsage(){return ((AppOpsManager)getSystemService(APP_OPS_SERVICE)).checkOpNoThrow(AppOpsManager.OPSTR_GET_USAGE_STATS,android.os.Process.myUid(),getPackageName())==AppOpsManager.MODE_ALLOWED;}
+    void usage(){if(!hasUsage()){new AlertDialog.Builder(this).setMessage("선택한 앱의 오늘 사용 시간을 보려면 사용 정보 접근 권한이 필요해요.").setPositiveButton("설정",(d,w)->startActivity(new Intent(Settings.ACTION_USAGE_ACCESS_SETTINGS))).setNegativeButton("나중에",null).show();return;}Cursor c=db.rawQuery("SELECT package FROM friends WHERE id=?",new String[]{""+friendId});if(!c.moveToFirst()){c.close();return;}String pkg=c.getString(0);c.close();Calendar start=Calendar.getInstance();start.set(Calendar.HOUR_OF_DAY,0);start.set(Calendar.MINUTE,0);start.set(Calendar.SECOND,0);start.set(Calendar.MILLISECOND,0);UsageStatsManager m=(UsageStatsManager)getSystemService(USAGE_STATS_SERVICE);Map<String,UsageStats> data=m.queryAndAggregateUsageStats(start.getTimeInMillis(),System.currentTimeMillis());UsageStats u=data.get(pkg);long minutes=u==null?0:u.getTotalTimeInForeground()/60000;new AlertDialog.Builder(this).setTitle("오늘의 사용 시간").setMessage(friendName+" 사용 시간: 약 "+minutes+"분\n\n시스템 집계 및 기기 상태에 따라 실제 시간과 차이가 있을 수 있어요. 사용한 내용은 알 수 없어요.").setPositiveButton("확인",null).show();}
+    void chat(int id,String name){friendId=id;friendName=name;screen("💬 "+name);body.addView(button("← 대화 목록",()->home()));body.addView(button("오늘 사용 시간 확인",()->usage()));body.addView(text("MVP: AI 연결 전 예시 답장입니다.",13));Cursor c=db.rawQuery("SELECT content,is_user FROM messages WHERE friend=? ORDER BY id",new String[]{""+id});while(c.moveToNext())body.addView(text((c.getInt(1)==1?"나: ":name+": ")+c.getString(0),16));c.close();LinearLayout bar=new LinearLayout(this);EditText input=new EditText(this);input.setSingleLine();input.setHint("메시지 보내기");bar.addView(input,new LinearLayout.LayoutParams(0,-2,1));bar.addView(button("전송",()->{String message=input.getText().toString().trim();if(message.isEmpty())return;save(id,message,true);save(id,"그랬구나! 이야기해줘서 고마워 😊",false);db.execSQL("UPDATE friends SET xp=xp+1 WHERE id=?",new Object[]{id});chat(id,name);}));root.addView(bar);}
+}
