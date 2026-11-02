@@ -1,0 +1,21 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent" android:layout_height="match_parent"
+    android:id="@+id/probe_root" android:orientation="vertical" android:padding="16dp">
+    <TextView android:layout_width="match_parent" android:layout_height="wrap_content"
+        android:text="@string/title" android:textSize="24sp" android:textStyle="bold" />
+    <TextView android:layout_width="match_parent" android:layout_height="wrap_content"
+        android:text="@string/scope"
+        android:paddingTop="8dp" />
+    <TextView android:id="@+id/environment" android:layout_width="match_parent" android:layout_height="wrap_content" />
+    <EditText android:id="@+id/search" android:layout_width="match_parent" android:layout_height="wrap_content"
+        android:minHeight="48dp" android:hint="@string/search_hint" android:inputType="text" android:singleLine="true" android:importantForAutofill="no" />
+    <TextView android:id="@+id/count" android:layout_width="match_parent" android:layout_height="wrap_content"
+        android:accessibilityLiveRegion="polite" />
+    <TextView android:id="@+id/selected" android:layout_width="match_parent" android:layout_height="wrap_content"
+        android:text="@string/none_selected" android:padding="8dp" android:accessibilityLiveRegion="polite" android:textIsSelectable="true" />
+    <TextView android:id="@android:id/empty" android:layout_width="match_parent" android:layout_height="wrap_content"
+        android:text="@string/empty" android:padding="16dp" />
+    <ListView android:id="@+id/apps" android:layout_width="match_parent" android:layout_height="0dp"
+        android:layout_weight="1" android:choiceMode="singleChoice" />
+</LinearLayout>
