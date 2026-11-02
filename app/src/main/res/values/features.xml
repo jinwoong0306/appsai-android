@@ -1,0 +1,14 @@
+<resources>
+    <string-array name="accessory_slot_names"><item>머리</item><item>얼굴</item><item>목·몸</item><item>등</item><item>손소품</item></string-array>
+    <string name="settings_title">설정</string>
+    <string name="settings_description">친구 추가와 앱 사용 권한을 관리해요.</string>
+    <string name="customize_title">친구 꾸미기</string>
+    <string name="customize_select">꾸밀 친구</string>
+    <string name="customize_empty">아직 친구가 없어요.\n우상단 설정에서 앱 친구를 추가해 주세요.</string>
+    <string name="customize_save">꾸미기 저장</string>
+    <string name="customize_reset">변경 취소</string>
+    <string name="customize_saved">꾸미기를 저장했어요.</string>
+    <string name="customize_unsaved">저장하지 않은 꾸미기가 있어요.</string>
+    <string name="customize_discard">변경 버리기</string>
+    <string name="customize_keep">계속 꾸미기</string>
+</resources>

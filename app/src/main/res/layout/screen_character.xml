@@ -1,0 +1,156 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    style="@style/Page" android:orientation="vertical">
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:minHeight="48dp"
+        android:orientation="horizontal"
+        android:gravity="center_vertical">
+
+        <Button
+            android:id="@+id/character_back"
+            style="@style/IconButton"
+            android:drawableStart="@drawable/ic_back"
+            android:contentDescription="@string/navigate_back" />
+
+        <TextView
+            style="@style/SectionTitle"
+            android:layout_width="0dp"
+            android:layout_weight="1"
+            android:layout_marginTop="8dp"
+            android:layout_marginBottom="8dp"
+            android:gravity="center"
+            android:text="@string/character_title" />
+
+        <Space
+            android:layout_width="48dp"
+            android:layout_height="1dp" />
+    </LinearLayout>
+
+    <TextView
+        android:id="@+id/linked_app"
+        style="@style/SecondaryText"
+        android:layout_marginBottom="8dp"
+        android:gravity="center"
+        android:maxLines="1"
+        android:ellipsize="end"
+        android:text="@string/linked_app_placeholder" />
+
+    <kr.example.haliltalk.character.CharacterView
+        android:id="@+id/character_preview"
+        android:layout_width="match_parent"
+        android:layout_height="152dp"
+        android:layout_marginBottom="8dp"
+        android:padding="8dp"
+        android:background="@drawable/bg_hero"
+        android:contentDescription="@string/character_preview_description" />
+
+    <ScrollView
+        android:id="@+id/character_scroll"
+        android:layout_width="match_parent"
+        android:layout_height="0dp"
+        android:layout_weight="1"
+        android:fillViewport="true"
+        android:clipToPadding="false">
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="vertical"
+            android:paddingBottom="20dp">
+
+            <TextView
+                style="@style/SectionTitle"
+                android:labelFor="@id/friend_name"
+                android:text="@string/friend_name_label" />
+
+            <EditText
+                android:id="@+id/friend_name"
+                style="@style/InputField"
+                android:hint="@string/friend_name_hint"
+                android:inputType="textPersonName|textCapWords"
+                android:imeOptions="actionDone"
+                android:maxLength="30"
+                android:autofillHints="nickname" />
+
+            <TextView
+                style="@style/SectionTitle"
+                android:text="@string/character_selection" />
+
+            <HorizontalScrollView
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:scrollbars="none"
+                android:clipToPadding="false">
+
+                <LinearLayout
+                    android:id="@+id/character_choices"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:orientation="horizontal" />
+            </HorizontalScrollView>
+
+            <TextView
+                style="@style/SectionTitle"
+                android:text="@string/accessory_selection" />
+
+            <HorizontalScrollView
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginBottom="12dp"
+                android:scrollbars="none"
+                android:clipToPadding="false">
+
+                <LinearLayout
+                    android:id="@+id/accessory_tabs"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:orientation="horizontal" />
+            </HorizontalScrollView>
+
+            <HorizontalScrollView
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:scrollbars="none"
+                android:clipToPadding="false">
+
+                <LinearLayout
+                    android:id="@+id/accessory_choices"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:orientation="horizontal" />
+            </HorizontalScrollView>
+
+            <TextView
+                style="@style/SectionTitle"
+                android:text="@string/personality_selection" />
+
+            <HorizontalScrollView
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:scrollbars="none"
+                android:clipToPadding="false">
+
+                <LinearLayout
+                    android:id="@+id/personality_choices"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:orientation="horizontal" />
+            </HorizontalScrollView>
+
+            <TextView
+                style="@style/SecondaryText"
+                android:layout_marginTop="16dp"
+                android:gravity="center"
+                android:text="@string/asset_preview_note" />
+        </LinearLayout>
+    </ScrollView>
+
+    <Button
+        android:id="@+id/create_friend"
+        style="@style/PrimaryButton"
+        android:layout_marginBottom="12dp"
+        android:text="@string/create_friend" />
+</LinearLayout>

@@ -1,0 +1,12 @@
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    style="@style/Page" android:orientation="vertical">
+    <LinearLayout android:layout_width="match_parent" android:layout_height="wrap_content" android:gravity="center_vertical" android:orientation="horizontal">
+        <ImageButton android:id="@+id/settings_back" style="@style/IconButton" android:src="@drawable/ic_back" android:contentDescription="@string/navigate_back"/>
+        <TextView style="@style/SectionTitle" android:layout_width="0dp" android:layout_weight="1" android:gravity="center" android:text="@string/settings_title"/>
+        <Space android:layout_width="48dp" android:layout_height="1dp"/>
+    </LinearLayout>
+    <TextView style="@style/SecondaryText" android:layout_marginTop="16dp" android:layout_marginBottom="16dp" android:text="@string/settings_description"/>
+    <Button android:id="@+id/add_friend" style="@style/PrimaryButton" android:text="@string/add_app_friend"/>
+    <Button android:id="@+id/usage_settings" style="@style/SecondaryButton" android:text="@string/usage_settings"/>
+    <TextView style="@style/SecondaryText" android:layout_marginTop="8dp" android:text="@string/usage_optional"/>
+</LinearLayout>
