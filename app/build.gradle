@@ -5,12 +5,12 @@ def firebaseConfigured = file('google-services.json').exists() && !project.hasPr
 if (firebaseConfigured) apply plugin: 'com.google.gms.google-services'
 
 def characterAssets = layout.buildDirectory.dir('generated/characterAssets')
-def copyCharacterAssets = tasks.register('copyCharacterAssets', Copy) {
+def copyCharacterAssets = tasks.register('copyCharacterAssets', Sync) {
     into(characterAssets)
     includeEmptyDirs = false
-    from(rootProject.file('캐릭터_에셋/02_분리레이어_64px')) {
-        include '*/몸체.png', '*/표정_기본.png', '*/손.png'
-        into 'characters/base'
+    from(rootProject.file('캐릭터_에셋/09_최종스타일_캐릭터에셋/02_픽셀에셋_128px')) {
+        include '*.png'
+        into 'characters/latest'
     }
     from(rootProject.file('캐릭터_에셋/07_액세서리_30종/01_장착레이어_64px')) {
         include '*/*.png'
@@ -28,7 +28,7 @@ android {
         targetCompatibility JavaVersion.VERSION_17
     }
     defaultConfig {
-        applicationId 'kr.example.haliltalk'; minSdk 26; targetSdk 35; versionCode 3; versionName '0.3.0'
+        applicationId 'kr.example.haliltalk'; minSdk 26; targetSdk 35; versionCode 4; versionName '0.3.1-images'
         testInstrumentationRunner project.hasProperty('geminiProbe') ?
                 'kr.example.haliltalk.GeminiConnectionProbe' : 'android.test.InstrumentationTestRunner'
         buildConfigField 'boolean', 'FIREBASE_CONFIGURED', firebaseConfigured.toString()
@@ -49,4 +49,11 @@ dependencies {
 
 tasks.named('preBuild').configure {
     dependsOn(copyCharacterAssets)
+}
+
+tasks.register('exportLatestImageApk', Copy) {
+    dependsOn('assembleDebug')
+    from(layout.buildDirectory.file('outputs/apk/debug/app-debug.apk'))
+    into(layout.buildDirectory.dir('outputs/deliverables'))
+    rename { 'Appsai-latest-images-v0.3.1-debug.apk' }
 }
