@@ -32,6 +32,8 @@ appsai-android/
 │  └─ AndroidManifest.xml                         # 앱 설정과 사용량 권한
 ├─ docs/
 │  ├─ ARCHITECTURE.md  # 현재 구조, 목표 구조와 데이터 흐름
+│  ├─ FILE_STRUCTURE.md  # main과 다른 작업의 현재 파일 위치
+│  ├─ PROJECT_STRUCTURE_PLAN.md  # 폴더 정리 순서와 검증 조건
 │  ├─ ROADMAP.md       # 개발 순서와 팀 작업
 │  ├─ STATUS.md        # 실제 구현·검증 상태
 │  └─ SOURCES.md       # 오픈소스·리소스 출처 기록
@@ -44,12 +46,14 @@ appsai-android/
 └─ Gradle 설정 파일
 ```
 
-현재 `MainActivity.java`에 로직이 모여 있어 화면별 XML과 기능별 Java 패키지로 나눌 계획입니다. 목표 구조는 [설계 문서](docs/ARCHITECTURE.md)에 있으며 아직 구현된 폴더는 아닙니다.
+위 트리는 GitHub `main`에 게시된 파일 기준입니다. 검증 모듈 브랜치와 로컬 미커밋 작업까지 구분한 [전체 파일 구조](docs/FILE_STRUCTURE.md), 실제 폴더 이동 순서와 검증 조건은 [project 구조 정리 계획](docs/PROJECT_STRUCTURE_PLAN.md)에 기록했습니다. `MainActivity.java`의 기능별 분리는 아직 계획입니다.
 
 ## 협업 문서
 
 - [수업 기준 및 발표 체크리스트](GUIDE.md)
 - [개발 계획과 완료 기준](docs/ROADMAP.md)
+- [현재 GitHub 파일 구조](docs/FILE_STRUCTURE.md)
+- [project 파일 구조 정리 계획](docs/PROJECT_STRUCTURE_PLAN.md)
 - [3인 팀 협업 가이드](CONTRIBUTING.md)
 - [현재 상태와 미확인 사항](docs/STATUS.md)
 - [오픈소스와 리소스 출처](docs/SOURCES.md)
