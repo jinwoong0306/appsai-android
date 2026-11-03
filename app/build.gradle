@@ -28,7 +28,7 @@ android {
         targetCompatibility JavaVersion.VERSION_17
     }
     defaultConfig {
-        applicationId 'kr.example.haliltalk'; minSdk 26; targetSdk 35; versionCode 4; versionName '0.3.1-images'
+        applicationId 'kr.example.haliltalk'; minSdk 26; targetSdk 35; versionCode 7; versionName '0.5.0-ui'
         testInstrumentationRunner project.hasProperty('geminiProbe') ?
                 'kr.example.haliltalk.GeminiConnectionProbe' : 'android.test.InstrumentationTestRunner'
         buildConfigField 'boolean', 'FIREBASE_CONFIGURED', firebaseConfigured.toString()
@@ -51,9 +51,9 @@ tasks.named('preBuild').configure {
     dependsOn(copyCharacterAssets)
 }
 
-tasks.register('exportLatestImageApk', Copy) {
+tasks.register('exportPreviewApk', Copy) {
     dependsOn('assembleDebug')
     from(layout.buildDirectory.file('outputs/apk/debug/app-debug.apk'))
     into(layout.buildDirectory.dir('outputs/deliverables'))
-    rename { 'Appsai-latest-images-v0.3.1-debug.apk' }
+    rename { 'Appsai-v0.5.0-ui-debug.apk' }
 }
