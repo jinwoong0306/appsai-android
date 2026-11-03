@@ -7,7 +7,7 @@
     <TextView android:id="@+id/wardrobe_empty" style="@style/BodyText" android:layout_height="0dp" android:layout_weight="1" android:gravity="center" android:text="@string/customize_empty" android:visibility="gone"/>
     <LinearLayout android:id="@+id/wardrobe_content" android:layout_width="match_parent" android:layout_height="0dp" android:layout_weight="1" android:orientation="vertical">
         <kr.example.haliltalk.character.CharacterView android:id="@+id/wardrobe_preview" android:layout_width="match_parent" android:layout_height="152dp" android:background="@drawable/bg_hero" android:padding="8dp"/>
-        <ScrollView android:layout_width="match_parent" android:layout_height="0dp" android:layout_weight="1">
+        <ScrollView android:id="@+id/wardrobe_scroll" android:layout_width="match_parent" android:layout_height="0dp" android:layout_weight="1">
             <LinearLayout android:layout_width="match_parent" android:layout_height="wrap_content" android:orientation="vertical">
                 <TextView style="@style/SectionTitle" android:text="@string/character_selection"/>
                 <HorizontalScrollView android:layout_width="match_parent" android:layout_height="wrap_content" android:scrollbars="none">
@@ -17,9 +17,7 @@
                 <HorizontalScrollView android:layout_width="match_parent" android:layout_height="wrap_content" android:scrollbars="none">
                     <LinearLayout android:id="@+id/wardrobe_tabs" android:layout_width="wrap_content" android:layout_height="wrap_content" android:orientation="horizontal"/>
                 </HorizontalScrollView>
-                <HorizontalScrollView android:layout_width="match_parent" android:layout_height="wrap_content" android:scrollbars="none" android:layout_marginBottom="12dp">
-                    <LinearLayout android:id="@+id/wardrobe_items" android:layout_width="wrap_content" android:layout_height="wrap_content" android:orientation="horizontal"/>
-                </HorizontalScrollView>
+                <kr.example.haliltalk.AccessoryGrid android:id="@+id/wardrobe_items" android:layout_width="match_parent" android:layout_height="wrap_content" android:layout_marginTop="8dp" android:layout_marginBottom="12dp"/>
             </LinearLayout>
         </ScrollView>
     </LinearLayout>

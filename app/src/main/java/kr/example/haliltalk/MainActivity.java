@@ -230,7 +230,8 @@ public class MainActivity extends Activity {
         String[] ids=accessoryTab==0?CharacterCatalog.HAT_IDS:accessoryTab==1?CharacterCatalog.FACE_IDS:CharacterCatalog.PROP_IDS;
         String[] names=accessoryTab==0?CharacterCatalog.HAT_NAMES:accessoryTab==1?CharacterCatalog.FACE_NAMES:CharacterCatalog.PROP_NAMES;
         String selected=accessoryTab==0?hat:accessoryTab==1?face:prop;
-        LinearLayout accessories=findViewById(R.id.accessory_choices);accessories.removeAllViews();
+        AccessoryGrid accessories=findViewById(R.id.accessory_choices);
+        if(!Integer.valueOf(accessoryTab).equals(accessories.getTag())){accessories.removeAllViews();accessories.setTag(accessoryTab);}
         for(int i=0;i<ids.length;i++){
             String id=ids[i];
             addChoice(accessories,id,names[i],id.equals(selected),character,accessoryTab==0?id:hat,
@@ -250,8 +251,9 @@ public class MainActivity extends Activity {
         LinearLayout.LayoutParams params=new LinearLayout.LayoutParams(ViewGroup.LayoutParams.WRAP_CONTENT,ViewGroup.LayoutParams.WRAP_CONTENT);
         params.setMarginEnd(dp(8));chip.setLayoutParams(params);chip.setOnClickListener(v->action.run());parent.addView(chip);
     }
-    void addChoice(LinearLayout parent,String id,String label,boolean selected,String base,String h,String f,String p,Runnable action){
-        View row=getLayoutInflater().inflate(R.layout.row_choice,parent,false);
+    void addChoice(ViewGroup parent,String id,String label,boolean selected,String base,String h,String f,String p,Runnable action){
+        View row=parent.findViewWithTag(id);
+        if(row==null){row=getLayoutInflater().inflate(R.layout.row_choice,parent,false);parent.addView(row);}
         row.setTag(id);row.setSelected(selected);row.setContentDescription(label+(selected?" 선택됨":""));
         ((CharacterView)row.findViewById(R.id.choice_character)).setAppearance(base,h,f,p);
         boolean owned=CharacterCatalog.slotFor(id)==null||shopStore.owns(id);
@@ -262,7 +264,7 @@ public class MainActivity extends Activity {
             else new AlertDialog.Builder(this).setMessage(getString(R.string.shop_locked,label,shopStore.price(id)))
                     .setPositiveButton(R.string.shop_open,(dialog,which)->startActivity(new Intent(this,ShopActivity.class).putExtra("item_id",id)))
                     .setNegativeButton(android.R.string.cancel,null).show();
-        });parent.addView(row);
+        });
     }
     void createFriend(){
         EditText field=findViewById(R.id.friend_name);String name=field.getText().toString().trim();

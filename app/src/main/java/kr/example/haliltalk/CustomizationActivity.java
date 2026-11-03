@@ -6,6 +6,7 @@ import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
 import android.os.Bundle;
 import android.view.View;
+import android.view.ViewGroup;
 import android.widget.Button;
 import android.widget.LinearLayout;
 import android.widget.TextView;
@@ -93,14 +94,16 @@ public final class CustomizationActivity extends FeatureActivity {
         }
         String[][] ids={CharacterCatalog.HAT_IDS,CharacterCatalog.FACE_IDS,CharacterCatalog.BODY_IDS,CharacterCatalog.BACK_IDS,CharacterCatalog.PROP_IDS};
         String[][] labels={CharacterCatalog.HAT_NAMES,CharacterCatalog.FACE_NAMES,CharacterCatalog.BODY_NAMES,CharacterCatalog.BACK_NAMES,CharacterCatalog.PROP_NAMES};
-        LinearLayout items=findViewById(R.id.wardrobe_items);items.removeAllViews();
+        AccessoryGrid items=findViewById(R.id.wardrobe_items);
+        if(!Integer.valueOf(slot).equals(items.getTag())){items.removeAllViews();items.setTag(slot);}
         for(int i=0;i<ids[slot].length;i++)addChoice(items,ids[slot][i],labels[slot][i],slot+1);
         findViewById(R.id.wardrobe_save).setEnabled(!Arrays.equals(saved,appearance));
         findViewById(R.id.wardrobe_cancel).setEnabled(!Arrays.equals(saved,appearance));
     }
 
-    void addChoice(LinearLayout parent,String id,String label,int part) {
-        View row=getLayoutInflater().inflate(R.layout.row_choice,parent,false);
+    void addChoice(ViewGroup parent,String id,String label,int part) {
+        View row=parent.findViewWithTag(id);
+        if(row==null){row=getLayoutInflater().inflate(R.layout.row_choice,parent,false);parent.addView(row);}
         row.setTag(id);boolean selected=id.equals(appearance[part]);row.setSelected(selected);
         String[] preview=appearance.clone();preview[part]=id;
         ((CharacterView)row.findViewById(R.id.choice_character)).setAppearance(preview[0],preview[1],preview[2],preview[3],preview[4],preview[5]);
@@ -115,7 +118,6 @@ public final class CustomizationActivity extends FeatureActivity {
                             startActivity(new android.content.Intent(this,ShopActivity.class).putExtra("item_id",id)))
                     .setNegativeButton(android.R.string.cancel,null).show();
         });
-        parent.addView(row);
     }
 
     void saveAppearance() {
