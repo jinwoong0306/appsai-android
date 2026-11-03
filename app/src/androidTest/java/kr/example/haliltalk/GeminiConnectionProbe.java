@@ -40,6 +40,14 @@ public final class GeminiConnectionProbe extends Instrumentation {
             for (Throwable cause = error; cause != null; cause = cause.getCause()) {
                 if (types.length() > 0) types.append(" -> ");
                 types.append(cause.getClass().getSimpleName());
+                String message = cause.getMessage();
+                if (message != null) {
+                    if (message.contains("Too many attempts")) result.putString("failure_reason", "APP_CHECK_BACKOFF");
+                    if (message.contains("App attestation failed")) result.putString("failure_reason", "ATTESTATION_REJECTED");
+                    java.util.regex.Matcher status = java.util.regex.Pattern
+                            .compile("code:\\s*(\\d{3})").matcher(message);
+                    if (status.find()) result.putString("http_status", status.group(1));
+                }
             }
             result.putString("stage", stage);
             result.putString("failure_types", types.toString());
