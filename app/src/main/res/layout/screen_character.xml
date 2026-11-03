@@ -110,18 +110,10 @@
                     android:orientation="horizontal" />
             </HorizontalScrollView>
 
-            <HorizontalScrollView
+            <kr.example.haliltalk.AccessoryGrid
+                android:id="@+id/accessory_choices"
                 android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:scrollbars="none"
-                android:clipToPadding="false">
-
-                <LinearLayout
-                    android:id="@+id/accessory_choices"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:orientation="horizontal" />
-            </HorizontalScrollView>
+                android:layout_height="wrap_content" />
 
             <TextView
                 style="@style/SectionTitle"
