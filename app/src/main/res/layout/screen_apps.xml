@@ -1,0 +1,129 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    style="@style/Page" android:orientation="vertical">
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:minHeight="48dp"
+        android:orientation="horizontal"
+        android:gravity="center_vertical">
+
+        <Button
+            android:id="@+id/apps_back"
+            style="@style/IconButton"
+            android:drawableStart="@drawable/ic_back"
+            android:contentDescription="@string/navigate_back" />
+
+        <TextView
+            style="@style/SectionTitle"
+            android:layout_width="0dp"
+            android:layout_weight="1"
+            android:layout_marginTop="8dp"
+            android:layout_marginBottom="8dp"
+            android:gravity="center"
+            android:text="@string/brand_name" />
+
+        <ImageButton android:id="@+id/open_settings" style="@style/IconButton" android:src="@drawable/ic_settings" android:contentDescription="@string/settings_title"/>
+    </LinearLayout>
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:minHeight="160dp"
+        android:layout_marginTop="8dp"
+        android:layout_marginBottom="16dp"
+        android:orientation="horizontal"
+        android:gravity="center_vertical"
+        android:background="@drawable/bg_hero"
+        android:padding="16dp">
+
+        <LinearLayout
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:orientation="vertical">
+
+            <TextView
+                style="@style/PageTitle"
+                android:layout_marginTop="0dp"
+                android:text="@string/picker_title" />
+
+            <TextView
+                style="@style/SecondaryText"
+                android:text="@string/picker_description" />
+        </LinearLayout>
+
+        <kr.example.haliltalk.character.CharacterView
+            android:id="@+id/picker_character"
+            android:layout_width="100dp"
+            android:layout_height="128dp"
+            android:importantForAccessibility="no" />
+    </LinearLayout>
+
+    <TextView
+        style="@style/SecondaryText"
+        android:layout_marginBottom="8dp"
+        android:labelFor="@id/app_search"
+        android:text="@string/app_search_label" />
+
+    <EditText
+        android:id="@+id/app_search"
+        style="@style/InputField"
+        android:drawableStart="@drawable/ic_search"
+        android:drawablePadding="12dp"
+        android:hint="@string/app_search_hint"
+        android:inputType="text"
+        android:imeOptions="actionSearch"
+        android:autofillHints="" />
+
+    <TextView
+        style="@style/SectionTitle"
+        android:layout_marginTop="16dp"
+        android:layout_marginBottom="4dp"
+        android:text="@string/available_apps" />
+
+    <TextView
+        android:id="@+id/apps_count"
+        style="@style/SecondaryText"
+        android:layout_marginBottom="12dp"
+        android:accessibilityLiveRegion="polite" />
+
+    <FrameLayout
+        android:layout_width="match_parent"
+        android:layout_height="0dp"
+        android:layout_weight="1">
+
+    <TextView
+        android:id="@+id/apps_empty"
+        style="@style/SecondaryText"
+        android:padding="20dp"
+        android:background="@drawable/bg_card"
+        android:gravity="center"
+        android:text="@string/apps_empty"
+        android:visibility="gone" />
+
+    <ListView
+        android:id="@+id/app_list"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:divider="@android:color/transparent"
+        android:dividerHeight="8dp"
+        android:listSelector="@android:color/transparent"
+        android:paddingBottom="8dp"
+        android:clipToPadding="false" />
+    </FrameLayout>
+
+    <Button
+        android:id="@+id/apps_continue"
+        style="@style/PrimaryButton"
+        android:enabled="false"
+        android:text="@string/apps_continue" />
+
+    <TextView
+        style="@style/SecondaryText"
+        android:layout_marginBottom="12dp"
+        android:gravity="center"
+        android:text="@string/selected_apps_only" />
+    <include layout="@layout/bottom_navigation" />
+</LinearLayout>

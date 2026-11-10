@@ -1,0 +1,16 @@
+<resources>
+    <color name="canvas">#1C1525</color>
+    <color name="surface">#292034</color>
+    <color name="ink">#F7ECFF</color>
+    <color name="muted">#C2AFD1</color>
+    <color name="primary">#8750CC</color>
+    <color name="primary_pressed">#8050C4</color>
+    <color name="lavender">#3C2A50</color>
+    <color name="border">#564361</color>
+    <color name="field_border">#9C84AF</color>
+    <color name="hero_top">#45305F</color>
+    <color name="hero_bottom">#332044</color>
+    <color name="disabled">#44374F</color>
+    <color name="ripple">#409462DB</color>
+    <bool name="light_system_bars">false</bool>
+</resources>

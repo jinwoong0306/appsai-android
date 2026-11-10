@@ -1,0 +1,20 @@
+<resources>
+    <item type="id" name="nav_shop"/>
+    <string name="shop_title">상점</string>
+    <string name="shop_balance">데모 코인 %1$d</string>
+    <string name="shop_demo_notice">구매 체험용 코인과 임시 가격이에요. 현금 결제가 아니에요.</string>
+    <string name="shop_owned">보유 중</string>
+    <string name="shop_price">데모 %1$d 코인</string>
+    <string name="shop_buy">%1$d 데모 코인으로 구매</string>
+    <string name="shop_preview_character">%1$s · 캐릭터 변경</string>
+    <string name="shop_insufficient">데모 코인이 부족해요</string>
+    <string name="shop_invalid">구매할 수 없는 아이템이에요.</string>
+    <string name="shop_confirm_title">데모 아이템 구매</string>
+    <string name="shop_confirm">%1$s을(를) %2$d 데모 코인으로 구매할까요?\n구매 후 꾸미기에서 장착할 수 있어요.</string>
+    <string name="shop_confirm_buy">구매하기</string>
+    <string name="shop_purchased">구매했어요. 꾸미기에서 장착해 보세요.</string>
+    <string name="shop_locked">%1$s\n상점 · %2$d 코인</string>
+    <string name="shop_open">상점 열기</string>
+    <string name="shop_ownership_needed">보유한 아이템만 저장할 수 있어요.</string>
+    <string-array name="shop_categories"><item>전체</item><item>머리</item><item>얼굴</item><item>목·몸</item><item>등</item><item>손소품</item></string-array>
+</resources>
