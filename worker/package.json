@@ -1,0 +1,16 @@
+{
+  "name": "appsai-chat-worker",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "test": "bun test",
+    "check": "wrangler deploy --dry-run --outdir build",
+    "deploy": "wrangler deploy"
+  },
+  "dependencies": {
+    "jose": "6.2.15"
+  },
+  "devDependencies": {
+    "wrangler": "4.157.0"
+  }
+}

@@ -10,3 +10,7 @@ captures/
 .env
 google-services.json
 *.apk
+.senpi/
+.herdr-web-ui/
+generated-images/
+검증자료/

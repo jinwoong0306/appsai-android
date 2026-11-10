@@ -1,0 +1,20 @@
+<resources>
+    <string name="app_name">앱사이</string>
+    <string name="login_tagline">앱과 친구가 되는 작은 일상</string>
+    <string name="login_greeting">오늘부터 우리, 앱 친구</string>
+    <string name="login_description">좋아하는 앱에 이름을 붙이고\n나만의 캐릭터와 이야기를 나눠요.</string>
+    <string name="mock_login">로그인하고 시작하기</string>
+    <string name="mock_login_notice">체험용 목업 로그인입니다.\n계정이나 비밀번호 없이 바로 시작해요.</string>
+    <string name="login_notifications_optional">첫 실행 알림은 허용한 경우에만 보내요.\n알림을 거절해도 앱을 사용할 수 있어요.</string>
+    <string name="notification_channel">앱 친구 소식</string>
+    <string name="welcome_notification_title">앱사이에 온 걸 환영해요!</string>
+    <string name="welcome_notification_body">나만의 앱 친구를 만나러 와요. 눌러서 앱을 열어보세요.</string>
+    <string name="notification_settings">알림 설정</string>
+    <string name="notifications_enabled">알림 켜짐 · 첫 실행 환영 알림은 한 번만 보내요.</string>
+    <string name="notifications_disabled">알림 꺼짐 · 알림 설정에서 허용할 수 있어요.</string>
+    <string name="mock_session_label">체험 계정으로 이용 중</string>
+    <string name="mock_session_description">실제 계정 인증이나 서버 동기화가 아닌 목업입니다.\n친구와 대화, 코인은 이 기기에 저장돼요.</string>
+    <string name="mock_logout">로그아웃</string>
+    <string name="mock_logout_message">로그인 화면으로 돌아갈까요? 이 기기의 친구와 대화, 코인은 유지돼요.</string>
+    <string name="cancel_action">취소</string>
+</resources>
