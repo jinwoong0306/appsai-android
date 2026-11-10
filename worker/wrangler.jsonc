@@ -1,0 +1,15 @@
+{
+  "$schema": "node_modules/wrangler/config-schema.json",
+  "name": "appsai-chat",
+  "account_id": "eb7df85164838c8b5582f8d0c0dfd05e",
+  "main": "src/index.js",
+  "compatibility_date": "2026-11-05",
+  "workers_dev": true,
+  "preview_urls": false,
+  "send_metrics": false,
+  "observability": { "enabled": false },
+  "vars": {
+    "FIREBASE_PROJECT_NUMBER": "838447717884",
+    "FIREBASE_APP_ID": "1:838447717884:android:e6990015645c76213a2679"
+  }
+}
