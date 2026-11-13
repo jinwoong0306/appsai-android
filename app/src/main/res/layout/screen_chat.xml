@@ -65,6 +65,12 @@
     </LinearLayout>
 
     <Button
+        android:id="@+id/open_goals"
+        style="@style/SecondaryButton"
+        android:layout_marginTop="0dp"
+        android:text="@string/goals_open" />
+
+    <Button
         android:id="@+id/check_usage"
         style="@style/SecondaryButton"
         android:layout_marginTop="0dp"
