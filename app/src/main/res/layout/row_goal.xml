@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent" android:layout_height="wrap_content"
+    android:orientation="vertical" android:padding="12dp" android:layout_marginBottom="12dp"
+    android:background="@drawable/bg_card">
+    <TextView android:id="@+id/goal_title" style="@style/BodyText" android:textStyle="bold" />
+    <TextView android:id="@+id/goal_due" style="@style/SecondaryText" />
+    <Button android:id="@+id/goal_complete" style="@style/SecondaryButton" android:text="@string/goals_complete" />
+    <Button android:id="@+id/goal_edit" style="@style/SecondaryButton" android:text="@string/goals_edit" />
+    <Button android:id="@+id/goal_delete" style="@style/SecondaryButton" android:text="@string/goals_delete" />
+</LinearLayout>

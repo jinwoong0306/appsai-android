@@ -327,6 +327,9 @@ public class MainActivity extends Activity {
             if(person.moveToFirst())((TextView)findViewById(R.id.chat_personality)).setText(person.getString(0));
         }
         findViewById(R.id.back_home).setOnClickListener(v->home());
+        // [U2] Open only the selected friend's local goals.
+        findViewById(R.id.open_goals).setOnClickListener(v->startActivity(
+                new Intent(this,GoalsActivity.class).putExtra("friend_id",id)));
         findViewById(R.id.check_usage).setOnClickListener(v->usage());
         findViewById(R.id.ai_notice).setOnClickListener(v->showAiConsent(null));
         findViewById(R.id.retry_message).setOnClickListener(v->withAiConsent(()->chatController.retry(id)));

@@ -1,0 +1,15 @@
+<resources>
+    <string name="goals_back">돌아가기</string>
+    <string name="goals_title">목표와 일정</string>
+    <string name="goals_add">목표 추가</string>
+    <string name="goals_complete">완료 처리</string>
+    <string name="goals_edit">수정</string>
+    <string name="goals_delete">삭제</string>
+    <string name="goals_content">목표 내용</string>
+    <string name="goals_friend_title">%1$s의 목표</string>
+    <string name="goals_status_due">%1$s · %2$s</string>
+    <string name="goals_no_due">기한 없음</string>
+    <string name="goals_pick_due">기한 선택</string>
+    <string name="goals_clear_due">기한 없애기</string>
+    <string name="goals_open">목표·일정</string>
+</resources>
