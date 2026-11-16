@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent" android:layout_height="wrap_content"
+    android:orientation="vertical" android:paddingTop="12dp" android:paddingBottom="12dp">
+    <TextView android:id="@+id/journey_entry_heading" style="@style/BodyText"
+        android:textStyle="bold"/>
+    <TextView android:id="@+id/journey_entry_body" style="@style/BodyText"
+        android:layout_marginTop="4dp"/>
+    <Button android:id="@+id/journey_entry_delete" style="@style/SecondaryButton"
+        android:text="@string/journey_delete"/>
+</LinearLayout>

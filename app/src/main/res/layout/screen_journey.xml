@@ -1,0 +1,58 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- [U3 | 필수 XML] 한 스크롤 안에 오늘 행동, 최근 변화, 실제 기록을 배치한다. -->
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    style="@style/Page" android:orientation="vertical">
+    <Button android:id="@+id/journey_back" style="@style/SecondaryButton"
+        android:text="@string/journey_back" />
+    <ScrollView android:id="@+id/journey_scroll" android:layout_width="match_parent"
+        android:layout_height="0dp" android:layout_weight="1" android:fillViewport="true">
+        <LinearLayout android:layout_width="match_parent" android:layout_height="wrap_content"
+            android:orientation="vertical" android:paddingBottom="24dp">
+            <TextView style="@style/PageTitle" android:text="@string/journey_title"
+                android:textColor="@color/ink" />
+            <TextView style="@style/BodyText" android:text="@string/journey_intro" />
+            <TextView style="@style/SecondaryText" android:text="@string/journey_friend_label"
+                android:labelFor="@id/journey_friend" android:layout_marginTop="16dp"/>
+            <Spinner android:id="@+id/journey_friend" android:layout_width="match_parent"
+                android:layout_height="wrap_content" android:minHeight="48dp" android:spinnerMode="dialog"
+                android:prompt="@string/journey_friend_label"/>
+            <kr.example.haliltalk.character.CharacterView android:id="@+id/journey_character"
+                android:layout_width="match_parent" android:layout_height="112dp"
+                android:importantForAccessibility="no" android:background="@drawable/bg_hero"/>
+            <TextView android:id="@+id/journey_date" style="@style/BodyText" />
+            <TextView android:id="@+id/journey_empty" style="@style/BodyText"
+                android:text="@string/journey_no_friend" android:visibility="gone"/>
+            <LinearLayout android:id="@+id/journey_content" android:layout_width="match_parent"
+                android:layout_height="wrap_content" android:orientation="vertical">
+                <TextView style="@style/SectionTitle" android:text="@string/journey_today"
+                    android:textColor="@color/ink"/>
+                <LinearLayout android:layout_width="match_parent" android:layout_height="wrap_content"
+                    android:orientation="vertical" android:padding="16dp"
+                    android:background="@drawable/bg_card">
+                    <TextView android:id="@+id/journey_today_text" style="@style/BodyText"/>
+                    <TextView android:id="@+id/journey_feedback" style="@style/BodyText"
+                        android:layout_marginTop="12dp" android:accessibilityLiveRegion="polite"/>
+                    <Button android:id="@+id/journey_plan" style="@style/PrimaryButton"
+                        android:text="@string/journey_plan"/>
+                    <Button android:id="@+id/journey_review" style="@style/SecondaryButton"
+                        android:text="@string/journey_review" android:visibility="gone"/>
+                </LinearLayout>
+                <Button android:id="@+id/journey_goals" style="@style/SecondaryButton"
+                    android:text="@string/journey_goals"/>
+                <TextView style="@style/SectionTitle" android:text="@string/journey_week"
+                    android:textColor="@color/ink"/>
+                <TextView android:id="@+id/journey_week" style="@style/BodyText"/>
+                <TextView android:id="@+id/journey_milestone" style="@style/BodyText"
+                    android:layout_marginTop="16dp" android:textColor="@color/ink"/>
+                <TextView style="@style/BodyText" android:text="@string/journey_rules"
+                    android:layout_marginTop="8dp"/>
+                <TextView style="@style/SectionTitle" android:text="@string/journey_history"
+                    android:textColor="@color/ink"/>
+                <LinearLayout android:id="@+id/journey_history" android:layout_width="match_parent"
+                    android:layout_height="wrap_content" android:orientation="vertical"/>
+            </LinearLayout>
+            <TextView style="@style/BodyText" android:text="@string/journey_privacy"
+                android:layout_marginTop="20dp"/>
+        </LinearLayout>
+    </ScrollView>
+</LinearLayout>

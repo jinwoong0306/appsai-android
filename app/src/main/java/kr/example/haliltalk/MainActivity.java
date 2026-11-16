@@ -21,6 +21,8 @@ import kr.example.haliltalk.ai.ChatController;
 import kr.example.haliltalk.shop.DemoShopStore;
 
 public class MainActivity extends Activity {
+    private boolean resumed;
+    private long displayedMessageId;
     SQLiteDatabase db; LinearLayout root, body; int friendId; String friendName; boolean showingHome, showingApps;
     final List<ResolveInfo> allApps=new ArrayList<>(), visibleApps=new ArrayList<>();
     BaseAdapter appsAdapter;
@@ -30,7 +32,10 @@ public class MainActivity extends Activity {
     int personality=0,accessoryTab=0;
     ChatController chatController;
     DemoShopStore shopStore;
-    final Runnable chatChanged=()->{if(!showingHome&&!showingApps&&!showingCharacter)refreshChat();};
+    final Runnable chatChanged=()->{
+        if(showingHome)renderHomeFriends();
+        else if(!showingApps&&!showingCharacter)refreshChat();
+    };
     AlertDialog consentDialog;
     final String[] personalities={"다정한 친구","장난기 많은 친구","차분한 친구"};
     @Override public void onCreate(Bundle b){
@@ -98,19 +103,55 @@ public class MainActivity extends Activity {
         showingHome=true;showingApps=false;showingCharacter=false;setContentView(R.layout.screen_home);
         BottomNavigation.bind(this,R.id.nav_friends,this::navigateTo);
         ((CharacterView)findViewById(R.id.home_character)).setAppearance("chat","beret","none","none");
-        LinearLayout friends=findViewById(R.id.friend_list);
         findViewById(R.id.open_settings).setOnClickListener(v->startActivity(new Intent(this,SettingsActivity.class)));
-        Cursor c=db.rawQuery("SELECT id,name,personality,xp FROM friends ORDER BY id DESC",null);
-        if(c.getCount()==0) friends.addView(text("아직 친구가 없어요. 앱을 선택해 첫 친구를 만들어봐요!",15));
-        while(c.moveToNext()){
-            int id=c.getInt(0);String name=c.getString(1),person=c.getString(2);int xp=c.getInt(3);
-            View row=getLayoutInflater().inflate(R.layout.row_friend,friends,false);
-            ((TextView)row.findViewById(R.id.friend_label)).setText(name);
-            ((TextView)row.findViewById(R.id.friend_detail)).setText(getString(R.string.friend_detail_format,person,xp));
-            showAppearance(row.findViewById(R.id.friend_character),id);
-            row.setOnClickListener(v->chat(id,name));friends.addView(row);
+        findViewById(R.id.home_journey).setOnClickListener(v->{
+            try(Cursor c=db.rawQuery("SELECT id FROM friends LIMIT 1",null)){
+                if(c.moveToFirst())startActivity(new Intent(this,JourneyActivity.class));
+                else startNewFriend();
+            }
+        });
+        renderHomeFriends();
+    }
+    void renderHomeFriends(){
+        renderJourneySummary();
+        LinearLayout friends=findViewById(R.id.friend_list);
+        if(friends==null||db==null||!db.isOpen())return;
+        friends.removeAllViews();
+        try(Cursor c=db.rawQuery("SELECT f.id,f.name,f.personality,f.xp,"
+                +"(SELECT COUNT(*) FROM messages m WHERE m.friend=f.id AND m.is_user=0"
+                +" AND NOT EXISTS(SELECT 1 FROM message_reads r WHERE r.message=m.id)) FROM friends f ORDER BY f.id DESC",null)){
+            if(c.getCount()==0)friends.addView(text("아직 친구가 없어요. 앱을 선택해 첫 친구를 만들어봐요!",15));
+            while(c.moveToNext()){
+                int id=c.getInt(0),xp=c.getInt(3),unread=c.getInt(4);
+                String name=c.getString(1),person=c.getString(2);
+                View row=getLayoutInflater().inflate(R.layout.row_friend,friends,false);
+                row.setTag(id);
+                ((TextView)row.findViewById(R.id.friend_label)).setText(name);
+                ((TextView)row.findViewById(R.id.friend_detail)).setText(getString(R.string.friend_detail_format,person,xp));
+                TextView badge=row.findViewById(R.id.friend_unread);
+                badge.setVisibility(unread==0?View.GONE:View.VISIBLE);
+                badge.setText(unread>99?"99+":Integer.toString(unread));
+                badge.setContentDescription(getString(R.string.home_unread_description,unread));
+                showAppearance(row.findViewById(R.id.friend_character),id);
+                row.setOnClickListener(v->chat(id,name));friends.addView(row);
+            }
         }
-        c.close();
+    }
+    void renderJourneySummary(){
+        TextView summary=findViewById(R.id.home_journey_summary);
+        if(summary==null||db==null||!db.isOpen())return;
+        try(Cursor c=db.rawQuery("SELECT id FROM friends LIMIT 1",null)){
+            if(!c.moveToFirst()){summary.setText(R.string.journey_home_empty);return;}
+        }
+        kr.example.haliltalk.data.JourneyStore.Summary value=
+                new kr.example.haliltalk.data.JourneyStore(db).summary(0,java.time.LocalDate.now().toString());
+        summary.setText(getString(R.string.journey_home_summary,
+                value.plannedToday,value.reviewedToday,value.activeDays7));
+    }
+    @Override public void onWindowFocusChanged(boolean focused){
+        super.onWindowFocusChanged(focused);
+        if(focused&&showingHome)renderJourneySummary();
+        else if(focused&&!showingApps&&!showingCharacter)markVisibleChatRead();
     }
     void showWelcomeIfNeeded(){
         if(getPreferences(MODE_PRIVATE).getBoolean("welcome_done",false)) return;
@@ -362,11 +403,15 @@ public class MainActivity extends Activity {
     void refreshChat(){
         LinearLayout messages=findViewById(R.id.message_list);if(messages==null)return;
         messages.removeAllViews();
+        displayedMessageId=0;
         try(Cursor c=db.rawQuery("SELECT m.content,m.is_user,"
-                +"EXISTS(SELECT 1 FROM chat_requests r WHERE r.reply_message=m.id AND r.state='complete')"
+                +"EXISTS(SELECT 1 FROM chat_requests r WHERE r.reply_message=m.id AND r.state='complete'),m.id"
                 +" FROM messages m WHERE m.friend=? ORDER BY m.id",new String[]{""+friendId})){
-            while(c.moveToNext())addMessage(messages,c.getString(0),c.getInt(1)==1,
-                    c.getInt(2)==1?friendName:friendName+getString(R.string.ai_local_history));
+            while(c.moveToNext()){
+                addMessage(messages,c.getString(0),c.getInt(1)==1,
+                        c.getInt(2)==1?friendName:friendName+getString(R.string.ai_local_history));
+                displayedMessageId=c.getLong(3);
+            }
         }
         ChatController.Request request=chatController.openRequest(friendId);
         boolean pending=request!=null&&request.state.equals("pending");
@@ -383,6 +428,27 @@ public class MainActivity extends Activity {
         findViewById(R.id.send_message).setEnabled(request==null&&chatController.isConfigured());
         ScrollView scroll=findViewById(R.id.chat_scroll);
         scroll.post(()->scroll.fullScroll(View.FOCUS_DOWN));
+        markVisibleChatRead();
+    }
+    private void markVisibleChatRead(){
+        final View messages=findViewById(R.id.message_list);
+        if(messages==null||db==null)return;
+        final int shownFriend=friendId;
+        final long boundary=displayedMessageId;
+        // [U3 | 읽음 동작] 뒤로 이동·백그라운드·다른 방·표시 이후 응답은 읽음 처리하지 않는다.
+        ViewTreeObserver observer=messages.getViewTreeObserver();
+        observer.addOnGlobalLayoutListener(new ViewTreeObserver.OnGlobalLayoutListener(){
+            @Override public void onGlobalLayout(){
+            if(observer.isAlive())observer.removeOnGlobalLayoutListener(this);
+            if(!resumed||isFinishing()||showingHome||showingApps||showingCharacter
+                    ||friendId!=shownFriend||findViewById(R.id.message_list)!=messages
+                    ||!getWindow().getDecorView().hasWindowFocus()||!messages.isShown()
+                    ||messages.getWidth()==0||messages.getHeight()==0||boundary==0||!db.isOpen())return;
+            try{new kr.example.haliltalk.data.MessageReadStore(db).markReadThrough(shownFriend,boundary);}
+            catch(SQLiteException error){((TextView)findViewById(R.id.ai_status)).setText(R.string.read_state_failed);}
+            }
+        });
+        messages.requestLayout();
     }
     void addMessage(LinearLayout parent,String message,boolean user,String name){
         android.widget.FrameLayout row=(android.widget.FrameLayout)getLayoutInflater().inflate(R.layout.row_message,parent,false);
@@ -402,6 +468,8 @@ public class MainActivity extends Activity {
         else if(!showingApps&&!showingCharacter)showAppearance(findViewById(R.id.chat_character),friendId);
         chatController.addListener(chatChanged);chatChanged.run();
     }
+    @Override protected void onResume(){super.onResume();resumed=true;markVisibleChatRead();}
+    @Override protected void onPause(){resumed=false;super.onPause();}
     @Override protected void onStop(){chatController.removeListener(chatChanged);super.onStop();}
     @Override protected void onDestroy(){
         if(personalityDialog!=null)personalityDialog.dismiss();

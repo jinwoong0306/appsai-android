@@ -3,6 +3,8 @@ package kr.example.haliltalk;
 import android.app.AlertDialog;
 import android.app.DatePickerDialog;
 import android.app.TimePickerDialog;
+import android.content.Intent;
+import android.widget.CheckBox;
 import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
 import android.os.Bundle;
@@ -47,6 +49,19 @@ public final class GoalsActivity extends FeatureActivity {
         ((TextView)findViewById(R.id.goals_title)).setText(getString(R.string.goals_friend_title,name));
         findViewById(R.id.goals_back).setOnClickListener(v->finish());
         findViewById(R.id.add_goal).setOnClickListener(v->edit(0,"",null));
+        // [U3] Daily actions and consented friend-specific goal context.
+        findViewById(R.id.goals_journey).setOnClickListener(v->startActivity(
+                new Intent(this,JourneyActivity.class).putExtra("friend_id",friend)));
+        findViewById(R.id.edit_purposes).setOnClickListener(v->choosePurposes());
+        CheckBox sharing=findViewById(R.id.share_goals); sharing.setChecked(store.sharing(friend));
+        sharing.setOnCheckedChangeListener((view,checked)->{
+            if(!checked) { store.setSharing(friend,false); return; }
+            prompt=new AlertDialog.Builder(this).setTitle("AI 목표 공유")
+                    .setMessage("이 친구의 목적·목표를\nGoogle Gemini로 보낼까요?\n미완료 목표 3개와 기한만\n다음 대화에 포함해요.")
+                    .setNegativeButton("취소",(d,w)->sharing.setChecked(false))
+                    .setPositiveButton("포함",(d,w)->store.setSharing(friend,true))
+                    .setOnCancelListener(d->sharing.setChecked(false)).show();
+        });
         render();
         if(state!=null&&state.getBoolean("editing")) {
             edit(state.getLong("draft_id"),state.getString("draft_title",""),
@@ -54,6 +69,15 @@ public final class GoalsActivity extends FeatureActivity {
             originalTitle=state.getString("original_title","");
             originalDue=state.containsKey("original_due")?state.getLong("original_due"):null;
         }
+    }
+    private void choosePurposes() {
+        String saved=store.purposes(friend);
+        boolean[] selected=new boolean[GoalStore.PURPOSES.length];
+        for(int i=0;i<selected.length;i++) selected[i]=saved.contains(GoalStore.PURPOSES[i]);
+        prompt=new AlertDialog.Builder(this).setTitle("친구 목적 · 복수 선택 가능")
+                .setMultiChoiceItems(GoalStore.PURPOSES,selected,(d,index,checked)->selected[index]=checked)
+                .setNegativeButton("취소",null)
+                .setPositiveButton("저장",(d,w)->{store.setPurposes(friend,selected);render();}).show();
     }
     private String dueText(Long value) {
         return value==null?"기한 없음":java.text.DateFormat.getDateTimeInstance().format(new java.util.Date(value));
@@ -104,6 +128,8 @@ public final class GoalsActivity extends FeatureActivity {
         });
     }
     private void render() {
+        String purpose=store.purposes(friend);
+        ((TextView)findViewById(R.id.purpose_summary)).setText(purpose.isEmpty()?"선택한 목적 없음":purpose);
         LinearLayout list=findViewById(R.id.goals_list); list.removeAllViews();
         List<GoalStore.Goal> goals=store.list(friend);
         if(goals.isEmpty()) {

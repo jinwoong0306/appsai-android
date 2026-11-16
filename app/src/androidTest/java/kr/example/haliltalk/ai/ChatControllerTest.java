@@ -177,4 +177,53 @@ public class ChatControllerTest extends InstrumentationTestCase {
         assertTrue(main[0]);
         assertEquals(1,count("SELECT COUNT(*) FROM chat_requests WHERE state='complete'"));
     }
+    public void testGoalsOnlyEnterContextAfterFriendConsentAndNeverChangeCompletion() throws Throwable {
+        kr.example.haliltalk.data.GoalStore goals=new kr.example.haliltalk.data.GoalStore(db);
+        long id=goals.save(7,0,"Synthetic saved goal",null);
+        goals.save(9,0,"Other friend goal",null);
+        runTestOnUiThread(()->{
+            controller.setConsent(true);
+            assertTrue(controller.send(7,"Before goal consent"));
+            assertEquals("Before goal consent",service.turns.get(0).text);
+            service.replies.get(0).set("First reply");
+            goals.setSharing(7,true);
+            assertTrue(controller.send(7,"After goal consent"));
+            String sent=service.turns.get(service.turns.size()-1).text;
+            assertTrue(sent.contains("Synthetic saved goal"));
+            assertFalse(sent.contains("Other friend goal"));
+            service.replies.get(1).set("Goal complete");
+            assertFalse(goals.list(7).get(0).completed);
+            assertEquals(id,goals.list(7).get(0).id);
+        });
+    }
+
+    public void testGoalContextLengthLimitKeepsOriginalMessageAndConsentRevocation() throws Throwable {
+        kr.example.haliltalk.data.GoalStore goals=new kr.example.haliltalk.data.GoalStore(db);
+        goals.save(7,0,"Synthetic context goal",null);
+        goals.setSharing(7,true);
+        String original="x".repeat(ChatController.MAX_MESSAGE_CHARS);
+        runTestOnUiThread(()->{
+            controller.setConsent(true);
+            assertTrue(controller.send(7,original));
+            assertEquals(original,service.turns.get(service.turns.size()-1).text);
+            service.replies.get(0).set("Synthetic response");
+            goals.setSharing(7,false);
+            assertTrue(controller.send(7,"Synthetic consent withdrawal"));
+            assertEquals("Synthetic consent withdrawal",service.turns.get(service.turns.size()-1).text);
+            service.replies.get(1).set("Synthetic response");
+            assertFalse(goals.list(7).get(0).completed);
+        });
+    }
+    public void testLateCallbackAfterCloseDoesNotTouchOldAccountDatabase() throws Throwable {
+        runTestOnUiThread(()->{
+            controller.setConsent(true);
+            assertTrue(controller.send(7,"Pending account switch"));
+            controller.close();
+            service.replies.get(0).set("Late response");
+            assertFalse(controller.send(7,"Stale activity"));
+            assertEquals(0,count("SELECT COUNT(*) FROM messages WHERE is_user=0 AND content='Late response'"));
+            controller.close();
+        });
+    }
+
 }
