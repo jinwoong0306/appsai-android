@@ -17,18 +17,22 @@ import java.util.List;
 import java.util.Set;
 import java.util.concurrent.Executor;
 import kr.example.haliltalk.data.FriendsDatabase;
+import kr.example.haliltalk.data.GoalStore;
 
 /** Application-scoped requests survive Activity rotation and navigation. Call on the main thread. */
 public final class ChatController implements AutoCloseable {
     public static final int MAX_MESSAGE_CHARS = 2000;
     public static final int MAX_CONTEXT_TURNS = 13;
     public static final int MAX_CONTEXT_CHARS = 12000;
+    public static final String CONSENT_KEY = "external_chat_v1";
     private final SQLiteDatabase db;
     private final FriendsDatabase helper;
     private final AiChatService service;
     private final SharedPreferences preferences;
     private final Handler handler = new Handler(Looper.getMainLooper());
     private final Set<Runnable> listeners = new HashSet<>();
+    private final Set<ListenableFuture<String>> pending = new HashSet<>();
+    private boolean closed;
     private final Executor main = command -> {
         if (Looper.myLooper() == Looper.getMainLooper()) command.run();
         else handler.post(command);
@@ -44,9 +48,9 @@ public final class ChatController implements AutoCloseable {
     }
 
     public boolean isConfigured() { return service.isConfigured(); }
-    public boolean hasConsent() { return preferences.getBoolean("external_chat_v1", false); }
+    public boolean hasConsent() { return preferences.getBoolean(CONSENT_KEY, false); }
     public void setConsent(boolean allowed) {
-        preferences.edit().putBoolean("external_chat_v1", allowed).apply();
+        preferences.edit().putBoolean(CONSENT_KEY, allowed).apply();
         changed();
     }
     public void addListener(Runnable listener) { listeners.add(listener); }
@@ -62,6 +66,7 @@ public final class ChatController implements AutoCloseable {
     }
 
     public Request openRequest(int friend) {
+        if (closed) return null;
         try (Cursor cursor = db.rawQuery("SELECT user_message,state,error FROM chat_requests"
                 +" WHERE friend=? AND state IN ('pending','failed')", new String[]{""+friend})) {
             return cursor.moveToFirst() ? new Request(cursor.getLong(0), cursor.getString(1), cursor.getString(2)) : null;
@@ -69,6 +74,7 @@ public final class ChatController implements AutoCloseable {
     }
 
     public boolean send(int friend, String text) {
+        if (closed) return false;
         text = text.trim();
         if (!hasConsent() || !isConfigured() || text.isEmpty() || text.length() > MAX_MESSAGE_CHARS
                 || openRequest(friend) != null) return false;
@@ -90,6 +96,7 @@ public final class ChatController implements AutoCloseable {
     }
 
     public void retry(int friend) {
+        if (closed) return;
         Request request = openRequest(friend);
         if (!hasConsent() || !isConfigured() || request == null || !request.state.equals("failed")) return;
         db.execSQL("UPDATE chat_requests SET state='pending',attempt=attempt+1,error=NULL WHERE user_message=?",
@@ -111,6 +118,7 @@ public final class ChatController implements AutoCloseable {
             finish(request.messageId, attempt, friend, null, "provider");
             return;
         }
+        pending.add(future);
         Runnable timeout = () -> {
             finish(request.messageId, attempt, friend, null, "timeout");
             future.cancel(true);
@@ -118,11 +126,13 @@ public final class ChatController implements AutoCloseable {
         handler.postDelayed(timeout, 60000);
         Futures.addCallback(future, new FutureCallback<String>() {
             @Override public void onSuccess(String text) {
+                pending.remove(future);
                 handler.removeCallbacks(timeout);
                 finish(request.messageId, attempt, friend, text,
                         text == null || text.trim().isEmpty() ? "empty" : null);
             }
             @Override public void onFailure(Throwable error) {
+                pending.remove(future);
                 handler.removeCallbacks(timeout);
                 finish(request.messageId, attempt, friend, null, "provider");
             }
@@ -130,6 +140,7 @@ public final class ChatController implements AutoCloseable {
     }
 
     public void cancelFailed(int friend) {
+        if (closed) return;
         db.execSQL("UPDATE chat_requests SET state='cancelled' WHERE friend=? AND state='failed'",
                 new Object[]{friend});
         changed();
@@ -153,10 +164,22 @@ public final class ChatController implements AutoCloseable {
         Collections.reverse(turns);
         // A clipped history must begin with a user turn, not an orphaned model response.
         if (!turns.isEmpty() && !turns.get(0).user) turns.remove(0);
+        String summary = new GoalStore(db).chatSummary(friend);
+        // 동의한 친구의 현재 사용자 턴에만 추가한다. 원문을 자르거나 다른 친구를 조회하지 않는다.
+        if (!summary.isEmpty() && !turns.isEmpty()) {
+            int last = turns.size()-1;
+            String original = turns.get(last).text;
+            if (original.length()+summary.length() <= MAX_MESSAGE_CHARS
+                    && chars+summary.length() <= MAX_CONTEXT_CHARS) {
+                turns.set(last, new AiChatService.Turn(true, summary+original));
+            }
+        }
         return Collections.unmodifiableList(turns);
     }
 
     private void finish(long message, int attempt, int friend, String text, String error) {
+        // 계정 전환 후 늦게 도착한 응답은 닫힌 계정 DB에 접근하지 않는다.
+        if (closed) return;
         db.beginTransaction();
         try {
             ContentValues update = new ContentValues();
@@ -177,8 +200,12 @@ public final class ChatController implements AutoCloseable {
     }
 
     @Override public void close() {
+        if (closed) return;
+        closed = true;
         handler.removeCallbacksAndMessages(null);
         listeners.clear();
+        for (ListenableFuture<String> future : new ArrayList<>(pending)) future.cancel(true);
+        pending.clear();
         helper.close();
     }
 }

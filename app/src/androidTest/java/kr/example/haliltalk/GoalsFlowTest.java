@@ -8,6 +8,7 @@ import android.database.sqlite.SQLiteDatabase;
 import android.graphics.Bitmap;
 import android.test.InstrumentationTestCase;
 import android.widget.EditText;
+import android.widget.CheckBox;
 import android.widget.LinearLayout;
 import android.view.View;
 import java.io.File;
@@ -49,13 +50,28 @@ public final class GoalsFlowTest extends InstrumentationTestCase {
     }
     private void capture(String name,android.app.Activity screen) throws Exception {
         getInstrumentation().waitForIdleSync();
-        CountDownLatch frame=new CountDownLatch(1);
+        android.view.Window[] window={null};
         getInstrumentation().runOnMainSync(()->{
             android.app.Dialog front=screen!=activity?null
                     :activity.picker!=null&&activity.picker.isShowing()?activity.picker
                     :activity.prompt!=null&&activity.prompt.isShowing()?activity.prompt
                     :activity.editor!=null&&activity.editor.isShowing()?activity.editor:null;
-            View decor=front==null?screen.getWindow().getDecorView():front.getWindow().getDecorView();
+            window[0]=front==null?screen.getWindow():front.getWindow();
+        });
+        View decor=window[0].getDecorView();
+        CountDownLatch focused=new CountDownLatch(1);
+        android.view.ViewTreeObserver.OnWindowFocusChangeListener listener=hasFocus->{
+            if(hasFocus)focused.countDown();
+        };
+        getInstrumentation().runOnMainSync(()->{
+            decor.getViewTreeObserver().addOnWindowFocusChangeListener(listener);
+            if(decor.hasWindowFocus())focused.countDown();
+        });
+        try { assertTrue("Capture window focused",focused.await(5,TimeUnit.SECONDS)); }
+        finally { getInstrumentation().runOnMainSync(()->
+                decor.getViewTreeObserver().removeOnWindowFocusChangeListener(listener)); }
+        CountDownLatch frame=new CountDownLatch(1);
+        getInstrumentation().runOnMainSync(()->{
             decor.getViewTreeObserver().registerFrameCommitCallback(()->decor.post(
                     ()->android.view.Choreographer.getInstance().postFrameCallback(t->frame.countDown())));
             decor.invalidate();
@@ -105,6 +121,19 @@ public final class GoalsFlowTest extends InstrumentationTestCase {
         android.app.Instrumentation.ActivityMonitor monitor=getInstrumentation().addMonitor(
                 GoalsActivity.class.getName(),null,false);
         try {
+            capture("home",main);
+            android.app.Instrumentation.ActivityMonitor journeyMonitor=getInstrumentation().addMonitor(
+                    JourneyActivity.class.getName(),null,false);
+            try {
+                runTestOnUiThread(()->assertTrue(main.findViewById(R.id.home_journey).performClick()));
+                JourneyActivity journey=(JourneyActivity)getInstrumentation()
+                        .waitForMonitorWithTimeout(journeyMonitor,5000);
+                assertNotNull("Home daily action navigation",journey);
+                getInstrumentation().waitForIdleSync();
+                assertNotNull(journey.findViewById(R.id.journey_plan));
+                runTestOnUiThread(journey::finish);
+                getInstrumentation().waitForIdleSync();
+            } finally { getInstrumentation().removeMonitor(journeyMonitor); }
             runTestOnUiThread(()->main.chat(friend,"독서 친구"));
             getInstrumentation().waitForIdleSync();
             capture("chat",main);
@@ -185,6 +214,26 @@ public final class GoalsFlowTest extends InstrumentationTestCase {
         try(Cursor c=db.rawQuery("SELECT xp FROM friends WHERE id=?",new String[]{""+friend})) {
             assertTrue(c.moveToFirst());assertEquals(0,c.getInt(0));
         }
+    }
+    public void testPurposeAndSharingDialogsCanBeCancelledWithoutChangingConsent() throws Throwable {
+        launch();
+        runTestOnUiThread(()->activity.findViewById(R.id.edit_purposes).performClick());
+        capture("purpose-dialog");
+        getInstrumentation().sendKeyDownUpSync(android.view.KeyEvent.KEYCODE_BACK);
+        getInstrumentation().waitForIdleSync();
+        assertEquals("",new GoalStore(db).purposes(friend));
+        runTestOnUiThread(()->((CheckBox)activity.findViewById(R.id.share_goals)).setChecked(true));
+        capture("sharing-dialog");
+        assertFalse(new GoalStore(db).sharing(friend));
+        getInstrumentation().sendKeyDownUpSync(android.view.KeyEvent.KEYCODE_BACK);
+        getInstrumentation().waitForIdleSync();
+        runTestOnUiThread(()->assertFalse(((CheckBox)activity.findViewById(R.id.share_goals)).isChecked()));
+        runTestOnUiThread(()->((CheckBox)activity.findViewById(R.id.share_goals)).setChecked(true));
+        getInstrumentation().waitForIdleSync();
+        clickDialogText("포함");
+        assertTrue(new GoalStore(db).sharing(friend));
+        runTestOnUiThread(()->((CheckBox)activity.findViewById(R.id.share_goals)).setChecked(false));
+        assertFalse(new GoalStore(db).sharing(friend));
     }
     public void testDraftBackRequiresConfirmationAfterRotation() throws Throwable {
         launch();

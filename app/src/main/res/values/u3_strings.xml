@@ -1,0 +1,7 @@
+<resources>
+    <string name="goals_purposes">친구 목적 선택</string>
+    <string name="goals_share">목적·목표를 AI에 포함</string>
+    <string name="goals_share_notice">목적·미완료 목표 3개와 기한을\nGoogle Gemini로 전송해요.\n꺼도 이전 대화 기록은 남아요.\nAI는 목표·보상을 바꾸지 않아요.</string>
+    <string name="read_state_failed">읽음 상태를 저장하지 못했어요. 대화 내용은 그대로 있어요.</string>
+    <string name="home_unread_description">읽지 않은 받은 메시지 %1$d개</string>
+</resources>
