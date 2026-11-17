@@ -32,7 +32,7 @@ import com.google.common.util.concurrent.SettableFuture;
 import java.util.ArrayList;
 import java.util.List;
 
-public class MainFlowTest extends InstrumentationTestCase {
+public class MainFlowTest extends GuestActivityTestCase {
     MainActivity activity;
     static final String NAME="QA calendar friend";
     static final String CHARACTER=CharacterCatalog.CHARACTER_IDS[6];
@@ -40,6 +40,7 @@ public class MainFlowTest extends InstrumentationTestCase {
     static final String FACE=CharacterCatalog.FACE_IDS[2];
     static final String PROP=CharacterCatalog.PROP_IDS[3];
     ChatController previousChat,injectedChat;
+    String previousChatDatabase;
     FakeChat fakeChat;
     SharedPreferences consentPreferences;
     boolean hadConsent,consent;
@@ -66,8 +67,10 @@ public class MainFlowTest extends InstrumentationTestCase {
         getInstrumentation().runOnMainSync(()->{
             ChatApplication app=(ChatApplication)context.getApplicationContext();
             previousChat=app.chatController;
+            previousChatDatabase=app.chatDatabase;
             injectedChat=new ChatController(context,fakeChat);
             injectedChat.setConsent(true);app.chatController=injectedChat;
+            app.chatDatabase=kr.example.haliltalk.auth.AccountSession.databaseName(context);
         });
     }
 
@@ -78,7 +81,9 @@ public class MainFlowTest extends InstrumentationTestCase {
             });
             getInstrumentation().waitForIdleSync();
             getInstrumentation().runOnMainSync(()->{
-                ((ChatApplication)getInstrumentation().getTargetContext().getApplicationContext()).chatController=previousChat;
+                ChatApplication app=(ChatApplication)getInstrumentation().getTargetContext().getApplicationContext();
+                app.chatController=previousChat;
+                app.chatDatabase=previousChatDatabase;
                 injectedChat.close();
             });
             SharedPreferences.Editor editor=consentPreferences.edit();

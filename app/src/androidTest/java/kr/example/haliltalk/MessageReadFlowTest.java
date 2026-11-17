@@ -17,7 +17,7 @@ import kr.example.haliltalk.data.FriendsDatabase;
 import kr.example.haliltalk.data.MessageReadStore;
 
 /** [U6 | 표시 검증] 합성 DB로 한국어·글꼴·읽음 생명주기를 검사한다. 실제 대화는 변경하지 않는다. */
-public final class MessageReadFlowTest extends android.test.InstrumentationTestCase {
+public final class MessageReadFlowTest extends GuestActivityTestCase {
     private MainActivity activity;
     private SQLiteDatabase fixture,original;
     private File file;

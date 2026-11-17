@@ -19,7 +19,7 @@ import kr.example.haliltalk.data.FriendsDatabase;
 import kr.example.haliltalk.data.GoalStore;
 
 /** 실제 데이터를 지우지 않고 이 테스트가 만든 친구만 정리한다. */
-public final class GoalsFlowTest extends InstrumentationTestCase {
+public final class GoalsFlowTest extends GuestActivityTestCase {
     private FriendsDatabase helper;
     private SQLiteDatabase db;
     private GoalsActivity activity;

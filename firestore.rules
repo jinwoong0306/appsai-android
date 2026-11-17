@@ -1,0 +1,16 @@
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+    // 본인의 명시적 최소 백업 한 건만 허용한다. 다른 경로는 기본 거부한다.
+    match /users/{uid}/backups/current {
+      allow read, delete: if request.auth != null && request.auth.uid == uid;
+      allow create, update: if request.auth != null && request.auth.uid == uid
+        && request.resource.data.keys().hasAll(['version', 'snapshot', 'savedAt'])
+        && request.resource.data.keys().hasOnly(['version', 'snapshot', 'savedAt'])
+        && request.resource.data.version is int && request.resource.data.version == 1
+        && request.resource.data.snapshot is string
+        && request.resource.data.snapshot.size() <= 400000
+        && request.resource.data.savedAt == request.time;
+    }
+  }
+}

@@ -10,7 +10,7 @@ import kr.example.haliltalk.data.FriendsDatabase;
 import kr.example.haliltalk.character.CharacterCatalog;
 import kr.example.haliltalk.character.CharacterView;
 
-public final class CustomizationFlowTest extends InstrumentationTestCase {
+public final class CustomizationFlowTest extends GuestActivityTestCase {
     public void testAllSlotsCancelSaveAndReopen() throws Throwable {
         SQLiteDatabase db=new FriendsDatabase(getInstrumentation().getTargetContext()).getWritableDatabase();
         int id=0;

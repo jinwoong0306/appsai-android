@@ -7,7 +7,9 @@ import kr.example.haliltalk.shop.DemoShopStore;
 
 /** Additive migrations preserve existing friends, messages, experience, and appearance. */
 public final class FriendsDatabase extends SQLiteOpenHelper {
-    public FriendsDatabase(Context context) { super(context, "friends.db", null, 8); }
+    public FriendsDatabase(Context context) {
+        super(context, kr.example.haliltalk.auth.AccountSession.databaseName(context), null, 8);
+    }
     @Override public void onConfigure(SQLiteDatabase db) { db.setForeignKeyConstraintsEnabled(true); }
     @Override public void onCreate(SQLiteDatabase db) {
         db.execSQL("CREATE TABLE friends(id INTEGER PRIMARY KEY, package TEXT UNIQUE, name TEXT, personality TEXT, xp INTEGER DEFAULT 0)");

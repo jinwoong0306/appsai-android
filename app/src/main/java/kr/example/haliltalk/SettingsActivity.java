@@ -5,8 +5,14 @@ import android.os.Bundle;
 import android.provider.Settings;
 import android.app.AlertDialog;
 import android.widget.TextView;
+import android.widget.Toast;
+import com.google.android.gms.tasks.Task;
+import com.google.firebase.auth.FirebaseUser;
+import kr.example.haliltalk.auth.AccountSession;
+import kr.example.haliltalk.auth.CloudBackup;
 
 public final class SettingsActivity extends FeatureActivity {
+    private Task<Boolean> observed;
     @Override public void onCreate(Bundle state) {
         super.onCreate(state);
         setContentView(R.layout.screen_settings);
@@ -24,15 +30,74 @@ public final class SettingsActivity extends FeatureActivity {
                         .putExtra(Settings.EXTRA_APP_PACKAGE, getPackageName())));
         findViewById(R.id.delay_test).setOnClickListener(view ->
                 startActivity(new Intent(this, DelayTestActivity.class)));
+        findViewById(R.id.auth_cloud_save).setOnClickListener(view -> confirmCloud(false));
+        findViewById(R.id.auth_cloud_restore).setOnClickListener(view -> confirmCloud(true));
         findViewById(R.id.mock_logout).setOnClickListener(view ->
-                new AlertDialog.Builder(this).setTitle(R.string.mock_logout)
-                        .setMessage(R.string.mock_logout_message)
+                new AlertDialog.Builder(this).setTitle(R.string.auth_logout)
+                        .setMessage(R.string.auth_logout_confirm)
                         .setNegativeButton(R.string.cancel_action, null)
-                        .setPositiveButton(R.string.mock_logout, (dialog, which) -> {
-                            LoginActivity.session(this).edit().putBoolean("signed_in", false).apply();
+                        .setPositiveButton(R.string.auth_logout, (dialog, which) -> {
+                            AccountSession.signOut(this);
                             startActivity(new Intent(this, LoginActivity.class)
                                     .addFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK));
                         }).show());
+    }
+
+    private void confirmCloud(boolean restore) {
+        new AlertDialog.Builder(this)
+                .setTitle(restore ? R.string.auth_cloud_restore : R.string.auth_cloud_save)
+                .setMessage(restore ? R.string.auth_cloud_restore_confirm : R.string.auth_cloud_save_confirm)
+                .setNegativeButton(R.string.cancel_action, null)
+                .setPositiveButton(restore ? R.string.auth_cloud_restore : R.string.auth_cloud_save,
+                        (dialog, which) -> observe(restore ? CloudBackup.restore(this) : CloudBackup.save(this)))
+                .show();
+    }
+
+    private void observe(Task<Boolean> task) {
+        renderAccount();
+        if (observed == task) return;
+        observed = task;
+        task.addOnCompleteListener(this, result -> {
+            if (CloudBackup.operation() != task) return;
+            CloudBackup.consume(task);
+            renderAccount();
+            TextView status = findViewById(R.id.auth_cloud_status);
+            if (!result.isSuccessful()) {
+                status.setText(CloudBackup.errorMessage(result.getException()));
+            } else if (Boolean.TRUE.equals(result.getResult())) {
+                Toast.makeText(this, R.string.auth_cloud_restored, Toast.LENGTH_LONG).show();
+                ((ChatApplication)getApplication()).resetChat();
+                startActivity(new Intent(this, MainActivity.class)
+                        .addFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK));
+            } else {
+                status.setText(R.string.auth_cloud_saved);
+            }
+        });
+    }
+
+    private void renderAccount() {
+        FirebaseUser user = AccountSession.user(this);
+        boolean busy = CloudBackup.isBusy();
+        ((TextView)findViewById(R.id.auth_account_status)).setText(user == null
+                ? getString(R.string.auth_guest_status)
+                : getString(R.string.auth_signed_in_status, user.getEmail()));
+        findViewById(R.id.auth_cloud_save).setEnabled(user != null && !busy);
+        findViewById(R.id.auth_cloud_restore).setEnabled(user != null && !busy);
+        findViewById(R.id.mock_logout).setEnabled(!busy);
+        ((TextView)findViewById(R.id.auth_cloud_status)).setText(busy
+                ? R.string.auth_cloud_working : user == null ? R.string.auth_cloud_requires_account
+                : R.string.auth_account_notice);
+    }
+
+    @Override protected void onStart() {
+        super.onStart();
+        renderAccount();
+        if (CloudBackup.operation() != null) observe(CloudBackup.operation());
+    }
+
+    @Override protected void onStop() {
+        observed = null;
+        super.onStop();
     }
 
     @Override protected void onResume() {

@@ -5,7 +5,9 @@
         <TextView style="@style/SectionTitle" android:layout_width="0dp" android:layout_weight="1" android:gravity="center" android:text="@string/settings_title"/>
         <Space android:layout_width="48dp" android:layout_height="1dp"/>
     </LinearLayout>
-    <ScrollView android:layout_width="match_parent" android:layout_height="0dp" android:layout_weight="1">
+    <ScrollView android:layout_width="match_parent" android:layout_height="0dp" android:layout_weight="1"
+        android:scrollbars="vertical" android:fadeScrollbars="false"
+        android:scrollbarStyle="insideOverlay">
         <LinearLayout android:layout_width="match_parent" android:layout_height="wrap_content" android:orientation="vertical" android:paddingBottom="24dp">
             <TextView style="@style/SecondaryText" android:layout_marginTop="16dp" android:layout_marginBottom="16dp" android:text="@string/settings_description"/>
             <Button android:id="@+id/add_friend" style="@style/PrimaryButton" android:text="@string/add_app_friend"/>
@@ -14,9 +16,13 @@
             <Button android:id="@+id/notification_settings" style="@style/SecondaryButton" android:layout_marginTop="24dp" android:text="@string/notification_settings"/>
             <TextView android:id="@+id/notification_status" style="@style/SecondaryText"/>
             <Button android:id="@+id/delay_test" style="@style/SecondaryButton" android:text="@string/delay_title"/>
-            <TextView style="@style/SectionTitle" android:text="@string/mock_session_label"/>
-            <TextView style="@style/SecondaryText" android:text="@string/mock_session_description"/>
-            <Button android:id="@+id/mock_logout" style="@style/SecondaryButton" android:text="@string/mock_logout"/>
+            <TextView style="@style/SectionTitle" android:text="@string/auth_account_title"/>
+            <TextView android:id="@+id/auth_account_status" style="@style/SecondaryText"/>
+            <TextView style="@style/SecondaryText" android:text="@string/auth_account_notice"/>
+            <Button android:id="@+id/auth_cloud_save" style="@style/SecondaryButton" android:text="@string/auth_cloud_save"/>
+            <Button android:id="@+id/auth_cloud_restore" style="@style/SecondaryButton" android:text="@string/auth_cloud_restore"/>
+            <TextView android:id="@+id/auth_cloud_status" style="@style/SecondaryText" android:accessibilityLiveRegion="polite"/>
+            <Button android:id="@+id/mock_logout" style="@style/SecondaryButton" android:text="@string/auth_logout"/>
         </LinearLayout>
     </ScrollView>
 </LinearLayout>

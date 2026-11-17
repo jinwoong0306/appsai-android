@@ -10,10 +10,22 @@ import android.view.WindowInsets;
 
 /** Insets and return routing shared by the settings, wardrobe and shop screens. */
 public abstract class FeatureActivity extends Activity {
+    private String openedDatabase;
     @Override public void onCreate(Bundle state) {
         setTheme(R.style.AppTheme);
         super.onCreate(state);
+        openedDatabase = kr.example.haliltalk.auth.AccountSession.databaseName(this);
         if (Build.VERSION.SDK_INT >= 30) getWindow().setDecorFitsSystemWindows(false);
+    }
+    @Override protected void onStart() {
+        super.onStart();
+        if (!(this instanceof LoginActivity)
+                && (!kr.example.haliltalk.auth.AccountSession.isEntered(this)
+                || !openedDatabase.equals(kr.example.haliltalk.auth.AccountSession.databaseName(this)))) {
+            startActivity(new Intent(this, LoginActivity.class)
+                    .addFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK));
+            finish();
+        }
     }
 
     @Override public void setContentView(int layout) {
