@@ -7,7 +7,7 @@ import android.database.sqlite.SQLiteDatabase;
 import android.test.InstrumentationTestCase;
 import kr.example.haliltalk.shop.DemoShopStore;
 
-public final class ShopFlowTest extends InstrumentationTestCase {
+public final class ShopFlowTest extends GuestActivityTestCase {
     public void testPreviewCancelConfirmAndOwnedState() throws Throwable {
         try(SQLiteDatabase fixture=SQLiteDatabase.create(null)){
             fixture.execSQL("CREATE TABLE appearance(hat TEXT,face TEXT,body TEXT,back TEXT,prop TEXT)");

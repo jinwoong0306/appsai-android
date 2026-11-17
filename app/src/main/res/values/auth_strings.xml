@@ -1,0 +1,32 @@
+<resources>
+    <string name="auth_sign_in">이메일로 로그인</string>
+    <string name="auth_register">새 계정 만들기</string>
+    <string name="auth_guest">로그인 없이 이 기기에서 사용</string>
+    <string name="auth_email">이메일</string>
+    <string name="auth_password">비밀번호</string>
+    <string name="auth_account_notice">계정마다 별도로 보관해요.\n기기 데이터는 그대로 둬요.</string>
+    <string name="auth_unconfigured">계정 연결 설정이 없어요.\n게스트로 사용할 수 있어요.</string>
+    <string name="auth_invalid_input">이메일 형식을 확인해 주세요.\n비밀번호도 확인해 주세요.</string>
+    <string name="auth_weak_password">비밀번호는 6자 이상이며 프로젝트의 비밀번호 정책을 충족해야 합니다.</string>
+    <string name="auth_working">계정 확인 중입니다…</string>
+    <string name="auth_failed">로그인 또는 계정 생성에 실패했어요. 입력 정보, Email/Password 활성화 여부와 연결 설정을 확인해 주세요.</string>
+    <string name="auth_network_error">네트워크에 연결할 수 없어요. 연결을 확인하고 다시 시도해 주세요.</string>
+    <string name="auth_account_title">계정과 클라우드 백업</string>
+    <string name="auth_guest_status">기기 내 사용 중 · 기존 로컬 데이터 보관</string>
+    <string name="auth_signed_in_status">로그인 계정: %1$s</string>
+    <string name="auth_logout">로그아웃 / 계정 전환</string>
+    <string name="auth_logout_confirm">현재 대화 요청을 종료합니다.\n로그인 화면으로 이동합니다.\n저장 데이터는 삭제하지 않습니다.</string>
+    <string name="auth_cloud_save">친구·목표를 클라우드에 저장</string>
+    <string name="auth_cloud_restore">클라우드 친구·목표 복원</string>
+    <string name="auth_cloud_save_confirm">현재 계정의 친구 정보·외형·목표를 Firebase에 전송할까요? 이 계정의 기존 클라우드 백업 한 건은 새 내용으로 교체됩니다. 게스트 데이터는 전송하지 않습니다.</string>
+    <string name="auth_cloud_restore_confirm">현재 계정의 클라우드 백업을 이 기기에 복원할까요? 친구·목표·대화가 없는 계정 저장소에만 추가하며 기존 데이터는 덮어쓰지 않습니다. 완료된 목표 상태도 복원되지만 보상과 AI 공유 동의는 복원되지 않습니다.</string>
+    <string name="auth_cloud_requires_account">클라우드 백업은 이메일 계정 로그인 후 사용할 수 있습니다.</string>
+    <string name="auth_cloud_working">서버 백업 처리 중입니다…</string>
+    <string name="auth_cloud_saved">서버에 친구·목표 백업을 저장했어요.</string>
+    <string name="auth_cloud_restored">친구·목표를 복원했어요.</string>
+    <string name="auth_no_backup">이 계정에 저장된 클라우드 백업이 없어요.</string>
+    <string name="auth_invalid_backup">백업 형식이나 크기를 확인해 주세요. 친구 100명·목표 500개·400KB 이하를 지원합니다.</string>
+    <string name="auth_restore_not_empty">이 계정의 기기 저장소에 이미 데이터가 있어 복원하지 않았어요. 기존 데이터는 그대로 보관합니다.</string>
+    <string name="auth_account_changed">작업 중 계정이 바뀌었어요. 현재 계정에서 다시 시도해 주세요.</string>
+    <string name="auth_cloud_failed">백업 작업을 완료하지 못했어요. 인터넷 연결, Firestore 생성 여부와 계정 보안 규칙을 확인해 주세요.</string>
+</resources>

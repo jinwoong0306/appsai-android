@@ -42,7 +42,8 @@ public final class ChatController implements AutoCloseable {
         helper = new FriendsDatabase(context.getApplicationContext());
         db = helper.getWritableDatabase();
         this.service = service;
-        preferences = context.getSharedPreferences("ai_chat_consent", Context.MODE_PRIVATE);
+        preferences = context.getSharedPreferences(
+                kr.example.haliltalk.auth.AccountSession.preferencesName(context, "ai_chat_consent"), Context.MODE_PRIVATE);
         // Process death cannot prove whether a remote response arrived. Never silently resend.
         db.execSQL("UPDATE chat_requests SET state='failed',error='interrupted' WHERE state='pending'");
     }

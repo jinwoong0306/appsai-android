@@ -1,5 +1,7 @@
 <ScrollView xmlns:android="http://schemas.android.com/apk/res/android"
-    style="@style/Page" android:fillViewport="true">
+    style="@style/Page" android:fillViewport="true"
+    android:scrollbars="vertical" android:fadeScrollbars="false"
+    android:scrollbarStyle="insideOverlay">
     <LinearLayout android:layout_width="match_parent" android:layout_height="wrap_content"
         android:orientation="vertical" android:gravity="center_horizontal"
         android:paddingTop="24dp" android:paddingBottom="24dp">
@@ -10,18 +12,32 @@
             android:orientation="vertical" android:gravity="center"
             android:background="@drawable/bg_hero" android:padding="24dp">
             <kr.example.haliltalk.character.CharacterView android:id="@+id/login_character"
-                android:layout_width="200dp" android:layout_height="200dp"
+                android:layout_width="148dp" android:layout_height="148dp"
                 android:importantForAccessibility="no"/>
             <TextView style="@style/SectionTitle" android:gravity="center"
                 android:text="@string/login_greeting"/>
             <TextView style="@style/BodyText" android:gravity="center"
                 android:text="@string/login_description" android:layout_marginBottom="12dp"/>
         </LinearLayout>
-        <Space android:layout_width="1dp" android:layout_height="24dp"/>
+        <Space android:layout_width="1dp" android:layout_height="12dp"/>
+        <Button android:id="@+id/auth_guest" style="@style/SecondaryButton"
+            android:text="@string/auth_guest"/>
+        <TextView style="@style/BodyText" android:text="@string/auth_email" android:labelFor="@id/auth_email" />
+        <EditText android:id="@+id/auth_email" style="@style/InputField"
+            android:inputType="textEmailAddress"
+            android:autofillHints="emailAddress" android:maxLength="254"/>
+        <TextView style="@style/BodyText" android:text="@string/auth_password"
+            android:layout_marginTop="8dp" android:labelFor="@id/auth_password" />
+        <EditText android:id="@+id/auth_password" style="@style/InputField"
+            android:inputType="textPassword"
+            android:layout_marginTop="8dp" android:autofillHints="password"
+            android:saveEnabled="false" android:maxLength="128"/>
         <Button android:id="@+id/login_button" style="@style/PrimaryButton"
-            android:text="@string/mock_login"/>
-        <TextView style="@style/SecondaryText" android:gravity="center"
-            android:layout_marginTop="8dp" android:text="@string/mock_login_notice"/>
+            android:text="@string/auth_sign_in"/>
+        <Button android:id="@+id/auth_register" style="@style/SecondaryButton"
+            android:text="@string/auth_register"/>
+        <TextView android:id="@+id/auth_status" style="@style/SecondaryText"
+            android:accessibilityLiveRegion="polite" android:text="@string/auth_account_notice"/>
         <TextView style="@style/SecondaryText" android:gravity="center"
             android:layout_marginTop="20dp" android:text="@string/login_notifications_optional"/>
     </LinearLayout>

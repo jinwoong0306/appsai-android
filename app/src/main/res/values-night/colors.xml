@@ -11,6 +11,7 @@
     <color name="hero_top">#45305F</color>
     <color name="hero_bottom">#332044</color>
     <color name="disabled">#44374F</color>
+    <color name="disabled_text">#C2AFD1</color>
     <color name="ripple">#409462DB</color>
     <bool name="light_system_bars">false</bool>
 </resources>

@@ -20,7 +20,7 @@ import java.util.concurrent.TimeUnit;
 import kr.example.haliltalk.character.CharacterCatalog;
 import kr.example.haliltalk.data.FriendsDatabase;
 
-public final class AccessoryGridTest extends InstrumentationTestCase {
+public final class AccessoryGridTest extends GuestActivityTestCase {
     public void testEqualCardsWrapAtPhoneAndLargeFontWidths() throws Throwable {
         runTestOnUiThread(()->{
             assertGrid(320,1,3);

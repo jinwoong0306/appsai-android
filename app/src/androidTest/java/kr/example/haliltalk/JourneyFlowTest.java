@@ -23,7 +23,7 @@ import kr.example.haliltalk.data.GoalStore;
 import kr.example.haliltalk.data.JourneyStore;
 
 /** [U6 | 검증] 실제 저장·회전·오류·재시도. 합성 친구만 생성하고 삭제한다. */
-public final class JourneyFlowTest extends InstrumentationTestCase {
+public final class JourneyFlowTest extends GuestActivityTestCase {
     private FriendsDatabase helper;
     private SQLiteDatabase db;
     private JourneyActivity activity;

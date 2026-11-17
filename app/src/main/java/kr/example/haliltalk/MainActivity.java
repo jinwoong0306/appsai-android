@@ -21,6 +21,7 @@ import kr.example.haliltalk.ai.ChatController;
 import kr.example.haliltalk.shop.DemoShopStore;
 
 public class MainActivity extends Activity {
+    private String openedDatabase;
     private boolean resumed;
     private long displayedMessageId;
     SQLiteDatabase db; LinearLayout root, body; int friendId; String friendName; boolean showingHome, showingApps;
@@ -40,6 +41,10 @@ public class MainActivity extends Activity {
     final String[] personalities={"다정한 친구","장난기 많은 친구","차분한 친구"};
     @Override public void onCreate(Bundle b){
         setTheme(R.style.AppTheme);super.onCreate(b);
+        if (!kr.example.haliltalk.auth.AccountSession.isEntered(this)) {
+            requireSession();return;
+        }
+        openedDatabase=kr.example.haliltalk.auth.AccountSession.databaseName(this);
         if(android.os.Build.VERSION.SDK_INT>=30)getWindow().setDecorFitsSystemWindows(false);
         db=new FriendsDatabase(this).getWritableDatabase();
         shopStore=new DemoShopStore(db);
@@ -83,6 +88,7 @@ public class MainActivity extends Activity {
         content.post(content::requestApplyInsets);
     }
     @Override protected void onSaveInstanceState(Bundle state){
+        if(db==null){super.onSaveInstanceState(state);return;}
         state.putString("page",showingHome?"home":showingApps?"apps":showingCharacter?"character":"chat");
         if(showingCharacter)nickname=((EditText)findViewById(R.id.friend_name)).getText().toString();
         state.putString("selected_package",selectedPackage);state.putString("selected_label",selectedLabel);
@@ -463,17 +469,25 @@ public class MainActivity extends Activity {
     @Override public void onBackPressed(){if(showingHome) super.onBackPressed(); else if(showingCharacter)apps();else home();}
     @Override protected void onStart(){
         super.onStart();
+        if(db==null||!kr.example.haliltalk.auth.AccountSession.isEntered(this)
+                ||!openedDatabase.equals(kr.example.haliltalk.auth.AccountSession.databaseName(this))){
+            requireSession();return;
+        }
         if(showingHome)home();
         else if(showingCharacter)renderChoices();
         else if(!showingApps&&!showingCharacter)showAppearance(findViewById(R.id.chat_character),friendId);
         chatController.addListener(chatChanged);chatChanged.run();
     }
+    private void requireSession(){
+        startActivity(new Intent(this,LoginActivity.class)
+                .addFlags(Intent.FLAG_ACTIVITY_NEW_TASK|Intent.FLAG_ACTIVITY_CLEAR_TASK));finish();
+    }
     @Override protected void onResume(){super.onResume();resumed=true;markVisibleChatRead();}
     @Override protected void onPause(){resumed=false;super.onPause();}
-    @Override protected void onStop(){chatController.removeListener(chatChanged);super.onStop();}
+    @Override protected void onStop(){if(chatController!=null)chatController.removeListener(chatChanged);super.onStop();}
     @Override protected void onDestroy(){
         if(personalityDialog!=null)personalityDialog.dismiss();
         if(consentDialog!=null)consentDialog.dismiss();
-        db.close();super.onDestroy();
+        if(db!=null)db.close();super.onDestroy();
     }
 }
