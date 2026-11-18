@@ -14,6 +14,7 @@ import java.util.Map;
 import org.json.JSONException;
 import kr.example.haliltalk.R;
 import kr.example.haliltalk.data.FriendsDatabase;
+import kr.example.haliltalk.goals.GoalNotifications;
 
 /** Only explicit, confirmed actions reach this service; no automatic synchronization. */
 public final class CloudBackup {
@@ -95,6 +96,7 @@ public final class CloudBackup {
                     } catch (IllegalStateException notEmpty) {
                         throw new Failure(R.string.auth_restore_not_empty);
                     }
+                    GoalNotifications.reschedule(app);
                     return true;
                     }
                 });

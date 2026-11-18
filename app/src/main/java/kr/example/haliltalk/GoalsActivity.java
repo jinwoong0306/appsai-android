@@ -8,6 +8,7 @@ import android.widget.CheckBox;
 import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
 import android.os.Bundle;
+import android.provider.Settings;
 import android.view.View;
 import android.widget.Button;
 import android.widget.EditText;
@@ -17,6 +18,8 @@ import java.util.Calendar;
 import java.util.List;
 import kr.example.haliltalk.data.FriendsDatabase;
 import kr.example.haliltalk.data.GoalStore;
+import kr.example.haliltalk.auth.AccountSession;
+import kr.example.haliltalk.goals.GoalNotifications;
 
 /** 친구별 목표 화면. 저장·완료·삭제는 명시적인 사용자 동작으로만 실행한다. */
 public final class GoalsActivity extends FeatureActivity {
@@ -35,6 +38,9 @@ public final class GoalsActivity extends FeatureActivity {
 
     @Override public void onCreate(Bundle state) {
         super.onCreate(state);
+        String notificationAccount=getIntent().getStringExtra("goal_account");
+        if(notificationAccount!=null&&(!AccountSession.isEntered(this)
+                ||!notificationAccount.equals(AccountSession.databaseName(this)))) { finish();return; }
         helper=new FriendsDatabase(this); db=helper.getWritableDatabase(); store=new GoalStore(db);
         Object friendExtra=getIntent().getExtras()==null?null:getIntent().getExtras().get("friend_id");
         long friendValue=friendExtra instanceof Number?((Number)friendExtra).longValue():0;
@@ -61,6 +67,14 @@ public final class GoalsActivity extends FeatureActivity {
                     .setNegativeButton("취소",(d,w)->sharing.setChecked(false))
                     .setPositiveButton("포함",(d,w)->store.setSharing(friend,true))
                     .setOnCancelListener(d->sharing.setChecked(false)).show();
+        });
+        findViewById(R.id.goals_notification_settings).setOnClickListener(v->{
+            if(android.os.Build.VERSION.SDK_INT>=33
+                    &&checkSelfPermission(android.Manifest.permission.POST_NOTIFICATIONS)
+                    !=android.content.pm.PackageManager.PERMISSION_GRANTED) {
+                requestPermissions(new String[]{android.Manifest.permission.POST_NOTIFICATIONS},81);
+            } else startActivity(new Intent(Settings.ACTION_APP_NOTIFICATION_SETTINGS)
+                    .putExtra(Settings.EXTRA_APP_PACKAGE,getPackageName()));
         });
         render();
         if(state!=null&&state.getBoolean("editing")) {
@@ -122,6 +136,7 @@ public final class GoalsActivity extends FeatureActivity {
         editor.getButton(AlertDialog.BUTTON_POSITIVE).setOnClickListener(v->{
             try {
                 store.save(friend,id,input.getText().toString(),draftDue);
+                GoalNotifications.reschedule(this);
                 render(); editor.dismiss();
             } catch(IllegalArgumentException error) { input.setError(error.getMessage()); }
             catch(android.database.sqlite.SQLiteException error) { input.setError("저장하지 못했어요. 저장 공간을 확인한 뒤 다시 시도해 주세요."); }
@@ -161,6 +176,7 @@ public final class GoalsActivity extends FeatureActivity {
         TextView error=findViewById(R.id.goals_error);
         try {
             action.run();error.setVisibility(View.GONE);
+            GoalNotifications.reschedule(this);
             render();
         } catch(android.database.sqlite.SQLiteException failure) {
             error.setText("변경하지 못했어요. 저장 공간을 확인한 뒤 다시 시도해 주세요.");
@@ -170,7 +186,22 @@ public final class GoalsActivity extends FeatureActivity {
     @Override protected void onResume() {
         super.onResume();
         if(store==null||isFinishing()) return;
+        ((TextView)findViewById(R.id.goals_notification_status)).setText(GoalNotifications.enabled(this)
+                ?"기한 알림 사용 가능 · 기기 상태에 따라 늦을 수 있어요."
+                :"알림이 꺼져 있어 기한 알림을 표시할 수 없어요.");
+        GoalNotifications.reschedule(this);
         render();
+    }
+    @Override protected void onNewIntent(Intent intent) {
+        super.onNewIntent(intent);
+        if(intent==null||!AccountSession.isEntered(this)
+                ||!AccountSession.databaseName(this).equals(intent.getStringExtra("goal_account"))) {
+            finish();
+            return;
+        }
+        // SINGLE_TOP 알림 탭은 기존 화면의 친구/편집 초안을 재사용하지 않는다.
+        finish();
+        startActivity(new Intent(this,GoalsActivity.class).putExtras(intent));
     }
     @Override protected void onSaveInstanceState(Bundle state) {
         if(editor!=null&&(editor.isShowing()||confirmingDiscard)) {

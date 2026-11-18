@@ -16,6 +16,7 @@
     <string name="auth_signed_in_status">로그인 계정: %1$s</string>
     <string name="auth_logout">로그아웃 / 계정 전환</string>
     <string name="auth_logout_confirm">현재 대화 요청을 종료합니다.\n로그인 화면으로 이동합니다.\n저장 데이터는 삭제하지 않습니다.</string>
+    <string name="auth_file_transfer">목표 파일 내보내기 / 가져오기</string>
     <string name="auth_cloud_save">친구·목표를 클라우드에 저장</string>
     <string name="auth_cloud_restore">클라우드 친구·목표 복원</string>
     <string name="auth_cloud_save_confirm">현재 계정의 친구 정보·외형·목표를 Firebase에 전송할까요? 이 계정의 기존 클라우드 백업 한 건은 새 내용으로 교체됩니다. 게스트 데이터는 전송하지 않습니다.</string>

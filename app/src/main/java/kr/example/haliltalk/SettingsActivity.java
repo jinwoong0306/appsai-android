@@ -30,6 +30,8 @@ public final class SettingsActivity extends FeatureActivity {
                         .putExtra(Settings.EXTRA_APP_PACKAGE, getPackageName())));
         findViewById(R.id.delay_test).setOnClickListener(view ->
                 startActivity(new Intent(this, DelayTestActivity.class)));
+        findViewById(R.id.auth_file_transfer).setOnClickListener(view ->
+                startActivity(new Intent(this, TransferActivity.class)));
         findViewById(R.id.auth_cloud_save).setOnClickListener(view -> confirmCloud(false));
         findViewById(R.id.auth_cloud_restore).setOnClickListener(view -> confirmCloud(true));
         findViewById(R.id.mock_logout).setOnClickListener(view ->

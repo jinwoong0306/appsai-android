@@ -4,6 +4,7 @@ import android.app.Application;
 import com.google.firebase.FirebaseApp;
 import com.google.firebase.auth.FirebaseAuth;
 import kr.example.haliltalk.auth.AccountSession;
+import kr.example.haliltalk.goals.GoalNotifications;
 import kr.example.haliltalk.ai.ChatController;
 import kr.example.haliltalk.ai.FirebaseAiChatService;
 
@@ -22,6 +23,7 @@ public final class ChatApplication extends Application {
                 if (!selected.equals(accountDatabase)) {
                     AccountSession.beforeTransition(this);
                     accountDatabase = selected;
+                    if (AccountSession.isEntered(this)) GoalNotifications.reschedule(this);
                 }
             });
         }

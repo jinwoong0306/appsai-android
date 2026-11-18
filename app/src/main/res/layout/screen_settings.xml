@@ -16,6 +16,7 @@
             <Button android:id="@+id/notification_settings" style="@style/SecondaryButton" android:layout_marginTop="24dp" android:text="@string/notification_settings"/>
             <TextView android:id="@+id/notification_status" style="@style/SecondaryText"/>
             <Button android:id="@+id/delay_test" style="@style/SecondaryButton" android:text="@string/delay_title"/>
+            <Button android:id="@+id/auth_file_transfer" style="@style/SecondaryButton" android:text="@string/auth_file_transfer"/>
             <TextView style="@style/SectionTitle" android:text="@string/auth_account_title"/>
             <TextView android:id="@+id/auth_account_status" style="@style/SecondaryText"/>
             <TextView style="@style/SecondaryText" android:text="@string/auth_account_notice"/>

@@ -13,6 +13,10 @@
             <CheckBox android:id="@+id/share_goals" style="@style/BodyText"
                 android:minHeight="48dp" android:text="@string/goals_share" />
             <TextView style="@style/SecondaryText" android:text="@string/goals_share_notice" />
+            <TextView android:id="@+id/goals_notification_status" style="@style/SecondaryText"
+                android:layout_marginTop="12dp" />
+            <Button android:id="@+id/goals_notification_settings" style="@style/SecondaryButton"
+                android:text="@string/goals_notifications" />
             <Button android:id="@+id/add_goal" style="@style/PrimaryButton" android:text="@string/goals_add" />
             <TextView android:id="@+id/goals_error" style="@style/SecondaryText"
                 android:accessibilityLiveRegion="polite" android:visibility="gone" />

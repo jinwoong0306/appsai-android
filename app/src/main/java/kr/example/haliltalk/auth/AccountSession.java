@@ -11,6 +11,7 @@ import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
 import kr.example.haliltalk.BuildConfig;
 import kr.example.haliltalk.ChatApplication;
+import kr.example.haliltalk.goals.GoalNotifications;
 
 /** Firebase identity selects storage; local guest data is never migrated into an account. */
 public final class AccountSession {
@@ -66,6 +67,7 @@ public final class AccountSession {
     /** Main-thread boundary: invalidate callbacks before any identity change. */
     public static void beforeTransition(Context context) {
         generation++;
+        GoalNotifications.cancelAll(context);
         ((ChatApplication) context.getApplicationContext()).resetChat();
     }
 
@@ -94,6 +96,7 @@ public final class AccountSession {
         if (isConfigured(context)) FirebaseAuth.getInstance().signOut();
         authentication = null;
         context.getSharedPreferences("account_session", 0).edit().putBoolean("guest_entered", true).apply();
+        GoalNotifications.reschedule(context);
     }
 
     public static void signOut(Context context) {
