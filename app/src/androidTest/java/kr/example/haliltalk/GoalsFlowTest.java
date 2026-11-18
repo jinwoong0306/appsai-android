@@ -17,6 +17,7 @@ import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.TimeUnit;
 import kr.example.haliltalk.data.FriendsDatabase;
 import kr.example.haliltalk.data.GoalStore;
+import kr.example.haliltalk.auth.AccountSession;
 
 /** 실제 데이터를 지우지 않고 이 테스트가 만든 친구만 정리한다. */
 public final class GoalsFlowTest extends GuestActivityTestCase {
@@ -104,6 +105,37 @@ public final class GoalsFlowTest extends GuestActivityTestCase {
         capture(name);
         getInstrumentation().runOnMainSync(()->scroll.scrollTo(0,0));
         getInstrumentation().waitForIdleSync();
+    }
+    public void testReminderTapReplacesReusedFriendAndRejectsOtherAccount() throws Throwable {
+        launch();
+        ContentValues other=new ContentValues();
+        other.put("package","qa.goals.route."+java.util.UUID.randomUUID());
+        other.put("name","다른 친구");
+        other.put("personality","차분한 친구");
+        int second=(int)db.insertOrThrow("friends",null,other);
+        android.app.Instrumentation.ActivityMonitor monitor=getInstrumentation().addMonitor(
+                GoalsActivity.class.getName(),null,false);
+        try {
+            String account=AccountSession.databaseName(getInstrumentation().getTargetContext());
+            runTestOnUiThread(()->activity.onNewIntent(new Intent(activity,GoalsActivity.class)
+                    .putExtra("friend_id",second).putExtra("goal_account",account)));
+            GoalsActivity routed=(GoalsActivity)getInstrumentation()
+                    .waitForMonitorWithTimeout(monitor,5000);
+            assertNotNull("Reminder routes to fresh friend screen",routed);
+            getInstrumentation().waitForIdleSync();
+            assertEquals(second,routed.getIntent().getIntExtra("friend_id",0));
+            assertTrue(((android.widget.TextView)routed.findViewById(R.id.goals_title))
+                    .getText().toString().contains("다른 친구"));
+            activity=routed;
+            runTestOnUiThread(()->activity.onNewIntent(new Intent(activity,GoalsActivity.class)
+                    .putExtra("friend_id",friend).putExtra("goal_account","other_account.db")));
+            getInstrumentation().waitForIdleSync();
+            assertTrue("Other account notification closes current goals",activity.isFinishing()
+                    ||activity.isDestroyed());
+        } finally {
+            getInstrumentation().removeMonitor(monitor);
+            db.delete("friends","id=?",new String[]{""+second});
+        }
     }
     public void testChatEntryOpensSelectedFriendsGoals() throws Throwable {
         android.content.Context context=getInstrumentation().getTargetContext();

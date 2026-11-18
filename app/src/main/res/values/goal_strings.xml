@@ -1,6 +1,7 @@
 <resources>
     <string name="goals_back">돌아가기</string>
     <string name="goals_title">목표와 일정</string>
+    <string name="goals_notifications">기한 알림 설정</string>
     <string name="goals_add">목표 추가</string>
     <string name="goals_complete">완료 처리</string>
     <string name="goals_edit">수정</string>
