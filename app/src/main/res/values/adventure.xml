@@ -1,0 +1,93 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <style name="AdventureCopy" parent="BodyText">
+        <item name="android:textColor">@color/ink</item>
+    </style>
+    <style name="AdventureSupport" parent="SecondaryText">
+        <item name="android:textColor">@color/muted</item>
+    </style>
+    <style name="AdventureToolbarTitle" parent="AdventureSection">
+        <item name="android:layout_width">0dp</item>
+        <item name="android:layout_weight">1</item>
+        <item name="android:layout_marginStart">8dp</item>
+        <item name="android:layout_marginTop">0dp</item>
+        <item name="android:layout_marginBottom">0dp</item>
+    </style>
+    <style name="AdventureSection" parent="SectionTitle">
+        <item name="android:textColor">@color/ink</item>
+    </style>
+    <style name="AdventureChoice" parent="android:style/Widget.Material.CompoundButton.RadioButton">
+        <item name="android:layout_width">match_parent</item>
+        <item name="android:layout_height">wrap_content</item>
+        <item name="android:minHeight">56dp</item>
+        <item name="android:textColor">@color/ink</item>
+        <item name="android:textSize">17sp</item>
+        <item name="android:buttonTint">@color/primary</item>
+        <item name="android:paddingTop">8dp</item>
+        <item name="android:paddingBottom">8dp</item>
+    </style>
+    <string name="adventure_title">친구와 작은 모험</string>
+    <string name="adventure_empty">함께할 친구가 아직 없어요.\n친구를 만들고 모험을 시작해요.</string>
+    <string name="adventure_add_friend">함께할 친구 만들기</string>
+    <string name="adventure_no_route">아래에서 첫 모험길을 골라보세요.</string>
+    <string name="adventure_route_progress">%1$s · %2$d / %3$d일 시도\n시작: %4$s</string>
+    <string name="adventure_route_complete">%1$s · %2$d / %3$d일 시도 · 도착!\n시작: %4$s</string>
+    <string name="adventure_route_open">모험길과 지점 보기</string>
+    <string name="adventure_route_close">모험길과 지점 접기</string>
+    <string name="adventure_suggestions_open">작은 행동 추천 보기</string>
+    <string name="adventure_suggestions_close">작은 행동 추천 접기</string>
+    <string name="adventure_gallery_open">함께 모은 엽서 보기</string>
+    <string name="adventure_gallery_close">함께 모은 엽서 접기</string>
+    <string name="adventure_stage">%1$d일 지점 · %2$s</string>
+    <string name="adventure_stage_reached">도착했어요</string>
+    <string name="adventure_stage_remaining">앞으로 %1$d일 시도</string>
+    <string name="adventure_route_three">첫걸음 모험 · 3일 시도</string>
+    <string name="adventure_route_seven">습관 모험 · 7일 시도</string>
+    <string name="adventure_route_fourteen">도전 모험 · 14일 시도</string>
+    <string-array name="adventure_route_names">
+        <item>첫걸음 모험</item><item>습관 모험</item><item>도전 모험</item>
+    </string-array>
+    <string name="adventure_choose">선택한 모험길 확인</string>
+    <string name="adventure_confirm_title">이 모험길로 시작할까요?</string>
+    <string name="adventure_confirm">%1$s과 %2$s · %3$d일 시도\n시작 날짜: %4$s\n\n확인하면 이 모험길의 진행도를 오늘부터 다시 계산해요. 오늘 이미 시도한 기록은 포함돼요. 이전 계획·회고와 누적 엽서는 지우지 않아요. 연속으로 하지 않아도 되고 마감은 없어요.</string>
+    <string name="adventure_confirm_save">이 모험 시작</string>
+    <string name="adventure_quest_plan_done">계획 · 저장 완료</string>
+    <string name="adventure_quest_plan_open">계획 · 아직 정하지 않았어요</string>
+    <string name="adventure_quest_review_done">돌아보기 · %1$s</string>
+    <string name="adventure_quest_review_open">돌아보기 · 행동 후 기록</string>
+    <string name="adventure_quest_reflection_done">한 줄 · 저장 완료</string>
+    <string name="adventure_quest_reflection_open">한 줄 · 선택 기록</string>
+    <string name="adventure_today_action">%1$s</string>
+    <string name="adventure_today_none">오늘 함께할 행동을 정해보세요.</string>
+    <string name="adventure_feedback_none">오늘의 작은 모험을 시작해요.</string>
+    <string name="adventure_feedback_planned">오늘 계획을 시도해볼 차례예요.</string>
+    <string name="adventure_feedback_done">오늘 해낸 시도가 남았어요.</string>
+    <string name="adventure_feedback_partial">오늘 조금 시도한 기록이 남았어요.</string>
+    <string name="adventure_feedback_rest">오늘은 휴식으로 기록했어요.</string>
+    <string name="adventure_feedback_named">%1$s · %2$s</string>
+    <string name="adventure_suggestion_theme">%1$s · 고른 행동은 초안으로 열려요.</string>
+    <string-array name="adventure_actions_first">
+        <item>책 한 쪽 읽기</item><item>물 한 잔 마시기</item><item>책상 위 물건 하나 정리하기</item>
+    </string-array>
+    <string-array name="adventure_actions_routine">
+        <item>식사 뒤 스트레칭 한 번 하기</item><item>잠들기 전 책 한 쪽 읽기</item><item>앉기 전에 책상 한 곳 정리하기</item>
+    </string-array>
+    <string-array name="adventure_actions_challenge">
+        <item>미뤄둔 일의 첫 줄 적기</item><item>어려운 문제 한 줄만 읽기</item><item>새로운 길로 1분 걷기</item>
+    </string-array>
+    <string name="adventure_primary">오늘 퀘스트 하기</string>
+    <string name="adventure_stamps">이 친구와 누적 %1$d일 시도</string>
+    <string-array name="adventure_postcard_names">
+        <item>첫 인사의 엽서</item><item>햇살 산책 엽서</item><item>함께 읽는 엽서</item><item>편안한 저녁 엽서</item>
+    </string-array>
+    <string name="adventure_postcard_earned">누적 %1$d일 달성 · 열어볼 수 있어요</string>
+    <string name="adventure_postcard_locked">누적 %1$d일에 열려요 · 앞으로 %2$d일 시도</string>
+    <string name="adventure_postcard_open">엽서 펼쳐보기</string>
+    <string name="adventure_postcard_requirement">열리는 조건 보기</string>
+    <string name="adventure_postcard_message">%1$s과 남긴 작은 시도가 이 장면을 열었어요.\n누적 %2$d일의 엽서예요.</string>
+    <string name="adventure_error_read">기록을 불러오지 못했어요. 저장 공간을 확인한 뒤 아래 버튼으로 다시 시도해 주세요.</string>
+    <string name="adventure_error_write">모험길을 저장하지 못했어요. 선택은 유지돼요. 저장 공간을 확인한 뒤 같은 창에서 다시 시도해 주세요.</string>
+    <string name="adventure_error_session">계정 상태가 바뀌었어요. 저장하지 않았어요. 창을 닫고 현재 계정에서 다시 열어 주세요.</string>
+    <string name="adventure_error_day">날짜가 바뀌었어요. 저장하지 않았어요. 창을 닫은 뒤 오늘 날짜로 다시 골라 주세요.</string>
+    <string name="adventure_retry">다시 불러오기</string>
+</resources>

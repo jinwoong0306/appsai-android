@@ -39,9 +39,14 @@
                 </LinearLayout>
                 <Button android:id="@+id/journey_goals" style="@style/SecondaryButton"
                     android:text="@string/journey_goals"/>
+                <Button android:id="@+id/journey_adventure" style="@style/SecondaryButton"
+                    android:text="@string/adventure_title"/>
                 <TextView style="@style/SectionTitle" android:text="@string/journey_week"
                     android:textColor="@color/ink"/>
                 <TextView android:id="@+id/journey_week" style="@style/BodyText"/>
+                <LinearLayout android:id="@+id/journey_days" android:layout_width="match_parent"
+                    android:layout_height="wrap_content" android:orientation="vertical"
+                    android:layout_marginTop="12dp"/>
                 <TextView android:id="@+id/journey_milestone" style="@style/BodyText"
                     android:layout_marginTop="16dp" android:textColor="@color/ink"/>
                 <TextView style="@style/BodyText" android:text="@string/journey_rules"

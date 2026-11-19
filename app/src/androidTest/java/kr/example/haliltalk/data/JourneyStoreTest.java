@@ -103,6 +103,27 @@ public final class JourneyStoreTest extends InstrumentationTestCase {
         assertEquals(3,store.recent(7,"2026-11-10",10000).size());
     }
 
+    public void testNextActionPrefersUnreviewedTodayThenReviewAndLatestPast() {
+        assertNull(store.nextEntry("2026-11-09"));
+        store.savePlan(9,"2026-11-10","Future",null,null,99);
+        store.savePlan(7,"2026-11-08","Past",null,null,20);
+        store.savePlan(9,"2026-11-08","Earlier edit",null,null,10);
+        assertEquals(7,store.nextEntry("2026-11-09").friend);
+        store.savePlan(9,"2026-11-09","Reviewed today",null,null,5);
+        store.review(9,"2026-11-09","rest","",6);
+        assertEquals(9,store.nextEntry("2026-11-09").friend);
+        store.savePlan(7,"2026-11-09","Unfinished today",null,null,1);
+        assertEquals(7,store.nextEntry("2026-11-09").friend);
+        store.review(7,"2026-11-09","done","",7);
+        assertEquals(7,store.nextEntry("2026-11-09").friend);
+        store.delete(7,"2026-11-09");
+        assertEquals(9,store.nextEntry("2026-11-09").friend);
+        store.delete(9,"2026-11-09");
+        assertEquals(7,store.nextEntry("2026-11-09").friend);
+        store.delete(7,"2026-11-08");
+        assertEquals(9,store.nextEntry("2026-11-09").friend);
+    }
+
     public void testInvalidDaysRejectNormalizationAndSqlInput() {
         for(String day:new String[]{null,"","2026-2-03","2026-02-30","2025-02-29",
                 "2026-13-01","2026-11-00","2026-11-09 ","2026-11-09T00:00",

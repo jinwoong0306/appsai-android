@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent" android:layout_height="wrap_content" android:minHeight="48dp"
+    android:orientation="horizontal" android:gravity="center_vertical" android:padding="12dp"
+    android:layout_marginBottom="4dp" android:background="@drawable/bg_card"
+    android:importantForAccessibility="yes">
+    <TextView android:id="@+id/journey_day_date" style="@style/AdventureSupport"
+        android:layout_width="0dp" android:layout_weight="1" android:importantForAccessibility="no"/>
+    <TextView android:id="@+id/journey_day_state" style="@style/AdventureCopy"
+        android:layout_width="0dp" android:layout_weight="1" android:gravity="end"
+        android:textColor="@color/primary" android:importantForAccessibility="no"/>
+</LinearLayout>

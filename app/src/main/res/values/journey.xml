@@ -41,4 +41,18 @@
     <string name="journey_goals">이 친구의 목표 보기</string>
     <string name="journey_repeat">최근 계획 가져오기</string>
     <string name="journey_no_friend">먼저 함께할 친구를 만들어 주세요.</string>
+    <string name="journey_home_add_friend">함께할 친구 만들기</string>
+    <string name="journey_next_first">함께할 친구를 골라 첫 작은 행동을 정해보세요.</string>
+    <string name="journey_next_return">%1$s과 다시 이어가요 · 최근 행동: %2$s</string>
+    <string name="journey_next_pending">%1$s과 오늘 이어갈 행동 · %2$s</string>
+    <string name="journey_next_recorded">%1$s과 오늘의 기록을 확인해요 · %2$s</string>
+    <string name="journey_continue">오늘 행동 이어가기</string>
+    <string name="journey_view_record">오늘 기록 보기</string>
+    <string name="journey_suggest">작은 행동 예시 고르기</string>
+    <string-array name="journey_examples">
+        <item>책 한 쪽 읽기</item><item>스트레칭 한 번 하기</item>
+        <item>물 한 잔 마시기</item><item>책상 위 물건 하나 정리하기</item>
+    </string-array>
+    <string name="journey_day_none">—</string>
+    <string name="journey_day_unrecorded">기록 없음</string>
 </resources>

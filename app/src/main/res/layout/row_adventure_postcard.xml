@@ -1,0 +1,21 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent" android:layout_height="wrap_content"
+    android:orientation="vertical" android:padding="16dp" android:layout_marginTop="12dp"
+    android:background="@drawable/bg_card">
+    <FrameLayout android:id="@+id/adventure_postcard_art" android:layout_width="match_parent"
+        android:layout_height="144dp">
+        <ImageView android:id="@+id/adventure_postcard_scene" android:layout_width="match_parent"
+            android:layout_height="match_parent" android:scaleType="centerCrop"
+            android:importantForAccessibility="no"/>
+        <kr.example.haliltalk.character.CharacterView android:id="@+id/adventure_postcard_character"
+            android:layout_width="match_parent" android:layout_height="match_parent"
+            android:importantForAccessibility="no"/>
+    </FrameLayout>
+    <TextView android:id="@+id/adventure_postcard_title" style="@style/AdventureCopy"
+        android:layout_marginTop="8dp"/>
+    <TextView android:id="@+id/adventure_postcard_state" style="@style/AdventureSupport"
+        android:layout_marginTop="4dp"/>
+    <Button android:id="@+id/adventure_postcard_open" style="@style/SecondaryButton"
+        android:text="@string/adventure_postcard_open"/>
+</LinearLayout>

@@ -217,4 +217,85 @@ public final class JourneyFlowTest extends GuestActivityTestCase {
             runTestOnUiThread(goals::finish);
         }
     }
+
+    public void testExamplesAreDraftsAndWeekRowsUseRecordedOutcomes() throws Throwable {
+        String yesterday=LocalDate.parse(day).minusDays(1).toString();
+        store.savePlan(friend,yesterday,"Previous plan","","",1);
+        store.review(friend,yesterday,"rest","",2);
+        launch();
+        LinearLayout days=activity.findViewById(R.id.journey_days);
+        assertEquals(7,days.getChildCount());
+        assertEquals("rest",days.findViewWithTag(yesterday).findViewById(R.id.journey_day_state).getTag());
+        assertEquals("none",days.findViewWithTag(day).findViewById(R.id.journey_day_state).getTag());
+        click(R.id.journey_plan);
+        runTestOnUiThread(()->activity.editor.findViewById(R.id.journey_suggest).performClick());
+        runTestOnUiThread(()->activity.suggestions.getListView().performItemClick(
+                activity.suggestions.getListView().getChildAt(0),0,0));
+        assertNull(store.entry(friend,day));
+        String expected=activity.getResources().getStringArray(R.array.journey_examples)[0];
+        assertEquals(expected,((EditText)activity.editor.findViewById(R.id.journey_action_input))
+                .getText().toString());
+        recreate();save();
+        assertEquals(expected,store.entry(friend,day).action);
+        assertEquals("planned",store.entry(friend,day).outcome);
+        days=activity.findViewById(R.id.journey_days);
+        assertEquals("planned",days.findViewWithTag(day).findViewById(R.id.journey_day_state).getTag());
+    }
+
+    public void testHomeContinuesTheFriendWithTodaysUnreviewedPlan() throws Throwable {
+        android.content.Context context=getInstrumentation().getTargetContext();
+        android.content.SharedPreferences welcome=context.getSharedPreferences("MainActivity",0);
+        boolean hadWelcome=welcome.contains("welcome_done");
+        boolean welcomed=welcome.getBoolean("welcome_done",false);
+        assertTrue(welcome.edit().putBoolean("welcome_done",true).commit());
+        ContentValues values=new ContentValues();
+        values.put("package","qa.journey.next."+System.nanoTime());
+        values.put("name","이어갈 친구");
+        values.put("personality","calm");
+        int next=(int)db.insertOrThrow("friends",null,values);
+        MainActivity main=null;
+        Instrumentation.ActivityMonitor monitor=getInstrumentation().addMonitor(
+                JourneyActivity.class.getName(),null,false);
+        try{
+            store.savePlan(friend,day,"먼저 완료한 계획",null,null,1);
+            store.review(friend,day,"done","",2);
+            store.savePlan(next,day,"아직 시도할 행동",null,null,1);
+            main=(MainActivity)getInstrumentation().startActivitySync(
+                    new Intent(context,MainActivity.class).addFlags(Intent.FLAG_ACTIVITY_NEW_TASK));
+            getInstrumentation().waitForIdleSync();
+            assertTrue(((android.widget.TextView)main.findViewById(R.id.home_journey_next))
+                    .getText().toString().contains("이어갈 친구"));
+            MainActivity screen=main;
+            runTestOnUiThread(()->screen.findViewById(R.id.home_journey).performClick());
+            activity=(JourneyActivity)getInstrumentation().waitForMonitorWithTimeout(monitor,5000);
+            assertNotNull(activity);
+            assertEquals(next,activity.getIntent().getIntExtra("friend_id",0));
+            assertEquals(next,((Integer)main.findViewById(R.id.home_journey).getTag()).intValue());
+        }finally{
+            getInstrumentation().removeMonitor(monitor);
+            MainActivity screen=main;
+            if(screen!=null)getInstrumentation().runOnMainSync(screen::finish);
+            db.delete("friends","id=?",new String[]{""+next});
+            android.content.SharedPreferences.Editor edit=welcome.edit();
+            if(hadWelcome)edit.putBoolean("welcome_done",welcomed);
+            else edit.remove("welcome_done");
+            assertTrue(edit.commit());
+        }
+    }
+
+    public void testStaleSessionKeepsUncommittedPlan() throws Throwable {
+        launch();click(R.id.journey_plan);
+        java.lang.reflect.Field generation=JourneyActivity.class.getDeclaredField("openedGeneration");
+        generation.setAccessible(true);
+        runTestOnUiThread(()->{
+            ((EditText)activity.editor.findViewById(R.id.journey_action_input)).setText("Uncommitted");
+            try{generation.setLong(activity,kr.example.haliltalk.auth.AccountSession.generation()-1);}
+            catch(IllegalAccessException failure){throw new AssertionError(failure);}
+        });
+        save();
+        assertTrue(activity.editor.isShowing());
+        assertNull(store.entry(friend,day));
+        assertEquals("Uncommitted",((EditText)activity.editor.findViewById(R.id.journey_action_input))
+                .getText().toString());
+    }
 }

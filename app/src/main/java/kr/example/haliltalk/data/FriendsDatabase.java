@@ -8,7 +8,7 @@ import kr.example.haliltalk.shop.DemoShopStore;
 /** Additive migrations preserve existing friends, messages, experience, and appearance. */
 public final class FriendsDatabase extends SQLiteOpenHelper {
     public FriendsDatabase(Context context) {
-        super(context, kr.example.haliltalk.auth.AccountSession.databaseName(context), null, 8);
+        super(context, kr.example.haliltalk.auth.AccountSession.databaseName(context), null, 9);
     }
     @Override public void onConfigure(SQLiteDatabase db) { db.setForeignKeyConstraintsEnabled(true); }
     @Override public void onCreate(SQLiteDatabase db) {
@@ -21,6 +21,7 @@ public final class FriendsDatabase extends SQLiteOpenHelper {
         createGoals(db);
         JourneyStore.createTables(db);
         MessageReadStore.createTables(db);
+        AdventureStore.createTables(db);
     }
     private void createAppearance(SQLiteDatabase db) {
         db.execSQL("CREATE TABLE appearance(friend INTEGER PRIMARY KEY REFERENCES friends(id) ON DELETE CASCADE, character TEXT NOT NULL, hat TEXT NOT NULL, face TEXT NOT NULL, prop TEXT NOT NULL)");
@@ -38,6 +39,8 @@ public final class FriendsDatabase extends SQLiteOpenHelper {
             MessageReadStore.createTables(db);
             MessageReadStore.markLegacyRead(db);
         }
+        // Adventure choices alone belong to v9; later shop tables use their own v10 step.
+        if (oldVersion < 9 && newVersion >= 9) AdventureStore.createTables(db);
     }
     private void createGoals(SQLiteDatabase db) {
         db.execSQL("ALTER TABLE friends ADD COLUMN purpose TEXT NOT NULL DEFAULT ''");

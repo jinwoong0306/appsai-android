@@ -111,10 +111,15 @@ public class MainActivity extends Activity {
         ((CharacterView)findViewById(R.id.home_character)).setAppearance("chat","beret","none","none");
         findViewById(R.id.open_settings).setOnClickListener(v->startActivity(new Intent(this,SettingsActivity.class)));
         findViewById(R.id.home_journey).setOnClickListener(v->{
-            try(Cursor c=db.rawQuery("SELECT id FROM friends LIMIT 1",null)){
-                if(c.moveToFirst())startActivity(new Intent(this,JourneyActivity.class));
-                else startNewFriend();
-            }
+            renderJourneySummary();
+            int next=(Integer)v.getTag();
+            if(next==0)startNewFriend();
+            else startActivity(new Intent(this,JourneyActivity.class).putExtra("friend_id",next));
+        });
+        findViewById(R.id.home_adventure).setOnClickListener(v->{
+            renderJourneySummary();
+            startActivity(new Intent(this,AdventureActivity.class)
+                    .putExtra("friend_id",(Integer)findViewById(R.id.home_journey).getTag()));
         });
         renderHomeFriends();
     }
@@ -146,13 +151,44 @@ public class MainActivity extends Activity {
     void renderJourneySummary(){
         TextView summary=findViewById(R.id.home_journey_summary);
         if(summary==null||db==null||!db.isOpen())return;
-        try(Cursor c=db.rawQuery("SELECT id FROM friends LIMIT 1",null)){
-            if(!c.moveToFirst()){summary.setText(R.string.journey_home_empty);return;}
+        Button open=findViewById(R.id.home_journey);
+        TextView nextAction=findViewById(R.id.home_journey_next);
+        int nextFriend;
+        try(Cursor c=db.rawQuery("SELECT id FROM friends ORDER BY id LIMIT 1",null)){
+            if(!c.moveToFirst()){
+                summary.setText(R.string.journey_home_empty);
+                nextAction.setVisibility(View.GONE);
+                open.setText(R.string.journey_home_add_friend);
+                open.setTag(0);
+                return;
+            }
+            nextFriend=c.getInt(0);
         }
+        String today=java.time.LocalDate.now().toString();
+        kr.example.haliltalk.data.JourneyStore store=new kr.example.haliltalk.data.JourneyStore(db);
         kr.example.haliltalk.data.JourneyStore.Summary value=
-                new kr.example.haliltalk.data.JourneyStore(db).summary(0,java.time.LocalDate.now().toString());
+                store.summary(0,today);
         summary.setText(getString(R.string.journey_home_summary,
                 value.plannedToday,value.reviewedToday,value.activeDays7));
+        kr.example.haliltalk.data.JourneyStore.Entry entry=store.nextEntry(today);
+        nextAction.setVisibility(View.VISIBLE);
+        if(entry==null){
+            nextAction.setText(R.string.journey_next_first);
+            open.setText(R.string.journey_plan);
+        }else{
+            nextFriend=entry.friend;
+            try(Cursor c=db.rawQuery("SELECT name FROM friends WHERE id=?",new String[]{""+nextFriend})){
+                if(c.moveToFirst()){
+                    boolean current=today.equals(entry.day),pending="planned".equals(entry.outcome);
+                    nextAction.setText(getString(!current?R.string.journey_next_return:
+                            pending?R.string.journey_next_pending:R.string.journey_next_recorded,
+                            c.getString(0),entry.action));
+                    open.setText(!current?R.string.journey_plan:
+                            pending?R.string.journey_continue:R.string.journey_view_record);
+                }
+            }
+        }
+        open.setTag(nextFriend);
     }
     @Override public void onWindowFocusChanged(boolean focused){
         super.onWindowFocusChanged(focused);

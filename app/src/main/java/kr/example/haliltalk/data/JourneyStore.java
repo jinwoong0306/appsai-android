@@ -57,6 +57,18 @@ public final class JourneyStore {
         }
     }
 
+    /** Prefer today's unfinished plan, then today's review, then the latest past record. */
+    public Entry nextEntry(String throughDay) {
+        validateDay(throughDay);
+        try(Cursor c=db.rawQuery("SELECT friend,day,action,cue,goal_title,outcome,note,updated_at"
+                +" FROM journey_entries WHERE day<=?"
+                +" ORDER BY CASE WHEN day=? AND outcome='planned' THEN 0 WHEN day=? THEN 1 ELSE 2 END,"
+                +"day DESC,updated_at DESC,friend ASC LIMIT 1",
+                new String[]{throughDay,throughDay,throughDay})) {
+            return c.moveToFirst()?new Entry(c):null;
+        }
+    }
+
     public List<Entry> recent(int friend,String throughDay,int limit) {
         validateFriend(friend);
         validateDay(throughDay);

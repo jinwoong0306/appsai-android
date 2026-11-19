@@ -1,0 +1,99 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    style="@style/Page" android:orientation="vertical" android:background="@null">
+    <LinearLayout android:layout_width="match_parent" android:layout_height="wrap_content"
+        android:orientation="horizontal" android:gravity="center_vertical">
+        <Button android:id="@+id/adventure_back" style="@style/SecondaryButton" android:layout_width="wrap_content"
+            android:text="@string/journey_back"/>
+        <TextView style="@style/AdventureToolbarTitle" android:text="@string/adventure_title"/>
+    </LinearLayout>
+    <ScrollView android:id="@+id/adventure_scroll" android:layout_width="match_parent"
+        android:layout_height="0dp" android:layout_weight="1" android:fillViewport="true">
+        <LinearLayout android:layout_width="match_parent" android:layout_height="wrap_content"
+            android:orientation="vertical" android:paddingBottom="24dp">
+            <TextView android:id="@+id/adventure_friend_label" style="@style/AdventureSupport"
+                android:text="@string/journey_friend_label"
+                android:labelFor="@id/adventure_friend"/>
+            <Spinner android:id="@+id/adventure_friend" android:layout_width="match_parent"
+                android:layout_height="wrap_content" android:minHeight="48dp"
+                android:spinnerMode="dialog" android:prompt="@string/journey_friend_label"/>
+            <TextView android:id="@+id/adventure_empty" style="@style/AdventureCopy"
+                android:text="@string/adventure_empty" android:visibility="gone"/>
+            <LinearLayout android:id="@+id/adventure_content" android:layout_width="match_parent"
+                android:layout_height="wrap_content" android:orientation="vertical">
+                <FrameLayout android:layout_width="match_parent" android:layout_height="144dp"
+                    android:importantForAccessibility="noHideDescendants">
+                    <ImageView android:layout_width="match_parent" android:layout_height="match_parent"
+                        android:src="@drawable/bg_hero" android:scaleType="centerCrop" android:importantForAccessibility="no"/>
+                    <kr.example.haliltalk.character.CharacterView android:id="@+id/adventure_character"
+                        android:layout_width="match_parent" android:layout_height="match_parent"/>
+                </FrameLayout>
+                <TextView android:id="@+id/adventure_feedback" style="@style/AdventureSupport"
+                    android:accessibilityLiveRegion="polite" android:layout_marginTop="12dp"/>
+                <TextView android:id="@+id/adventure_route" style="@style/AdventureCopy"
+                    android:layout_marginTop="8dp"/>
+                <ProgressBar android:id="@+id/adventure_progress"
+                    style="?android:attr/progressBarStyleHorizontal"
+                    android:layout_width="match_parent" android:layout_height="wrap_content"
+                    android:minHeight="24dp" android:progressTint="@color/primary"
+                    android:layout_marginTop="4dp" android:max="3"/>
+                <LinearLayout android:layout_width="match_parent" android:layout_height="wrap_content"
+                    android:orientation="vertical" android:padding="16dp"
+                    android:layout_marginTop="12dp" android:background="@drawable/bg_card">
+                    <TextView android:id="@+id/adventure_date" style="@style/AdventureSupport"/>
+                    <TextView android:id="@+id/adventure_today_action" style="@style/AdventureCopy"
+                        android:layout_marginTop="8dp"/>
+                    <TextView android:id="@+id/adventure_quest_plan" style="@style/AdventureSupport"
+                        android:layout_marginTop="8dp"/>
+                    <TextView android:id="@+id/adventure_quest_review" style="@style/AdventureSupport"
+                        android:layout_marginTop="4dp"/>
+                    <TextView android:id="@+id/adventure_quest_reflection" style="@style/AdventureSupport"
+                        android:layout_marginTop="4dp"/>
+                </LinearLayout>
+                <Button android:id="@+id/adventure_route_toggle" style="@style/SecondaryButton"
+                    android:text="@string/adventure_route_open"/>
+                <LinearLayout android:id="@+id/adventure_route_details" android:layout_width="match_parent"
+                    android:layout_height="wrap_content" android:orientation="vertical" android:visibility="gone">
+                    <LinearLayout android:id="@+id/adventure_stages" android:layout_width="match_parent"
+                        android:layout_height="wrap_content" android:orientation="vertical"/>
+                    <RadioGroup android:id="@+id/adventure_routes" android:layout_width="match_parent"
+                        android:layout_height="wrap_content" android:orientation="vertical">
+                        <RadioButton android:id="@+id/adventure_route_three" style="@style/AdventureChoice"
+                            android:text="@string/adventure_route_three"/>
+                        <RadioButton android:id="@+id/adventure_route_seven" style="@style/AdventureChoice"
+                            android:text="@string/adventure_route_seven"/>
+                        <RadioButton android:id="@+id/adventure_route_fourteen" style="@style/AdventureChoice"
+                            android:text="@string/adventure_route_fourteen"/>
+                    </RadioGroup>
+                    <Button android:id="@+id/adventure_choose" style="@style/SecondaryButton"
+                        android:text="@string/adventure_choose"/>
+                </LinearLayout>
+                <Button android:id="@+id/adventure_suggestions_toggle" style="@style/SecondaryButton"
+                    android:text="@string/adventure_suggestions_open"/>
+                <LinearLayout android:id="@+id/adventure_suggestion_details" android:layout_width="match_parent"
+                    android:layout_height="wrap_content" android:orientation="vertical" android:visibility="gone">
+                    <TextView android:id="@+id/adventure_suggestion_theme" style="@style/AdventureSupport"/>
+                    <RadioGroup android:id="@+id/adventure_suggestions" android:layout_width="match_parent"
+                        android:layout_height="wrap_content" android:orientation="vertical">
+                        <RadioButton android:id="@+id/adventure_suggestion_one" style="@style/AdventureChoice"/>
+                        <RadioButton android:id="@+id/adventure_suggestion_two" style="@style/AdventureChoice"/>
+                        <RadioButton android:id="@+id/adventure_suggestion_three" style="@style/AdventureChoice"/>
+                    </RadioGroup>
+                </LinearLayout>
+                <Button android:id="@+id/adventure_gallery_toggle" style="@style/SecondaryButton"
+                    android:text="@string/adventure_gallery_open"/>
+                <LinearLayout android:id="@+id/adventure_gallery_details" android:layout_width="match_parent"
+                    android:layout_height="wrap_content" android:orientation="vertical" android:visibility="gone">
+                    <TextView android:id="@+id/adventure_stamps" style="@style/AdventureSupport"/>
+                    <LinearLayout android:id="@+id/adventure_gallery" android:layout_width="match_parent"
+                        android:layout_height="wrap_content" android:orientation="vertical"/>
+                </LinearLayout>
+            </LinearLayout>
+        </LinearLayout>
+    </ScrollView>
+    <TextView android:id="@+id/adventure_error" style="@style/AdventureCopy"
+        android:textColor="@color/ink" android:accessibilityLiveRegion="polite"
+        android:visibility="gone"/>
+    <Button android:id="@+id/adventure_primary" style="@style/PrimaryButton"
+        android:text="@string/adventure_primary"/>
+</LinearLayout>
