@@ -5,6 +5,53 @@ import android.database.sqlite.SQLiteDatabase;
 import android.test.InstrumentationTestCase;
 
 public class FriendsDatabaseMigrationTest extends InstrumentationTestCase {
+    public void testVersionEightAddsOnlyAdventureChoicesAndKeepsExistingRows() {
+        try(SQLiteDatabase database=SQLiteDatabase.create(null);
+                FriendsDatabase helper=new FriendsDatabase(getInstrumentation().getTargetContext())){
+            database.setForeignKeyConstraintsEnabled(true);
+            // Build an actual v8 fixture, even after a later onCreate adds shop v10 tables.
+            database.execSQL("CREATE TABLE friends(id INTEGER PRIMARY KEY,package TEXT UNIQUE,"
+                    +"name TEXT,personality TEXT,xp INTEGER DEFAULT 0)");
+            database.execSQL("CREATE TABLE messages(id INTEGER PRIMARY KEY,friend INTEGER,"
+                    +"content TEXT,is_user INTEGER,created INTEGER)");
+            helper.onUpgrade(database,1,8);
+            database.execSQL("INSERT INTO friends(id,package,name,xp) VALUES(7,'qa.migration.adventure','Kept',41)");
+            long goal=new GoalStore(database).save(7,0,"Keep reminder goal",123456L);
+            JourneyStore journeys=new JourneyStore(database);
+            journeys.savePlan(7,"2026-11-16","Read one page","","",1);
+            journeys.review(7,"2026-11-16","partial","Keep reflection",2);
+            java.util.Set<String> before=tableNames(database);
+            helper.onUpgrade(database,8,9);
+            java.util.Set<String> added=tableNames(database);added.removeAll(before);
+            assertEquals(java.util.Collections.singleton("adventure_choices"),added);
+            AdventureStore adventures=new AdventureStore(database);
+            assertNull(adventures.choice(7));
+            adventures.choose(7,7,"2026-11-16");
+            assertEquals(1,adventures.activeDays(7,"2026-11-16"));
+            // A later migration must not attempt to create the v9 table again.
+            helper.onUpgrade(database,9,10);
+            assertEquals(7,adventures.choice(7).days);
+            assertEquals("partial",journeys.entry(7,"2026-11-16").outcome);
+            assertEquals("Keep reflection",journeys.entry(7,"2026-11-16").note);
+            assertEquals(goal,new GoalStore(database).list(7).get(0).id);
+            assertEquals(Long.valueOf(123456L),new GoalStore(database).list(7).get(0).dueAt);
+            try(Cursor c=database.rawQuery("SELECT xp FROM friends WHERE id=7",null)){
+                assertTrue(c.moveToFirst());assertEquals(41,c.getInt(0));
+            }
+            assertEquals(500,new kr.example.haliltalk.shop.DemoShopStore(database).balance());
+            database.delete("friends","id=7",null);
+            assertNull(adventures.choice(7));
+        }
+    }
+
+    private java.util.Set<String> tableNames(SQLiteDatabase database) {
+        java.util.Set<String> names=new java.util.HashSet<>();
+        try(Cursor c=database.rawQuery("SELECT name FROM sqlite_master WHERE type='table'",null)){
+            while(c.moveToNext())names.add(c.getString(0));
+        }
+        return names;
+    }
+
     public void testVersionFourSeedsDemoWalletAndKeepsEquippedItems() {
         try(SQLiteDatabase database=SQLiteDatabase.create(null);
                 FriendsDatabase helper=new FriendsDatabase(getInstrumentation().getTargetContext())){

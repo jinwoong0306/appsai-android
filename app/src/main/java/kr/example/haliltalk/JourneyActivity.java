@@ -23,6 +23,7 @@ import kr.example.haliltalk.character.CharacterView;
 import kr.example.haliltalk.data.FriendsDatabase;
 import kr.example.haliltalk.data.GoalStore;
 import kr.example.haliltalk.data.JourneyStore;
+import kr.example.haliltalk.auth.AccountSession;
 
 /** [U3 | 동작] 사용자가 선택한 작은 행동과 회고. AI 추측·자동 완료·출석 보상 없음. */
 public final class JourneyActivity extends FeatureActivity {
@@ -32,15 +33,21 @@ public final class JourneyActivity extends FeatureActivity {
     private final List<Integer> friends=new ArrayList<>();
     private int friend;
     String day;
-    AlertDialog editor, prompt;
+    AlertDialog editor, prompt, suggestions;
     private View fields;
     private String editorKind="", editorDay="", originalDraft="";
     private List<String> goalTitles;
     private boolean discarding;
     private int historyLimit=7;
+    private String openedDatabase,adventureAction="";
+    private long openedGeneration;
+    private boolean openedEntered,destroyed;
 
     @Override public void onCreate(Bundle state) {
         super.onCreate(state);
+        openedDatabase=state==null?AccountSession.databaseName(this):state.getString("opened_database");
+        openedGeneration=state==null?AccountSession.generation():state.getLong("opened_generation");
+        openedEntered=state==null?AccountSession.isEntered(this):state.getBoolean("opened_entered");
         helper=new FriendsDatabase(this);db=helper.getWritableDatabase();store=new JourneyStore(db);
         setContentView(R.layout.screen_journey);
         findViewById(R.id.journey_back).setOnClickListener(v->finish());
@@ -64,11 +71,19 @@ public final class JourneyActivity extends FeatureActivity {
         });
         findViewById(R.id.journey_plan).setOnClickListener(v->editPlan(null));
         findViewById(R.id.journey_review).setOnClickListener(v->editReview(null));
+        findViewById(R.id.journey_adventure).setOnClickListener(v->startActivity(
+                new Intent(this,AdventureActivity.class).putExtra("friend_id",friend)));
         findViewById(R.id.journey_goals).setOnClickListener(v->startActivity(
                 new Intent(this,GoalsActivity.class).putExtra("friend_id",friend)));
         render();
         if(state!=null&&!state.getString("editor","").isEmpty()) {
             if(state.getString("editor").equals("plan"))editPlan(state);else editReview(state);
+        }
+        // A suggestion is consumed once, for the requested friend and only an empty day.
+        if(state==null&&requested==friend&&friend!=0&&getIntent().hasExtra("adventure_action")
+                &&store.entry(friend,day)==null){
+            adventureAction=getIntent().getStringExtra("adventure_action");
+            editPlan(null);adventureAction="";
         }
     }
 
@@ -131,6 +146,21 @@ public final class JourneyActivity extends FeatureActivity {
         JourneyStore.Summary summary=store.summary(friend,day);
         ((TextView)findViewById(R.id.journey_week)).setText(getString(R.string.journey_week_summary,
                 summary.activeDays7,summary.done7,summary.partial7,summary.rest7));
+        LinearLayout days=findViewById(R.id.journey_days);days.removeAllViews();
+        for(int offset=6;offset>=0;offset--){
+            String date=LocalDate.parse(day).minusDays(offset).toString();
+            JourneyStore.Entry entry=store.entry(friend,date);
+            View cell=getLayoutInflater().inflate(R.layout.row_journey_day,days,false);
+            cell.setTag(date);
+            ((TextView)cell.findViewById(R.id.journey_day_date)).setText(
+                    LocalDate.parse(date).format(DateTimeFormatter.ofPattern("M월 d일 (E)",Locale.KOREAN)));
+            TextView outcome=cell.findViewById(R.id.journey_day_state);
+            outcome.setText(entry==null?getString(R.string.journey_day_none):status(entry.outcome));
+            outcome.setTag(entry==null?"none":entry.outcome);
+            cell.setContentDescription(formatDay(date)+" · "+
+                    (entry==null?getString(R.string.journey_day_unrecorded):status(entry.outcome)));
+            days.addView(cell);
+        }
         int next=1;
         for(int milestone:new int[]{1,3,7,14,30})if(milestone>summary.totalActiveDays){next=milestone;break;}
         ((TextView)findViewById(R.id.journey_milestone)).setText(summary.totalActiveDays>=30?
@@ -165,7 +195,7 @@ public final class JourneyActivity extends FeatureActivity {
         prompt.show();
         prompt.getButton(AlertDialog.BUTTON_NEGATIVE).requestFocus();
         prompt.getButton(AlertDialog.BUTTON_POSITIVE).setOnClickListener(v->{
-            try{store.delete(friend,entry.day);prompt.dismiss();render();}
+            try{requireSession();store.delete(friend,entry.day);prompt.dismiss();render();}
             catch(IllegalArgumentException error){prompt.setMessage(error.getMessage());}
             catch(SQLiteException error){prompt.setMessage("삭제하지 못했어요. 저장 공간을 확인한 뒤 다시 시도해 주세요.");}
         });
@@ -177,8 +207,16 @@ public final class JourneyActivity extends FeatureActivity {
         fields=getLayoutInflater().inflate(R.layout.dialog_journey_plan,new android.widget.FrameLayout(this),false);
         EditText action=fields.findViewById(R.id.journey_action_input);
         EditText cue=fields.findViewById(R.id.journey_cue_input);
-        action.setText(saved!=null?saved.getString("action",""):current==null?"":current.action);
+        action.setText(saved!=null?saved.getString("action",""):current==null?adventureAction:current.action);
         cue.setText(saved!=null?saved.getString("cue",""):current==null?"":current.cue);
+        fields.findViewById(R.id.journey_suggest).setOnClickListener(v->{
+            String[] examples=getResources().getStringArray(R.array.journey_examples);
+            suggestions=new AlertDialog.Builder(this).setTitle(R.string.journey_suggest)
+                    .setItems(examples,(dialog,index)->{
+                        action.setText(examples[index]);action.setSelection(action.length());
+                        fields.findViewById(R.id.journey_dialog_error).setVisibility(View.GONE);
+                    }).setNegativeButton(android.R.string.cancel,null).show();
+        });
         goalTitles=new ArrayList<>();goalTitles.add("");
         for(GoalStore.Goal goal:new GoalStore(db).list(friend))if(!goal.completed)goalTitles.add(goal.title);
         String goal=saved!=null?saved.getString("goal",""):current==null?"":current.goalTitle;
@@ -245,6 +283,7 @@ public final class JourneyActivity extends FeatureActivity {
         editor.getButton(AlertDialog.BUTTON_POSITIVE).setOnClickListener(v->{
             TextView error=fields.findViewById(R.id.journey_dialog_error);
             try{
+                requireSession();
                 if(!LocalDate.now().toString().equals(editorDay))
                     throw new IllegalArgumentException("날짜가 바뀌었어요. 내용을 확인하고 닫은 뒤 오늘의 계획을 다시 열어 주세요.");
                 persist.run();editorKind="";editor.dismiss();render();
@@ -266,6 +305,8 @@ public final class JourneyActivity extends FeatureActivity {
     }
 
     @Override protected void onSaveInstanceState(Bundle state){
+        state.putString("opened_database",openedDatabase);state.putLong("opened_generation",openedGeneration);
+        state.putBoolean("opened_entered",openedEntered);
         state.putInt("friend",friend);
         state.putInt("history_limit",historyLimit);
         if(!editorKind.isEmpty()&&editor!=null&&(editor.isShowing()||discarding)){
@@ -284,7 +325,16 @@ public final class JourneyActivity extends FeatureActivity {
     }
 
     @Override protected void onDestroy(){
+        destroyed=true;
         if(editor!=null)editor.dismiss();if(prompt!=null)prompt.dismiss();
+        if(suggestions!=null)suggestions.dismiss();
         if(helper!=null)helper.close();super.onDestroy();
+    }
+
+    private void requireSession(){
+        if(destroyed||!openedEntered||!AccountSession.isEntered(this)
+                ||openedGeneration!=AccountSession.generation()
+                ||!openedDatabase.equals(AccountSession.databaseName(this)))
+            throw new IllegalArgumentException(getString(R.string.adventure_error_session));
     }
 }

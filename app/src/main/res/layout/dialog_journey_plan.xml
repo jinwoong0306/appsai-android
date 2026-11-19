@@ -8,6 +8,8 @@
         <EditText android:id="@+id/journey_action_input" style="@style/InputField"
             android:inputType="textCapSentences" android:importantForAutofill="no" android:maxLength="120"/>
         <TextView style="@style/SecondaryText" android:text="@string/journey_action_hint"/>
+        <Button android:id="@+id/journey_suggest" style="@style/SecondaryButton"
+            android:text="@string/journey_suggest"/>
         <TextView style="@style/SecondaryText" android:text="@string/journey_cue_label"
             android:labelFor="@id/journey_cue_input" android:layout_marginTop="12dp"/>
         <EditText android:id="@+id/journey_cue_input" style="@style/InputField"

@@ -1,0 +1,5 @@
+<?xml version="1.0" encoding="utf-8"?>
+<TextView xmlns:android="http://schemas.android.com/apk/res/android"
+    android:id="@+id/adventure_stage_label" style="@style/AdventureSupport"
+    android:layout_marginTop="8dp" android:padding="12dp"
+    android:background="@drawable/bg_card"/>
