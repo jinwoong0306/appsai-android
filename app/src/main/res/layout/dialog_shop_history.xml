@@ -1,0 +1,5 @@
+<ListView xmlns:android="http://schemas.android.com/apk/res/android"
+    android:id="@+id/shop_history_list" android:layout_width="match_parent"
+    android:layout_height="wrap_content" android:padding="8dp"
+    android:scrollbars="vertical" android:fadeScrollbars="false"
+    android:divider="@android:color/transparent" android:dividerHeight="8dp"/>

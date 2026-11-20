@@ -1,5 +1,6 @@
 <resources>
     <item type="id" name="nav_shop"/>
+    <item type="id" name="shop_history"/>
     <string name="shop_title">상점</string>
     <string name="shop_balance">데모 코인 %1$d</string>
     <string name="shop_demo_notice">구매 체험용 코인과 임시 가격이에요. 현금 결제가 아니에요.</string>
@@ -28,6 +29,15 @@
     <string name="shop_action_item">%1$s · %2$s</string>
     <string name="shop_purchase_failed">구매를 저장하지 못했어요. 코인은 차감되지 않았어요. 다시 눌러 주세요.</string>
     <string name="shop_account_changed">계정이나 저장소가 바뀌었어요. 상점을 다시 열어 주세요.</string>
+    <string name="shop_history_title">코인·구매 내역</string>
+    <string name="shop_history_notice">이 계정의 기기 내 기록이에요. 이전 구매의 시각은 기록하지 않았어요.</string>
+    <string name="shop_history_purchase">%1$s 구매</string>
+    <string name="shop_history_starter">첫 데모 코인</string>
+    <string name="shop_history_opening">기록 시작 시 잔액</string>
+    <string name="shop_history_opening_balance">잔액 %1$d 코인</string>
+    <string name="shop_history_change">%1$+d 코인 · 잔액 %2$d</string>
+    <string name="shop_history_unknown_date">이전 기록 · 시각 없음</string>
+    <string name="shop_history_failed">내역을 불러오지 못했어요. 다시 열어 주세요.</string>
     <string-array name="shop_themes"><item>모든 테마</item><item>독서와 휴식</item><item>가벼운 외출</item><item>함께 축하</item><item>새로운 탐험</item></string-array>
     <string-array name="shop_filters"><item>모두 보기</item><item>보유한 소품</item><item>아직 없는 소품</item><item>지금 구매 가능</item></string-array>
     <string-array name="shop_categories"><item>전체</item><item>머리</item><item>얼굴</item><item>목·몸</item><item>등</item><item>손소품</item></string-array>

@@ -8,11 +8,55 @@ import android.view.View;
 import android.widget.LinearLayout;
 import android.widget.ListView;
 import android.widget.Spinner;
+import android.widget.TextView;
 import kr.example.haliltalk.data.FriendsDatabase;
 import kr.example.haliltalk.shop.DemoShopStore;
 import kr.example.haliltalk.shop.ShopCollectionStore;
 
 public final class ShopEnhancementTest extends ShopFixtureTest {
+    public void testHistoryShowsPurchaseAndStarterWithoutChangingEconomy() throws Throwable {
+        wallet.purchase("crown");
+        fixture.execSQL("CREATE TRIGGER reject_history_write BEFORE INSERT ON coin_ledger "
+                +"BEGIN SELECT RAISE(ABORT,'history must be read only'); END");
+        clickHeader(R.id.shop_history);
+        runTestOnUiThread(()->{
+            assertTrue(activity.historyDialog.isShowing());
+            ListView history=activity.historyDialog.findViewById(R.id.shop_history_list);
+            assertNotNull(history);assertEquals(2,history.getAdapter().getCount());
+            assertFalse(history.getAdapter().isEnabled(0));assertFalse(history.getAdapter().isEnabled(1));
+            View purchase=history.getAdapter().getView(0,null,history);
+            assertEquals("purchase:crown",purchase.getTag());
+            assertTrue(((TextView)purchase.findViewById(android.R.id.text2)).getText().toString().contains("-90"));
+            assertTrue(((TextView)purchase.findViewById(android.R.id.text2)).getText().toString().contains("410"));
+            assertEquals("opening",history.getAdapter().getView(1,null,history).getTag());
+            activity.showHistory();assertEquals(2,history.getAdapter().getCount());
+            activity.historyDialog.getButton(android.app.AlertDialog.BUTTON_POSITIVE).performClick();
+            assertEquals(410,wallet.balance());assertTrue(wallet.owns("crown"));
+            assertEquals(2L,DatabaseUtils.queryNumEntries(fixture,"coin_ledger"));
+            assertEquals(1L,DatabaseUtils.queryNumEntries(fixture,"purchases"));
+            assertEquals(0L,DatabaseUtils.queryNumEntries(fixture,"appearance"));
+        });
+    }
+
+    public void testHistoryFailureCanBeRetriedAndCannotOpenAfterAccountChange() throws Throwable {
+        fixture.execSQL("ALTER TABLE coin_ledger RENAME TO hidden_ledger");
+        clickHeader(R.id.shop_history);
+        runTestOnUiThread(()->assertNull(activity.historyDialog));
+        assertEquals(500,wallet.balance());assertEquals(8L,DatabaseUtils.queryNumEntries(fixture,"owned_items"));
+        fixture.execSQL("ALTER TABLE hidden_ledger RENAME TO coin_ledger");
+        clickHeader(R.id.shop_history);
+        runTestOnUiThread(()->{
+            assertTrue(activity.historyDialog.isShowing());
+            activity.historyDialog.dismiss();activity.historyDialog=null;
+            long generation=activity.openedGeneration;
+            try{
+                activity.openedGeneration=generation-1;
+                activity.header.findViewById(R.id.shop_history).performClick();
+                assertNull(activity.historyDialog);
+            }finally{activity.openedGeneration=generation;}
+        });
+    }
+
     public void testIntersectingFiltersEmptyStateAndHeaderRowSelection() throws Throwable {
         runTestOnUiThread(()->activity.header.findViewById(R.id.shop_filters_toggle).performClick());
         filter(R.id.shop_theme,4);

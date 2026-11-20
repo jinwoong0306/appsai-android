@@ -15,6 +15,10 @@ import android.widget.ListView;
 import android.widget.Spinner;
 import android.widget.TextView;
 import java.util.ArrayList;
+import java.util.List;
+import java.text.SimpleDateFormat;
+import java.util.Date;
+import java.util.Locale;
 import kr.example.haliltalk.character.CharacterCatalog;
 import kr.example.haliltalk.auth.AccountSession;
 import kr.example.haliltalk.character.CharacterView;
@@ -22,6 +26,7 @@ import kr.example.haliltalk.data.FriendsDatabase;
 import kr.example.haliltalk.shop.DemoShopStore;
 import kr.example.haliltalk.shop.ShopCatalog;
 import kr.example.haliltalk.shop.ShopCollectionStore;
+import kr.example.haliltalk.shop.CoinLedger;
 
 public final class ShopActivity extends FeatureActivity {
     SQLiteDatabase db;
@@ -35,7 +40,7 @@ public final class ShopActivity extends FeatureActivity {
     int category, theme, ownership;
     final ArrayList<String> visibleItems=new ArrayList<>();
     BaseAdapter adapter;
-    AlertDialog purchaseDialog, collectionDialog, characterDialog;
+    AlertDialog purchaseDialog, collectionDialog, characterDialog, historyDialog;
 
     @Override public void onCreate(Bundle state){
         super.onCreate(state);
@@ -54,6 +59,10 @@ public final class ShopActivity extends FeatureActivity {
         ListView list=findViewById(R.id.shop_list);
         header=getLayoutInflater().inflate(R.layout.view_shop_header,list,false);
         list.addHeaderView(header,null,false);
+        Button history=new Button(this,null,0,R.style.SecondaryButton);
+        history.setId(R.id.shop_history);history.setText(R.string.shop_history_title);
+        ((LinearLayout)header).addView(history,2);
+        history.setOnClickListener(v->showHistory());
         header.findViewById(R.id.shop_character).setOnClickListener(v->characterDialog=new AlertDialog.Builder(this)
                 .setTitle(R.string.character_selection).setItems(CharacterCatalog.CHARACTER_NAMES,(dialog,index)->{
                     base=CharacterCatalog.CHARACTER_IDS[index];refresh();
@@ -243,6 +252,44 @@ public final class ShopActivity extends FeatureActivity {
                 &&openedDatabase.equals(AccountSession.databaseName(this));
     }
 
+    void showHistory(){
+        if(!currentAccount()){
+            ((TextView)findViewById(R.id.shop_message)).setText(R.string.shop_account_changed);return;
+        }
+        if(historyDialog!=null&&historyDialog.isShowing())return;
+        final List<CoinLedger.Entry> entries;
+        try{entries=store.history();}
+        catch(SQLiteException failure){
+            ((TextView)findViewById(R.id.shop_message)).setText(R.string.shop_history_failed);return;
+        }
+        ListView history=(ListView)getLayoutInflater().inflate(R.layout.dialog_shop_history,null);
+        history.setAdapter(new BaseAdapter(){
+            public int getCount(){return entries.size();}
+            public CoinLedger.Entry getItem(int position){return entries.get(position);}
+            public long getItemId(int position){return position;}
+            public boolean areAllItemsEnabled(){return false;}
+            public boolean isEnabled(int position){return false;}
+            public View getView(int position,View recycled,ViewGroup parent){
+                View row=recycled==null?getLayoutInflater().inflate(android.R.layout.simple_list_item_2,parent,false):recycled;
+                CoinLedger.Entry entry=getItem(position);row.setTag(entry.eventKey);
+                String source="purchase".equals(entry.source)?
+                        getString(R.string.shop_history_purchase,CharacterCatalog.itemName(entry.itemId)):
+                        getString("starter".equals(entry.source)?R.string.shop_history_starter:R.string.shop_history_opening);
+                ((TextView)row.findViewById(android.R.id.text1)).setText(source);
+                TextView detail=row.findViewById(android.R.id.text2);detail.setSingleLine(false);
+                String amount="opening".equals(entry.source)?getString(R.string.shop_history_opening_balance,entry.balance):
+                        getString(R.string.shop_history_change,entry.amount,entry.balance);
+                String date=entry.createdAt==null?getString(R.string.shop_history_unknown_date):
+                        new SimpleDateFormat("yyyy년 M월 d일 a h:mm",Locale.KOREAN).format(new Date(entry.createdAt));
+                detail.setText(amount+"\n"+date);
+                return row;
+            }
+        });
+        historyDialog=new AlertDialog.Builder(this).setTitle(R.string.shop_history_title)
+                .setMessage(R.string.shop_history_notice).setView(history)
+                .setPositiveButton(android.R.string.ok,null).show();
+    }
+
     void confirmPurchase(){
         final String item=selected;
         if(item==null||!visibleItems.contains(item)||!currentAccount()||store.owns(item)||store.balance()<store.price(item))return;
@@ -281,6 +328,7 @@ public final class ShopActivity extends FeatureActivity {
         if(purchaseDialog!=null)purchaseDialog.dismiss();
         if(collectionDialog!=null)collectionDialog.dismiss();
         if(characterDialog!=null)characterDialog.dismiss();
+        if(historyDialog!=null)historyDialog.dismiss();
         db.close();super.onDestroy();
     }
 }

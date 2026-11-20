@@ -90,6 +90,7 @@ public class DemoShopStoreTest extends InstrumentationTestCase {
         assertFalse(store.owns("star_glasses"));
         assertEquals(11, count("owned_items"));
         assertEquals(3, count("purchases"));
+        assertEquals(4, count("coin_ledger"));
     }
 
     public void testExactBalanceCanReachZero() {
@@ -112,6 +113,88 @@ public class DemoShopStoreTest extends InstrumentationTestCase {
         assertEquals(500, store.balance());
         assertEquals(8, count("owned_items"));
         assertEquals(0, count("purchases"));
+        assertEquals(1, count("coin_ledger"));
+    }
+
+    public void testStarterAndPurchaseLedgerAreRecordedOnceWithSignedAmounts() {
+        CoinLedger.Entry starter=store.history().get(0);
+        assertEquals("opening",starter.eventKey);assertEquals("starter",starter.source);
+        assertEquals(500,starter.amount);assertEquals(500,starter.balance);
+        assertNotNull(starter.createdAt);assertNull(starter.itemId);
+        new DemoShopStore(database);
+        assertEquals(1,count("coin_ledger"));
+        assertEquals(DemoShopStore.PurchaseResult.PURCHASED,store.purchase("crown"));
+        CoinLedger.Entry purchase=store.history().get(0);
+        assertEquals("purchase:crown",purchase.eventKey);assertEquals("purchase",purchase.source);
+        assertEquals("crown",purchase.itemId);
+        assertEquals(-90,purchase.amount);assertEquals(410,purchase.balance);assertNotNull(purchase.createdAt);
+        assertEquals(DemoShopStore.PurchaseResult.ALREADY_OWNED,new DemoShopStore(database).purchase("crown"));
+        assertEquals(2,count("coin_ledger"));assertEquals(410,store.balance());
+    }
+
+    public void testLedgerFailureRollsBackPurchaseOwnershipReceiptAndDebit() {
+        database.execSQL("CREATE TRIGGER reject_coin_purchase BEFORE INSERT ON coin_ledger "
+                +"WHEN NEW.source='purchase' BEGIN SELECT RAISE(ABORT,'ledger failure'); END");
+        try{store.purchase("crown");fail("Ledger failure must abort the whole purchase");}
+        catch(SQLiteConstraintException expected){}
+        assertEquals(500,store.balance());assertFalse(store.owns("crown"));
+        assertEquals(8,count("owned_items"));assertEquals(0,count("purchases"));assertEquals(1,count("coin_ledger"));
+        assertFalse(database.inTransaction());
+        database.execSQL("DROP TRIGGER reject_coin_purchase");
+        assertEquals(DemoShopStore.PurchaseResult.PURCHASED,store.purchase("crown"));
+        assertEquals(410,store.balance());assertEquals(1,count("purchases"));assertEquals(2,count("coin_ledger"));
+    }
+
+    public void testLedgerEventKeysRejectDuplicateEvents() {
+        assertEquals(DemoShopStore.PurchaseResult.PURCHASED,store.purchase("crown"));
+        database.beginTransaction();
+        try {
+            try{CoinLedger.purchase(database,"crown",90,320);fail("Event key must be unique");}
+            catch(SQLiteConstraintException expected){}
+        } finally {database.endTransaction();}
+        assertEquals(2,count("coin_ledger"));assertEquals(410,store.balance());
+        assertEquals(-90,store.history().get(0).amount);assertEquals(410,store.history().get(0).balance);
+    }
+
+    public void testHistoryReadDoesNotWriteOrMergeAccountDatabases() {
+        try(SQLiteDatabase other=SQLiteDatabase.create(null)) {
+            other.execSQL("CREATE TABLE appearance(friend INTEGER PRIMARY KEY,hat TEXT,face TEXT,prop TEXT)");
+            DemoShopStore otherAccount=new DemoShopStore(other);
+            store.purchase("crown");
+            otherAccount.purchase("umbrella");
+            database.execSQL("CREATE TRIGGER reject_history_write BEFORE INSERT ON coin_ledger "
+                    +"BEGIN SELECT RAISE(ABORT,'history must be read only'); END");
+            assertEquals("purchase:crown",store.history().get(0).eventKey);
+            assertEquals(2,store.history().size());assertEquals(410,store.balance());
+            assertEquals("purchase:umbrella",otherAccount.history().get(0).eventKey);
+            assertEquals(2,otherAccount.history().size());assertEquals(380,otherAccount.balance());
+            assertFalse(otherAccount.owns("crown"));assertFalse(store.owns("umbrella"));
+        }
+    }
+
+    public void testStarterLedgerFailureRollsBackWalletAndFreeItemsThenRetries() {
+        try(SQLiteDatabase fresh=SQLiteDatabase.create(null)) {
+            fresh.execSQL("CREATE TABLE appearance(friend INTEGER PRIMARY KEY,hat TEXT,face TEXT,prop TEXT)");
+            DemoShopStore.createTables(fresh);
+            CoinLedger.createTables(fresh);
+            fresh.execSQL("DELETE FROM coin_ledger");
+            fresh.execSQL("DELETE FROM demo_wallet");
+            fresh.execSQL("DELETE FROM owned_items");
+            fresh.execSQL("CREATE TRIGGER reject_starter BEFORE INSERT ON coin_ledger "
+                    +"BEGIN SELECT RAISE(ABORT,'starter failure'); END");
+            try{new DemoShopStore(fresh);fail("Starter history failure must roll back the seed");}
+            catch(SQLiteConstraintException expected){}
+            assertEquals(0L,android.database.DatabaseUtils.queryNumEntries(fresh,"demo_wallet"));
+            assertEquals(0L,android.database.DatabaseUtils.queryNumEntries(fresh,"owned_items"));
+            assertEquals(0L,android.database.DatabaseUtils.queryNumEntries(fresh,"coin_ledger"));
+            assertFalse(fresh.inTransaction());
+            fresh.execSQL("DROP TRIGGER reject_starter");
+            DemoShopStore retried=new DemoShopStore(fresh);
+            assertEquals(500,retried.balance());
+            assertEquals(8L,android.database.DatabaseUtils.queryNumEntries(fresh,"owned_items"));
+            assertEquals(1,retried.history().size());
+            assertEquals("starter",retried.history().get(0).source);
+        }
     }
 
     public void testReinitializationDoesNotRefillOrReseed() {
@@ -197,6 +280,7 @@ public class DemoShopStoreTest extends InstrumentationTestCase {
         assertFalse(store.owns("crown"));
         assertEquals(8, count("owned_items"));
         assertEquals(0, count("purchases"));
+        assertEquals(1, count("coin_ledger"));
         assertFalse(database.inTransaction());
         database.execSQL("DROP TRIGGER reject_purchase");
         assertEquals(DemoShopStore.PurchaseResult.PURCHASED, store.purchase("crown"));
@@ -204,6 +288,7 @@ public class DemoShopStoreTest extends InstrumentationTestCase {
         assertTrue(store.owns("crown"));
         assertEquals(9, count("owned_items"));
         assertEquals(1, count("purchases"));
+        assertEquals(2, count("coin_ledger"));
     }
 
     public void testDatabaseConstraintsProtectWalletAndUniqueReceipt() {
