@@ -5,11 +5,12 @@ import android.database.sqlite.SQLiteDatabase;
 import android.database.sqlite.SQLiteOpenHelper;
 import kr.example.haliltalk.shop.DemoShopStore;
 import kr.example.haliltalk.shop.ShopCollectionStore;
+import kr.example.haliltalk.shop.CoinLedger;
 
 /** Additive migrations preserve existing friends, messages, experience, and appearance. */
 public final class FriendsDatabase extends SQLiteOpenHelper {
     public FriendsDatabase(Context context) {
-        super(context, kr.example.haliltalk.auth.AccountSession.databaseName(context), null, 10);
+        super(context, kr.example.haliltalk.auth.AccountSession.databaseName(context), null, 11);
     }
     @Override public void onConfigure(SQLiteDatabase db) { db.setForeignKeyConstraintsEnabled(true); }
     @Override public void onCreate(SQLiteDatabase db) {
@@ -18,7 +19,7 @@ public final class FriendsDatabase extends SQLiteOpenHelper {
         createAppearance(db);
         createChatRequests(db);
         addAppearanceSlots(db);
-        DemoShopStore.createTables(db);
+        new DemoShopStore(db);
         createGoals(db);
         JourneyStore.createTables(db);
         MessageReadStore.createTables(db);
@@ -43,8 +44,10 @@ public final class FriendsDatabase extends SQLiteOpenHelper {
         }
         // Adventure choices alone belong to v9; later shop tables use their own v10 step.
         if (oldVersion < 9 && newVersion >= 9) AdventureStore.createTables(db);
-        // Wishlist alone is v10; ledger and rewards belong to later independent increments.
+        // Wishlist alone is v10.
         if (oldVersion < 10 && newVersion >= 10) ShopCollectionStore.createTables(db);
+        // v11 adds only coin history, preserving the existing wallet and purchase receipts.
+        if (oldVersion < 11 && newVersion >= 11) CoinLedger.createTables(db);
     }
     private void createGoals(SQLiteDatabase db) {
         db.execSQL("ALTER TABLE friends ADD COLUMN purpose TEXT NOT NULL DEFAULT ''");

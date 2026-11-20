@@ -23,11 +23,16 @@ public final class DemoShopStore {
     /** The caller retains ownership of the open database, including its appearance table. */
     public DemoShopStore(SQLiteDatabase database) {
         this.database = database;
-        createTables(database);
+        createTables(database,true);
+    }
+
+    /** Historical v5 schema only; later migrations add their own tables. */
+    public static void createTables(SQLiteDatabase database) {
+        createTables(database,false);
     }
 
     /** Idempotent; the wallet row marks the single atomic seed for this database. */
-    public static void createTables(SQLiteDatabase database) {
+    private static void createTables(SQLiteDatabase database,boolean ledger) {
         database.beginTransaction();
         try {
             database.execSQL("CREATE TABLE IF NOT EXISTS demo_wallet("
@@ -41,8 +46,9 @@ public final class DemoShopStore {
             ContentValues wallet = new ContentValues();
             wallet.put("id", 1);
             wallet.put("balance", 500);
-            if (database.insertWithOnConflict("demo_wallet", null, wallet,
-                    SQLiteDatabase.CONFLICT_IGNORE) != -1) {
+            boolean seeded=database.insertWithOnConflict("demo_wallet", null, wallet,
+                    SQLiteDatabase.CONFLICT_IGNORE) != -1;
+            if (seeded) {
                 for (String id : FREE_ITEMS) addOwned(database, id);
                 try (Cursor cursor = database.rawQuery("SELECT * FROM appearance", null)) {
                     while (cursor.moveToNext()) {
@@ -56,6 +62,7 @@ public final class DemoShopStore {
                     }
                 }
             }
+            if (ledger) CoinLedger.initialize(database,seeded);
             database.setTransactionSuccessful();
         } finally {
             database.endTransaction();
@@ -99,7 +106,7 @@ public final class DemoShopStore {
 
     /**
      * Call only after UI confirmation. Storage errors propagate after rolling back all changes.
-     * The transaction serializes ownership checks, debit, and the unique purchase receipt.
+     * The transaction serializes ownership checks, debit, receipt, and the unique ledger event.
      */
     public PurchaseResult purchase(String id) {
         int cost = price(id);
@@ -118,11 +125,16 @@ public final class DemoShopStore {
             receipt.put("item_id", id);
             receipt.put("price", cost);
             database.insertOrThrow("purchases", null, receipt);
+            CoinLedger.purchase(database,id,cost,currentBalance-cost);
             database.setTransactionSuccessful();
             return PurchaseResult.PURCHASED;
         } finally {
             database.endTransaction();
         }
+    }
+
+    public java.util.List<CoinLedger.Entry> history() {
+        return new CoinLedger(database).entries();
     }
 
     private static void addOwned(SQLiteDatabase database, String id) {
