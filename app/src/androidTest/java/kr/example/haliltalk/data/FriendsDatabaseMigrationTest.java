@@ -5,6 +5,61 @@ import android.database.sqlite.SQLiteDatabase;
 import android.test.InstrumentationTestCase;
 
 public class FriendsDatabaseMigrationTest extends InstrumentationTestCase {
+    public void testVersionNineAddsOnlyWishlistAndPreservesEconomyAndAdventure() {
+        try(SQLiteDatabase db=SQLiteDatabase.create(null);
+                FriendsDatabase helper=new FriendsDatabase(getInstrumentation().getTargetContext())){
+            db.setForeignKeyConstraintsEnabled(true);
+            db.execSQL("CREATE TABLE friends(id INTEGER PRIMARY KEY,package TEXT UNIQUE,"
+                    +"name TEXT,personality TEXT,xp INTEGER DEFAULT 0)");
+            db.execSQL("CREATE TABLE messages(id INTEGER PRIMARY KEY,friend INTEGER,"
+                    +"content TEXT,is_user INTEGER,created INTEGER)");
+            helper.onUpgrade(db,1,9);
+            db.execSQL("INSERT INTO friends(id,package,name,xp) VALUES(7,'qa.wishlist.migration','Kept',41)");
+            db.execSQL("INSERT INTO messages VALUES(11,7,'Keep message',0,1000)");
+            db.execSQL("INSERT INTO appearance(friend,character,hat,face,body,back,prop)"
+                    +" VALUES(7,'reading','beret','none','none','none','none')");
+            AdventureStore adventure=new AdventureStore(db);adventure.choose(7,7,"2026-11-16");
+            kr.example.haliltalk.shop.DemoShopStore wallet=new kr.example.haliltalk.shop.DemoShopStore(db);
+            assertEquals(kr.example.haliltalk.shop.DemoShopStore.PurchaseResult.PURCHASED,wallet.purchase("crown"));
+            java.util.Set<String> before=tableNames(db);
+            helper.onUpgrade(db,9,10);
+            java.util.Set<String> added=tableNames(db);added.removeAll(before);
+            assertEquals(java.util.Collections.singleton("shop_wishlist"),added);
+            kr.example.haliltalk.shop.ShopCollectionStore wishlist=new kr.example.haliltalk.shop.ShopCollectionStore(db);
+            assertNull(wishlist.target());wishlist.setTarget("rocket_pack");
+            assertEquals(410,wallet.balance());assertTrue(wallet.owns("crown"));
+            assertFalse(wallet.owns("rocket_pack"));assertEquals(7,adventure.choice(7).days);
+            assertEquals(1L,android.database.DatabaseUtils.queryNumEntries(db,"purchases"));
+            assertEquals(90L,android.database.DatabaseUtils.longForQuery(db,"SELECT price FROM purchases WHERE item_id='crown'",null));
+            assertEquals(41L,android.database.DatabaseUtils.longForQuery(db,"SELECT xp FROM friends WHERE id=7",null));
+            try(Cursor c=db.rawQuery("SELECT content FROM messages WHERE id=11",null)){
+                assertTrue(c.moveToFirst());assertEquals("Keep message",c.getString(0));
+            }
+            try(Cursor c=db.rawQuery("SELECT character,hat FROM appearance WHERE friend=7",null)){
+                assertTrue(c.moveToFirst());assertEquals("reading",c.getString(0));assertEquals("beret",c.getString(1));
+            }
+        }
+    }
+
+    public void testFreshSchemaAndSequentialUpgradeHaveSameTables() {
+        try(SQLiteDatabase fresh=SQLiteDatabase.create(null);SQLiteDatabase upgraded=SQLiteDatabase.create(null);
+                FriendsDatabase helper=new FriendsDatabase(getInstrumentation().getTargetContext())){
+            helper.onCreate(fresh);
+            upgraded.execSQL("CREATE TABLE friends(id INTEGER PRIMARY KEY,package TEXT UNIQUE,"
+                    +"name TEXT,personality TEXT,xp INTEGER DEFAULT 0)");
+            upgraded.execSQL("CREATE TABLE messages(id INTEGER PRIMARY KEY,friend INTEGER,"
+                    +"content TEXT,is_user INTEGER,created INTEGER)");
+            helper.onUpgrade(upgraded,1,8);
+            helper.onUpgrade(upgraded,8,9);
+            helper.onUpgrade(upgraded,9,10);
+            assertEquals(tableNames(fresh),tableNames(upgraded));
+            assertFalse(tableNames(fresh).contains("coin_ledger"));
+            assertFalse(tableNames(fresh).contains("quest_rewards"));
+            assertNull(new kr.example.haliltalk.shop.ShopCollectionStore(fresh).target());
+            assertNull(new kr.example.haliltalk.shop.ShopCollectionStore(upgraded).target());
+        }
+    }
+
     public void testVersionEightAddsOnlyAdventureChoicesAndKeepsExistingRows() {
         try(SQLiteDatabase database=SQLiteDatabase.create(null);
                 FriendsDatabase helper=new FriendsDatabase(getInstrumentation().getTargetContext())){
