@@ -9,7 +9,7 @@ import java.util.List;
 /** Account-local coin history. The wallet remains canonical; old receipts have no known time. */
 public final class CoinLedger {
     public static final class Entry {
-        public final String eventKey, source, itemId;
+        public final String eventKey, source, itemId, day;
         public final int amount, balance;
         public final Long createdAt;
 
@@ -18,6 +18,7 @@ public final class CoinLedger {
             amount=cursor.getInt(2);balance=cursor.getInt(3);
             createdAt=cursor.isNull(4)?null:cursor.getLong(4);
             itemId=cursor.getString(5);
+            day=cursor.getString(6);
         }
     }
 
@@ -42,7 +43,7 @@ public final class CoinLedger {
                     +"source TEXT NOT NULL CHECK(source IN ('opening','starter','purchase','quest')),"
                     +"amount INTEGER NOT NULL CHECK(amount BETWEEN -2147483647 AND 2147483647),"
                     +"balance INTEGER NOT NULL CHECK(balance BETWEEN 0 AND 2147483647),"
-                    +"created_at INTEGER, item_id TEXT,"
+                    +"created_at INTEGER, item_id TEXT, day TEXT,"
                     +"CHECK((source='opening' AND amount=0 AND created_at IS NULL)"
                     +" OR (source!='opening' AND created_at IS NOT NULL)))");
             try(Cursor existing=database.rawQuery("SELECT 1 FROM coin_ledger WHERE event_key='opening'",null)) {
@@ -64,10 +65,29 @@ public final class CoinLedger {
         insert(database,"purchase:"+item,"purchase",-cost,balance,System.currentTimeMillis(),item);
     }
 
+    /** v12 is additive for an actual v11 ledger; safe if the column already exists. */
+    public static void addRewardDay(SQLiteDatabase database) {
+        try(Cursor columns=database.rawQuery("PRAGMA table_info(coin_ledger)",null)) {
+            while(columns.moveToNext())
+                if("day".equals(columns.getString(columns.getColumnIndexOrThrow("name"))))return;
+        }
+        database.execSQL("ALTER TABLE coin_ledger ADD COLUMN day TEXT");
+    }
+
+    public static void reward(SQLiteDatabase database,String day,int amount,int balance) {
+        if(!database.inTransaction())throw new IllegalStateException("Coin changes require a transaction");
+        ContentValues values=new ContentValues();
+        values.put("event_key","quest:"+day);values.put("source","quest");
+        values.put("amount",amount);values.put("balance",balance);
+        values.put("created_at",System.currentTimeMillis());values.put("day",day);
+        if(database.insertOrThrow("coin_ledger",null,values)==-1)
+            throw new android.database.sqlite.SQLiteException("Reward ledger was not inserted");
+    }
+
     public List<Entry> entries() {
         ArrayList<Entry> entries=new ArrayList<>();
         try(Cursor cursor=database.rawQuery(
-                "SELECT event_key,source,amount,balance,created_at,item_id FROM coin_ledger ORDER BY id DESC",null)) {
+                "SELECT event_key,source,amount,balance,created_at,item_id,day FROM coin_ledger ORDER BY id DESC",null)) {
             while(cursor.moveToNext())entries.add(new Entry(cursor));
         }
         return entries;

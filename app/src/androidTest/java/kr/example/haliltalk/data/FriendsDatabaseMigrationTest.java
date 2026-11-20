@@ -5,6 +5,74 @@ import android.database.sqlite.SQLiteDatabase;
 import android.test.InstrumentationTestCase;
 
 public class FriendsDatabaseMigrationTest extends InstrumentationTestCase {
+    public void testActualVersionElevenAddsNullableDayAndIndependentRewardReceipts() {
+        try(SQLiteDatabase db=SQLiteDatabase.create(null);
+                FriendsDatabase helper=new FriendsDatabase(getInstrumentation().getTargetContext())) {
+            db.setForeignKeyConstraintsEnabled(true);
+            db.execSQL("CREATE TABLE friends(id INTEGER PRIMARY KEY,package TEXT UNIQUE,"
+                    +"name TEXT,personality TEXT,xp INTEGER DEFAULT 0)");
+            db.execSQL("CREATE TABLE messages(id INTEGER PRIMARY KEY,friend INTEGER,"
+                    +"content TEXT,is_user INTEGER,created INTEGER)");
+            helper.onUpgrade(db,1,10);
+            // Actual shipped v11 schema, deliberately without v12's day column.
+            db.execSQL("CREATE TABLE coin_ledger(id INTEGER PRIMARY KEY,event_key TEXT NOT NULL UNIQUE,"
+                    +"source TEXT NOT NULL CHECK(source IN ('opening','starter','purchase','quest')),"
+                    +"amount INTEGER NOT NULL CHECK(amount BETWEEN -2147483647 AND 2147483647),"
+                    +"balance INTEGER NOT NULL CHECK(balance BETWEEN 0 AND 2147483647),"
+                    +"created_at INTEGER,item_id TEXT,"
+                    +"CHECK((source='opening' AND amount=0 AND created_at IS NULL)"
+                    +" OR (source!='opening' AND created_at IS NOT NULL)))");
+            db.execSQL("INSERT INTO coin_ledger VALUES(1,'opening','opening',0,500,NULL,NULL)");
+            db.execSQL("INSERT INTO coin_ledger VALUES(2,'purchase:crown','purchase',-90,410,123,'crown')");
+            db.execSQL("UPDATE demo_wallet SET balance=410 WHERE id=1");
+            db.execSQL("INSERT INTO owned_items VALUES('crown')");
+            db.execSQL("INSERT INTO purchases VALUES('crown',90)");
+            db.execSQL("INSERT INTO friends(id,package,name,xp) VALUES(7,'qa.v12','Keep',41)");
+            db.execSQL("INSERT INTO messages VALUES(11,7,'Keep message',0,1000)");
+            db.execSQL("INSERT INTO appearance(friend,character,hat,face,body,back,prop)"
+                    +" VALUES(7,'reading','beret','none','none','none','none')");
+            new kr.example.haliltalk.shop.ShopCollectionStore(db).setTarget("rocket_pack");
+            new AdventureStore(db).choose(7,7,"2026-11-16");
+            JourneyStore journeys=new JourneyStore(db);
+            journeys.savePlan(7,"2026-11-16","Keep action",null,null,1);
+            journeys.review(7,"2026-11-16","done","Keep review",2);
+            long goal=new GoalStore(db).save(7,0,"Keep goal",123456L);
+            java.util.Set<String> before=tableNames(db);
+            helper.onUpgrade(db,11,12);helper.onUpgrade(db,11,12);
+            java.util.Set<String> added=tableNames(db);added.removeAll(before);
+            assertEquals(java.util.Collections.singleton("quest_reward_receipts"),added);
+            try(Cursor foreignKeys=db.rawQuery("PRAGMA foreign_key_list(quest_reward_receipts)",null)) {
+                assertEquals(0,foreignKeys.getCount());
+            }
+            try(Cursor columns=db.rawQuery("PRAGMA table_info(coin_ledger)",null)) {
+                int found=0;
+                while(columns.moveToNext())if("day".equals(columns.getString(1))) {
+                    found++;assertEquals("TEXT",columns.getString(2));assertEquals(0,columns.getInt(3));
+                }
+                assertEquals(1,found);
+            }
+            kr.example.haliltalk.shop.DemoShopStore wallet=new kr.example.haliltalk.shop.DemoShopStore(db);
+            assertEquals(410,wallet.balance());assertTrue(wallet.owns("crown"));
+            assertEquals(1L,android.database.DatabaseUtils.queryNumEntries(db,"purchases"));
+            assertEquals(2,wallet.history().size());
+            assertEquals("purchase:crown",wallet.history().get(0).eventKey);
+            assertEquals(Long.valueOf(123),wallet.history().get(0).createdAt);
+            assertNull(wallet.history().get(0).day);assertNull(wallet.history().get(1).createdAt);
+            assertEquals("rocket_pack",new kr.example.haliltalk.shop.ShopCollectionStore(db).target());
+            assertEquals(7,new AdventureStore(db).choice(7).days);
+            assertEquals(goal,new GoalStore(db).list(7).get(0).id);
+            assertFalse(new GoalStore(db).list(7).get(0).completed);
+            assertEquals("Keep review",journeys.entry(7,"2026-11-16").note);
+            assertEquals(41L,android.database.DatabaseUtils.longForQuery(db,"SELECT xp FROM friends WHERE id=7",null));
+            assertEquals("Keep message",android.database.DatabaseUtils.stringForQuery(db,"SELECT content FROM messages WHERE id=11",null));
+            assertEquals("beret",android.database.DatabaseUtils.stringForQuery(db,"SELECT hat FROM appearance WHERE friend=7",null));
+            assertTrue(new QuestRewardStore(db).claim(7,"2026-11-16"));
+            assertEquals(430,wallet.balance());assertEquals(3,wallet.history().size());
+            journeys.delete(7,"2026-11-16");db.delete("friends","id=7",null);
+            assertEquals(1L,android.database.DatabaseUtils.queryNumEntries(db,"quest_reward_receipts"));
+        }
+    }
+
     public void testVersionTenAddsOnlyLedgerWithOpeningSnapshotAndKeepsExistingState() {
         try(SQLiteDatabase db=SQLiteDatabase.create(null);
                 FriendsDatabase helper=new FriendsDatabase(getInstrumentation().getTargetContext())){
@@ -112,8 +180,21 @@ public class FriendsDatabaseMigrationTest extends InstrumentationTestCase {
             helper.onUpgrade(upgraded,8,9);
             helper.onUpgrade(upgraded,9,10);
             helper.onUpgrade(upgraded,10,11);
+            helper.onUpgrade(upgraded,11,12);
             assertEquals(tableNames(fresh),tableNames(upgraded));
             assertTrue(tableNames(fresh).contains("coin_ledger"));
+            assertTrue(tableNames(fresh).contains("quest_reward_receipts"));
+            for(String table:tableNames(fresh)) {
+                try(Cursor expected=fresh.rawQuery("PRAGMA table_info("+table+")",null);
+                        Cursor actual=upgraded.rawQuery("PRAGMA table_info("+table+")",null)) {
+                    assertEquals(table,expected.getCount(),actual.getCount());
+                    while(expected.moveToNext()) {
+                        assertTrue(actual.moveToNext());
+                        for(int column=0;column<expected.getColumnCount();column++)
+                            assertEquals(table,expected.getString(column),actual.getString(column));
+                    }
+                }
+            }
             assertFalse(tableNames(fresh).contains("quest_rewards"));
             assertEquals("starter",new kr.example.haliltalk.shop.DemoShopStore(fresh).history().get(0).source);
             assertEquals("opening",new kr.example.haliltalk.shop.DemoShopStore(upgraded).history().get(0).source);

@@ -10,7 +10,7 @@ import kr.example.haliltalk.shop.CoinLedger;
 /** Additive migrations preserve existing friends, messages, experience, and appearance. */
 public final class FriendsDatabase extends SQLiteOpenHelper {
     public FriendsDatabase(Context context) {
-        super(context, kr.example.haliltalk.auth.AccountSession.databaseName(context), null, 11);
+        super(context, kr.example.haliltalk.auth.AccountSession.databaseName(context), null, 12);
     }
     @Override public void onConfigure(SQLiteDatabase db) { db.setForeignKeyConstraintsEnabled(true); }
     @Override public void onCreate(SQLiteDatabase db) {
@@ -25,6 +25,7 @@ public final class FriendsDatabase extends SQLiteOpenHelper {
         MessageReadStore.createTables(db);
         AdventureStore.createTables(db);
         ShopCollectionStore.createTables(db);
+        QuestRewardStore.createTables(db);
     }
     private void createAppearance(SQLiteDatabase db) {
         db.execSQL("CREATE TABLE appearance(friend INTEGER PRIMARY KEY REFERENCES friends(id) ON DELETE CASCADE, character TEXT NOT NULL, hat TEXT NOT NULL, face TEXT NOT NULL, prop TEXT NOT NULL)");
@@ -48,6 +49,10 @@ public final class FriendsDatabase extends SQLiteOpenHelper {
         if (oldVersion < 10 && newVersion >= 10) ShopCollectionStore.createTables(db);
         // v11 adds only coin history, preserving the existing wallet and purchase receipts.
         if (oldVersion < 11 && newVersion >= 11) CoinLedger.createTables(db);
+        if (oldVersion < 12 && newVersion >= 12) {
+            CoinLedger.addRewardDay(db);
+            QuestRewardStore.createTables(db);
+        }
     }
     private void createGoals(SQLiteDatabase db) {
         db.execSQL("ALTER TABLE friends ADD COLUMN purpose TEXT NOT NULL DEFAULT ''");
