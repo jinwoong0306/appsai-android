@@ -20,7 +20,7 @@ U3의 기존 작은 행동/회고를 보존하며, 홈의 오늘 이어갈 친�
 
 기존 소품의 테마/부위/보유/구매 가능 필터, 도감과 찜, 직접 구매 확인, 보유품의 꾸미기 초안 전달, 오늘 실제 시도 회고 뒤 **별도 확인한** 계정·기기 날짜별 1회 20코인, 시작 선물·이전 잔액·적립·구매 원장을 맡는다.
 
-주요 경계: `ShopActivity.java`, `shop/ShopCatalog.java`, `shop/ShopCollectionStore.java`, `shop/CoinLedger.java`, `shop/DemoShopStore.java`, `data/QuestRewardStore.java`, `JourneyActivity.java`의 보상 진입, `CustomizationActivity.java`의 초안 연결, `res/layout/screen_shop.xml`과 상점 행·내역, `res/values/shop.xml`, `collections.xml`, DB v9 `shop_wishlist`/`quest_reward_receipts`, v10 `coin_ledger` 및 구매·마이그레이션 회귀. 1번의 v9 `adventure_choices`와 기존 500코인·8개 기본 소품·XP·소유권을 보존한다. 지급·구매/원장은 각각 같은 트랜잭션으로 처리하고 실패 시 롤백한다. 찜은 자동 구매가 아니다.
+주요 경계: `ShopActivity.java`, `shop/ShopCatalog.java`, `shop/ShopCollectionStore.java`, `shop/CoinLedger.java`, `shop/DemoShopStore.java`, `data/QuestRewardStore.java`, `JourneyActivity.java`의 보상 진입, `CustomizationActivity.java`의 초안 연결, `res/layout/screen_shop.xml`과 상점 행·내역, `res/values/shop.xml`, `collections.xml` 및 구매·마이그레이션 회귀. 이미 공개된 1번의 DB v9 `adventure_choices`를 보존하고, 각각 독립적으로 빌드·검증되는 실제 증분으로 v10 `shop_wishlist` → v11 `coin_ledger`/구매 기록 → v12 `quest_reward_receipts`/확인형 보상을 추가한다. 기존 500코인·8개 기본 소품·XP·소유권을 보존한다. 지급·구매/원장은 각각 같은 트랜잭션으로 처리하고 실패 시 롤백한다. 찜은 자동 구매가 아니다.
 
 ## 3. 장진웅: 화면·안내
 

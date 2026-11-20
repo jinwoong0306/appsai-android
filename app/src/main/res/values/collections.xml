@@ -1,0 +1,22 @@
+<resources>
+    <string name="collection_wishlist_open">나의 찜</string>
+    <string name="collection_wishlist_close">찜 접기</string>
+    <string name="collection_set">이 소품 찜하기</string>
+    <string name="collection_selected">찜한 소품</string>
+    <string name="collection_empty">마음에 드는 소품을 선택하고 찜해 두세요.</string>
+    <string name="collection_affordable">%1$s · 데모 %2$d코인\n잔액 %3$d코인 · 구매 가능</string>
+    <string name="collection_shortfall">%1$s · 데모 %2$d코인\n잔액 %3$d코인 · %4$d코인 부족</string>
+    <string name="collection_owned">%1$s · 보유 완료\n미리보기로 확인해 보세요.</string>
+    <string name="collection_reveal">찜한 소품 미리보기</string>
+    <string name="collection_clear">찜 해제</string>
+    <string name="collection_replace_title">찜한 소품을 바꿀까요?</string>
+    <string name="collection_replace_message">%1$s 대신 %2$s을(를) 찜해요. 구매하거나 장착하지 않아요.</string>
+    <string name="collection_replace">찜 바꾸기</string>
+    <string name="collection_clear_title">찜을 해제할까요?</string>
+    <string name="collection_clear_message">%1$s의 찜만 해제해요. 보유 소품과 코인은 그대로예요.</string>
+    <string name="collection_saved">찜을 저장했어요. 구매나 장착은 하지 않았어요.</string>
+    <string name="collection_cleared">찜을 해제했어요.</string>
+    <string name="collection_failed">찜을 저장하지 못했어요. 이전 찜과 현재 선택은 그대로예요. 다시 눌러 주세요.</string>
+    <string name="collection_read_failed">찜을 불러오지 못했어요. 상점을 다시 열어 주세요.</string>
+    <string name="collection_changed">계정이나 선택이 바뀌었어요. 상점을 다시 열어 확인해 주세요.</string>
+</resources>

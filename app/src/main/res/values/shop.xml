@@ -16,5 +16,19 @@
     <string name="shop_locked">%1$s\n상점 · %2$d 코인</string>
     <string name="shop_open">상점 열기</string>
     <string name="shop_ownership_needed">보유한 아이템만 저장할 수 있어요.</string>
+    <string name="shop_filters_open">필터</string>
+    <string name="shop_filters_close">필터 접기</string>
+    <string name="shop_filters_active">필터 %1$d</string>
+    <string name="shop_results">소품 %1$d개</string>
+    <string name="shop_theme_label">테마</string>
+    <string name="shop_slot_label">착용 부위</string>
+    <string name="shop_filter_label">소장 상태</string>
+    <string name="shop_empty">조건에 맞는 소품이 없어요. 테마·부위·소장 조건을 바꿔 보세요.</string>
+    <string name="shop_select_item">소품을 선택해 주세요</string>
+    <string name="shop_action_item">%1$s · %2$s</string>
+    <string name="shop_purchase_failed">구매를 저장하지 못했어요. 코인은 차감되지 않았어요. 다시 눌러 주세요.</string>
+    <string name="shop_account_changed">계정이나 저장소가 바뀌었어요. 상점을 다시 열어 주세요.</string>
+    <string-array name="shop_themes"><item>모든 테마</item><item>독서와 휴식</item><item>가벼운 외출</item><item>함께 축하</item><item>새로운 탐험</item></string-array>
+    <string-array name="shop_filters"><item>모두 보기</item><item>보유한 소품</item><item>아직 없는 소품</item><item>지금 구매 가능</item></string-array>
     <string-array name="shop_categories"><item>전체</item><item>머리</item><item>얼굴</item><item>목·몸</item><item>등</item><item>손소품</item></string-array>
 </resources>

@@ -2,44 +2,74 @@ package kr.example.haliltalk;
 
 import android.app.AlertDialog;
 import android.database.sqlite.SQLiteDatabase;
+import android.database.sqlite.SQLiteException;
 import android.os.Bundle;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.BaseAdapter;
+import android.widget.AdapterView;
+import android.widget.ArrayAdapter;
 import android.widget.Button;
 import android.widget.LinearLayout;
 import android.widget.ListView;
+import android.widget.Spinner;
 import android.widget.TextView;
 import java.util.ArrayList;
 import kr.example.haliltalk.character.CharacterCatalog;
+import kr.example.haliltalk.auth.AccountSession;
 import kr.example.haliltalk.character.CharacterView;
 import kr.example.haliltalk.data.FriendsDatabase;
 import kr.example.haliltalk.shop.DemoShopStore;
+import kr.example.haliltalk.shop.ShopCatalog;
+import kr.example.haliltalk.shop.ShopCollectionStore;
 
 public final class ShopActivity extends FeatureActivity {
     SQLiteDatabase db;
     DemoShopStore store;
+    ShopCollectionStore collectionStore;
+    String collectionTarget, openedDatabase;
+    long openedGeneration;
+    boolean filtersOpen, collectionWishlistOpen;
+    View header;
     String selected="crown", base="chat";
-    int category;
+    int category, theme, ownership;
     final ArrayList<String> visibleItems=new ArrayList<>();
     BaseAdapter adapter;
-    AlertDialog purchaseDialog;
-    final String[] slots={"","hat","face","body","back","prop"};
+    AlertDialog purchaseDialog, collectionDialog, characterDialog;
 
     @Override public void onCreate(Bundle state){
         super.onCreate(state);
+        openedDatabase=AccountSession.databaseName(this);openedGeneration=AccountSession.generation();
         db=new FriendsDatabase(this).getWritableDatabase();store=new DemoShopStore(db);
-        if(state!=null){selected=state.getString("selected","crown");base=state.getString("base","chat");category=state.getInt("category");}
+        collectionStore=new ShopCollectionStore(db);
+        if(state!=null){
+            selected=state.getString("selected","crown");base=state.getString("base","chat");
+            category=state.getInt("category");theme=state.getInt("theme");ownership=state.getInt("ownership");
+            filtersOpen=state.getBoolean("filters_open");collectionWishlistOpen=state.getBoolean("wishlist_open");
+        }
         else if(CharacterCatalog.slotFor(getIntent().getStringExtra("item_id"))!=null)selected=getIntent().getStringExtra("item_id");
         setContentView(R.layout.screen_shop);
         findViewById(R.id.open_settings).setOnClickListener(v->openSettings());
         BottomNavigation.bind(this,R.id.nav_shop,this::navigateFeature);
-        findViewById(R.id.shop_character).setOnClickListener(v->new AlertDialog.Builder(this)
+        ListView list=findViewById(R.id.shop_list);
+        header=getLayoutInflater().inflate(R.layout.view_shop_header,list,false);
+        list.addHeaderView(header,null,false);
+        header.findViewById(R.id.shop_character).setOnClickListener(v->characterDialog=new AlertDialog.Builder(this)
                 .setTitle(R.string.character_selection).setItems(CharacterCatalog.CHARACTER_NAMES,(dialog,index)->{
                     base=CharacterCatalog.CHARACTER_IDS[index];refresh();
                 }).setNegativeButton(android.R.string.cancel,null).show());
         findViewById(R.id.shop_buy).setOnClickListener(v->confirmPurchase());
-        ListView list=findViewById(R.id.shop_list);
+        header.findViewById(R.id.shop_filters_toggle).setOnClickListener(v->{
+            filtersOpen=!filtersOpen;renderFilters();
+        });
+        header.findViewById(R.id.collection_wishlist_toggle).setOnClickListener(v->{
+            collectionWishlistOpen=!collectionWishlistOpen;renderCollection();
+        });
+        header.findViewById(R.id.collection_set).setOnClickListener(v->changeCollectionTarget(selected));
+        header.findViewById(R.id.collection_clear).setOnClickListener(v->changeCollectionTarget(null));
+        header.findViewById(R.id.collection_reveal).setOnClickListener(v->revealCollectionTarget());
+        bindFilter(R.id.shop_theme,R.array.shop_themes,theme,true);
+        bindFilter(R.id.shop_filter,R.array.shop_filters,ownership,false);
         adapter=new BaseAdapter(){
             public int getCount(){return visibleItems.size();}
             public String getItem(int position){return visibleItems.get(position);}
@@ -56,8 +86,26 @@ public final class ShopActivity extends FeatureActivity {
             }
         };
         list.setAdapter(adapter);
-        list.setOnItemClickListener((parent,row,position,id)->{selected=visibleItems.get(position);refresh();});
+        list.setOnItemClickListener((parent,row,position,id)->{
+            int index=position-list.getHeaderViewsCount();
+            if(index>=0&&index<visibleItems.size()){selected=visibleItems.get(index);refresh();}
+        });
         renderCategories();refresh();
+    }
+
+    void bindFilter(int id,int entries,int selection,boolean themes){
+        Spinner spinner=header.findViewById(id);
+        ArrayAdapter<CharSequence> choices=ArrayAdapter.createFromResource(this,entries,android.R.layout.simple_spinner_item);
+        choices.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
+        spinner.setAdapter(choices);spinner.setSelection(selection);
+        spinner.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener(){
+            public void onItemSelected(AdapterView<?> parent,View view,int position,long itemId){
+                if(themes?theme==position:ownership==position)return;
+                if(themes)theme=position;else ownership=position;
+                refresh();
+            }
+            public void onNothingSelected(AdapterView<?> parent){}
+        });
     }
 
     void preview(CharacterView view,String item){
@@ -67,7 +115,7 @@ public final class ShopActivity extends FeatureActivity {
     }
 
     void renderCategories(){
-        LinearLayout tabs=findViewById(R.id.shop_categories);tabs.removeAllViews();
+        LinearLayout tabs=header.findViewById(R.id.shop_categories);tabs.removeAllViews();
         String[] names=getResources().getStringArray(R.array.shop_categories);
         for(int i=0;i<names.length;i++){
             int index=i;Button tab=new Button(this,null,0,R.style.SecondaryButton);
@@ -80,40 +128,159 @@ public final class ShopActivity extends FeatureActivity {
     }
 
     void refresh(){
-        ((TextView)findViewById(R.id.shop_balance)).setText(getString(R.string.shop_balance,store.balance()));
-        ((Button)findViewById(R.id.shop_character)).setText(getString(R.string.shop_preview_character,CharacterCatalog.nameFor(base)));
-        ((TextView)findViewById(R.id.shop_selected_name)).setText(CharacterCatalog.itemName(selected));
-        preview(findViewById(R.id.shop_preview),selected);
+        renderFilters();
+        int balance=store.balance();
         visibleItems.clear();
-        for(String id:CharacterCatalog.allAccessoryIds())if(category==0||slots[category].equals(CharacterCatalog.slotFor(id)))visibleItems.add(id);
+        for(String id:CharacterCatalog.allAccessoryIds())
+            if(ShopCatalog.matches(id,theme,category,ownership,store.owns(id),store.price(id),balance))visibleItems.add(id);
+        if(!visibleItems.contains(selected))selected=visibleItems.isEmpty()?null:visibleItems.get(0);
+        ((TextView)header.findViewById(R.id.shop_balance)).setText(getString(R.string.shop_balance,balance));
+        ((Button)header.findViewById(R.id.shop_character)).setText(getString(R.string.shop_preview_character,CharacterCatalog.nameFor(base)));
+        ((TextView)header.findViewById(R.id.shop_selected_name)).setText(selected==null?getString(R.string.shop_select_item):CharacterCatalog.itemName(selected));
+        preview(header.findViewById(R.id.shop_preview),selected);
+        ((TextView)header.findViewById(R.id.shop_results)).setText(getString(R.string.shop_results,visibleItems.size()));
+        header.findViewById(R.id.shop_empty).setVisibility(visibleItems.isEmpty()?View.VISIBLE:View.GONE);
+        renderCollection();
         adapter.notifyDataSetChanged();
+        TextView actionItem=findViewById(R.id.shop_action_item);
+        actionItem.setText(selected==null?"":getString(R.string.shop_action_item,CharacterCatalog.itemName(selected),
+                store.owns(selected)?getString(R.string.shop_owned):getString(R.string.shop_price,store.price(selected))));
+        actionItem.setTag(selected);
+        actionItem.setVisibility(selected==null?View.GONE:View.VISIBLE);
         Button buy=findViewById(R.id.shop_buy);
+        if(selected==null){buy.setEnabled(false);buy.setText(R.string.shop_select_item);return;}
         boolean owned=store.owns(selected),affordable=store.balance()>=store.price(selected);
         buy.setEnabled(!owned&&affordable);
         buy.setText(owned?getString(R.string.shop_owned):!affordable?getString(R.string.shop_insufficient):
                 getString(R.string.shop_buy,store.price(selected)));
     }
 
+    void renderFilters(){
+        header.findViewById(R.id.shop_filters_panel).setVisibility(filtersOpen?View.VISIBLE:View.GONE);
+        int count=(theme==0?0:1)+(category==0?0:1)+(ownership==0?0:1);
+        ((Button)header.findViewById(R.id.shop_filters_toggle)).setText(filtersOpen?
+                getString(R.string.shop_filters_close):count==0?getString(R.string.shop_filters_open):
+                        getString(R.string.shop_filters_active,count));
+    }
+
+    void renderCollection(){
+        header.findViewById(R.id.collection_wishlist).setVisibility(collectionWishlistOpen?View.VISIBLE:View.GONE);
+        ((Button)header.findViewById(R.id.collection_wishlist_toggle)).setText(
+                collectionWishlistOpen?R.string.collection_wishlist_close:R.string.collection_wishlist_open);
+        boolean loaded=true;
+        try{collectionTarget=collectionStore.target();}
+        catch(SQLiteException|IllegalArgumentException failure){loaded=false;collectionMessage(R.string.collection_read_failed);}
+        boolean hasTarget=loaded&&collectionTarget!=null;
+        Button set=header.findViewById(R.id.collection_set);
+        set.setEnabled(loaded&&selected!=null&&!selected.equals(collectionTarget));
+        set.setText(selected!=null&&selected.equals(collectionTarget)?R.string.collection_selected:R.string.collection_set);
+        TextView target=header.findViewById(R.id.collection_target);
+        if(!hasTarget)target.setText(loaded?R.string.collection_empty:R.string.collection_read_failed);
+        else if(store.owns(collectionTarget))target.setText(getString(R.string.collection_owned,CharacterCatalog.itemName(collectionTarget)));
+        else{
+            int price=store.price(collectionTarget),balance=store.balance();
+            target.setText(balance>=price?getString(R.string.collection_affordable,CharacterCatalog.itemName(collectionTarget),price,balance):
+                    getString(R.string.collection_shortfall,CharacterCatalog.itemName(collectionTarget),price,balance,price-balance));
+        }
+        header.findViewById(R.id.collection_reveal).setVisibility(hasTarget?View.VISIBLE:View.GONE);
+        header.findViewById(R.id.collection_clear).setVisibility(hasTarget?View.VISIBLE:View.GONE);
+    }
+
+    void changeCollectionTarget(String item){
+        if(!currentAccount()){collectionMessage(R.string.collection_changed);return;}
+        if(item!=null&&(!item.equals(selected)||!visibleItems.contains(item)))return;
+        if(collectionDialog!=null&&collectionDialog.isShowing())return;
+        final String previous;
+        try{previous=collectionStore.target();}
+        catch(SQLiteException|IllegalArgumentException failure){collectionMessage(R.string.collection_read_failed);return;}
+        if(java.util.Objects.equals(item,previous))return;
+        final ShopCollectionStore confirmedStore=collectionStore;
+        final SQLiteDatabase confirmedDatabase=db;
+        Runnable save=()->{
+            if(!currentAccount()||confirmedDatabase!=db||confirmedStore!=collectionStore
+                    ||item!=null&&(!item.equals(selected)||!visibleItems.contains(item))){
+                collectionMessage(R.string.collection_changed);return;
+            }
+            try{
+                if(!java.util.Objects.equals(previous,confirmedStore.target())){
+                    collectionMessage(R.string.collection_changed);renderCollection();return;
+                }
+                if(item==null)confirmedStore.clear();else confirmedStore.setTarget(item);
+                collectionWishlistOpen=true;
+                collectionMessage(item==null?R.string.collection_cleared:R.string.collection_saved);
+                renderCollection();
+            }catch(SQLiteException|IllegalArgumentException failure){collectionMessage(R.string.collection_failed);}
+        };
+        if(previous==null){save.run();return;}
+        collectionDialog=new AlertDialog.Builder(this)
+                .setTitle(item==null?R.string.collection_clear_title:R.string.collection_replace_title)
+                .setMessage(item==null?getString(R.string.collection_clear_message,CharacterCatalog.itemName(previous)):
+                        getString(R.string.collection_replace_message,CharacterCatalog.itemName(previous),CharacterCatalog.itemName(item)))
+                .setNegativeButton(android.R.string.cancel,null)
+                .setPositiveButton(item==null?R.string.collection_clear:R.string.collection_replace,(d,w)->save.run()).show();
+    }
+
+    void revealCollectionTarget(){
+        if(!currentAccount())return;
+        try{collectionTarget=collectionStore.target();}
+        catch(SQLiteException|IllegalArgumentException failure){collectionMessage(R.string.collection_read_failed);return;}
+        if(collectionTarget==null)return;
+        theme=0;category=0;ownership=0;selected=collectionTarget;
+        ((Spinner)header.findViewById(R.id.shop_theme)).setSelection(0);
+        ((Spinner)header.findViewById(R.id.shop_filter)).setSelection(0);
+        renderCategories();refresh();
+        ((ListView)findViewById(R.id.shop_list)).setSelection(0);
+    }
+
+    void collectionMessage(int text){
+        TextView message=header.findViewById(R.id.collection_message);
+        message.setText(text);message.setVisibility(View.VISIBLE);
+        ((TextView)findViewById(R.id.shop_message)).setText(text);
+    }
+
+    boolean currentAccount(){
+        return db.isOpen()&&AccountSession.isEntered(this)&&openedGeneration==AccountSession.generation()
+                &&openedDatabase.equals(AccountSession.databaseName(this));
+    }
+
     void confirmPurchase(){
         final String item=selected;
-        if(store.owns(item)||store.balance()<store.price(item))return;
+        if(item==null||!visibleItems.contains(item)||!currentAccount()||store.owns(item)||store.balance()<store.price(item))return;
+        if(purchaseDialog!=null&&purchaseDialog.isShowing())return;
+        final DemoShopStore confirmedStore=store;
+        final SQLiteDatabase confirmedDatabase=db;
         purchaseDialog=new AlertDialog.Builder(this).setTitle(R.string.shop_confirm_title)
                 .setMessage(getString(R.string.shop_confirm,CharacterCatalog.itemName(item),store.price(item)))
                 .setNegativeButton(android.R.string.cancel,null)
                 .setPositiveButton(R.string.shop_confirm_buy,(dialog,which)->{
-                    DemoShopStore.PurchaseResult result=store.purchase(item);
+                    if(!currentAccount()||confirmedDatabase!=db||confirmedStore!=store){
+                        ((TextView)findViewById(R.id.shop_message)).setText(R.string.shop_account_changed);return;
+                    }
+                    if(!item.equals(selected)||!visibleItems.contains(item))return;
+                    try{
+                    DemoShopStore.PurchaseResult result=confirmedStore.purchase(item);
                     int message=result==DemoShopStore.PurchaseResult.PURCHASED?R.string.shop_purchased:
                             result==DemoShopStore.PurchaseResult.ALREADY_OWNED?R.string.shop_owned:
                             result==DemoShopStore.PurchaseResult.INSUFFICIENT_FUNDS?R.string.shop_insufficient:R.string.shop_invalid;
                     ((TextView)findViewById(R.id.shop_message)).setText(message);refresh();
+                    }catch(SQLiteException failure){
+                        ((TextView)findViewById(R.id.shop_message)).setText(R.string.shop_purchase_failed);
+                    }
                 }).show();
+    }
+    @Override protected void onResume(){
+        super.onResume();if(adapter!=null&&currentAccount())refresh();
     }
     @Override protected void onSaveInstanceState(Bundle state){
         state.putString("selected",selected);state.putString("base",base);state.putInt("category",category);
+        state.putInt("theme",theme);state.putInt("ownership",ownership);
+        state.putBoolean("filters_open",filtersOpen);state.putBoolean("wishlist_open",collectionWishlistOpen);
         super.onSaveInstanceState(state);
     }
     @Override protected void onDestroy(){
         if(purchaseDialog!=null)purchaseDialog.dismiss();
+        if(collectionDialog!=null)collectionDialog.dismiss();
+        if(characterDialog!=null)characterDialog.dismiss();
         db.close();super.onDestroy();
     }
 }

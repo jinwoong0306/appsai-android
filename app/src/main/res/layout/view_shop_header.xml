@@ -1,0 +1,39 @@
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent" android:layout_height="wrap_content"
+    android:orientation="vertical" android:paddingBottom="8dp">
+    <TextView android:id="@+id/shop_balance" style="@style/BodyText" android:textStyle="bold" android:gravity="end"/>
+    <TextView style="@style/SecondaryText" android:text="@string/shop_demo_notice"/>
+    <kr.example.haliltalk.character.CharacterView android:id="@+id/shop_preview"
+        android:layout_width="match_parent" android:layout_height="144dp"/>
+    <TextView android:id="@+id/shop_selected_name" style="@style/SectionTitle" android:layout_marginTop="0dp"/>
+    <Button android:id="@+id/shop_character" style="@style/SecondaryButton"/>
+    <Button android:id="@+id/collection_set" style="@style/SecondaryButton" android:text="@string/collection_set"/>
+    <Button android:id="@+id/shop_filters_toggle" style="@style/SecondaryButton" android:text="@string/shop_filters_open"/>
+    <LinearLayout android:id="@+id/shop_filters_panel" android:layout_width="match_parent"
+        android:layout_height="wrap_content" android:orientation="vertical" android:visibility="gone">
+        <TextView style="@style/BodyText" android:text="@string/shop_theme_label" android:labelFor="@+id/shop_theme"/>
+        <Spinner android:id="@id/shop_theme" android:layout_width="match_parent"
+            android:layout_height="wrap_content" android:minHeight="48dp"/>
+        <TextView style="@style/BodyText" android:text="@string/shop_filter_label" android:labelFor="@+id/shop_filter"/>
+        <Spinner android:id="@id/shop_filter" android:layout_width="match_parent"
+            android:layout_height="wrap_content" android:minHeight="48dp"/>
+        <TextView style="@style/BodyText" android:text="@string/shop_slot_label"/>
+        <HorizontalScrollView android:layout_width="match_parent" android:layout_height="wrap_content">
+            <LinearLayout android:id="@+id/shop_categories" android:layout_width="wrap_content"
+                android:layout_height="wrap_content" android:orientation="horizontal"/>
+        </HorizontalScrollView>
+    </LinearLayout>
+    <Button android:id="@+id/collection_wishlist_toggle" style="@style/SecondaryButton" android:text="@string/collection_wishlist_open"/>
+    <LinearLayout android:id="@+id/collection_wishlist" android:layout_width="match_parent"
+        android:layout_height="wrap_content" android:orientation="vertical" android:visibility="gone"
+        android:background="@drawable/bg_card" android:padding="12dp">
+        <TextView android:id="@+id/collection_target" style="@style/BodyText" android:accessibilityLiveRegion="polite"/>
+        <Button android:id="@+id/collection_reveal" style="@style/SecondaryButton" android:text="@string/collection_reveal"/>
+        <Button android:id="@+id/collection_clear" style="@style/SecondaryButton" android:text="@string/collection_clear"/>
+    </LinearLayout>
+    <TextView android:id="@+id/collection_message" style="@style/SecondaryText"
+        android:visibility="gone" android:accessibilityLiveRegion="polite"/>
+    <TextView android:id="@+id/shop_results" style="@style/SecondaryText" android:accessibilityLiveRegion="polite"/>
+    <TextView android:id="@+id/shop_empty" style="@style/BodyText" android:text="@string/shop_empty"
+        android:padding="16dp" android:visibility="gone" android:accessibilityLiveRegion="polite"/>
+</LinearLayout>
