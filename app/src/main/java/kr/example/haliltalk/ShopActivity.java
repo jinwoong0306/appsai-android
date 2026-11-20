@@ -274,6 +274,7 @@ public final class ShopActivity extends FeatureActivity {
                 CoinLedger.Entry entry=getItem(position);row.setTag(entry.eventKey);
                 String source="purchase".equals(entry.source)?
                         getString(R.string.shop_history_purchase,CharacterCatalog.itemName(entry.itemId)):
+                        "quest".equals(entry.source)?getString(R.string.shop_history_quest,entry.day):
                         getString("starter".equals(entry.source)?R.string.shop_history_starter:R.string.shop_history_opening);
                 ((TextView)row.findViewById(android.R.id.text1)).setText(source);
                 TextView detail=row.findViewById(android.R.id.text2);detail.setSingleLine(false);
@@ -281,7 +282,7 @@ public final class ShopActivity extends FeatureActivity {
                         getString(R.string.shop_history_change,entry.amount,entry.balance);
                 String date=entry.createdAt==null?getString(R.string.shop_history_unknown_date):
                         new SimpleDateFormat("yyyy년 M월 d일 a h:mm",Locale.KOREAN).format(new Date(entry.createdAt));
-                detail.setText(amount+"\n"+date);
+                detail.setText(getString(R.string.shop_history_detail,amount,date));
                 return row;
             }
         });

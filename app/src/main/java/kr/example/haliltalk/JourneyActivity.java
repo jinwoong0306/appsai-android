@@ -23,17 +23,20 @@ import kr.example.haliltalk.character.CharacterView;
 import kr.example.haliltalk.data.FriendsDatabase;
 import kr.example.haliltalk.data.GoalStore;
 import kr.example.haliltalk.data.JourneyStore;
+import kr.example.haliltalk.data.QuestRewardStore;
 import kr.example.haliltalk.auth.AccountSession;
 
-/** [U3 | 동작] 사용자가 선택한 작은 행동과 회고. AI 추측·자동 완료·출석 보상 없음. */
+/** User-recorded actions and reviews; demo rewards require their own confirmation. */
 public final class JourneyActivity extends FeatureActivity {
     private FriendsDatabase helper;
     private android.database.sqlite.SQLiteDatabase db;
     private JourneyStore store;
+    private QuestRewardStore rewards;
     private final List<Integer> friends=new ArrayList<>();
     private int friend;
     String day;
     AlertDialog editor, prompt, suggestions;
+    AlertDialog rewardDialog;
     private View fields;
     private String editorKind="", editorDay="", originalDraft="";
     private List<String> goalTitles;
@@ -49,6 +52,7 @@ public final class JourneyActivity extends FeatureActivity {
         openedGeneration=state==null?AccountSession.generation():state.getLong("opened_generation");
         openedEntered=state==null?AccountSession.isEntered(this):state.getBoolean("opened_entered");
         helper=new FriendsDatabase(this);db=helper.getWritableDatabase();store=new JourneyStore(db);
+        rewards=new QuestRewardStore(db);
         setContentView(R.layout.screen_journey);
         findViewById(R.id.journey_back).setOnClickListener(v->finish());
         List<String> names=new ArrayList<>();
@@ -71,6 +75,7 @@ public final class JourneyActivity extends FeatureActivity {
         });
         findViewById(R.id.journey_plan).setOnClickListener(v->editPlan(null));
         findViewById(R.id.journey_review).setOnClickListener(v->editReview(null));
+        findViewById(R.id.journey_reward).setOnClickListener(v->confirmReward());
         findViewById(R.id.journey_adventure).setOnClickListener(v->startActivity(
                 new Intent(this,AdventureActivity.class).putExtra("friend_id",friend)));
         findViewById(R.id.journey_goals).setOnClickListener(v->startActivity(
@@ -137,6 +142,7 @@ public final class JourneyActivity extends FeatureActivity {
         Button review=findViewById(R.id.journey_review);
         review.setVisibility(today==null?View.GONE:View.VISIBLE);
         review.setText(reviewed?R.string.journey_review_edit:R.string.journey_review);
+        renderReward();
         String feedback=today==null?"계획은 작게, 시작은 가볍게.":
                 today.outcome.equals("done")?"직접 해낸 한 걸음이 남았어요. 다음에는 무엇을 이어갈까요?":
                 today.outcome.equals("partial")?"조금 한 것도 시도예요. 다음 행동은 더 작게 정해도 좋아요.":
@@ -186,6 +192,57 @@ public final class JourneyActivity extends FeatureActivity {
             more.setOnClickListener(v->{historyLimit=Math.min(10000,historyLimit+7);render();});
             history.addView(more);
         }
+    }
+
+    private void renderReward(){
+        Button button=findViewById(R.id.journey_reward);
+        TextView message=findViewById(R.id.journey_reward_status);
+        button.setEnabled(false);
+        try{
+            requireSession();
+            QuestRewardStore.Status reward=rewards.status(friend,day);
+            message.setText(reward==QuestRewardStore.Status.AVAILABLE?R.string.journey_reward_available:
+                    reward==QuestRewardStore.Status.ALREADY_CLAIMED?R.string.journey_reward_claimed:
+                    reward==QuestRewardStore.Status.BALANCE_LIMIT?R.string.journey_reward_limit:
+                    R.string.journey_reward_no_attempt);
+            button.setEnabled(reward==QuestRewardStore.Status.AVAILABLE);
+        }catch(IllegalArgumentException failure){message.setText(failure.getMessage());}
+        catch(SQLiteException failure){message.setText(R.string.journey_reward_failed);}
+    }
+
+    private void confirmReward(){
+        if(rewardDialog!=null&&rewardDialog.isShowing())return;
+        final int confirmedFriend=friend;
+        final String confirmedDay=day;
+        TextView message=findViewById(R.id.journey_reward_status);
+        try{
+            requireSession();
+            if(!LocalDate.now().toString().equals(confirmedDay)
+                    ||rewards.status(confirmedFriend,confirmedDay)!=QuestRewardStore.Status.AVAILABLE){
+                render();return;
+            }
+        }catch(IllegalArgumentException failure){message.setText(failure.getMessage());return;}
+        catch(SQLiteException failure){message.setText(R.string.journey_reward_failed);return;}
+        rewardDialog=new AlertDialog.Builder(this).setTitle(R.string.journey_reward_title)
+                .setMessage(getString(R.string.journey_reward_confirm,confirmedDay,QuestRewardStore.REWARD))
+                .setNegativeButton(android.R.string.cancel,null)
+                .setPositiveButton(R.string.journey_reward_accept,null).create();
+        rewardDialog.show();
+        rewardDialog.getButton(AlertDialog.BUTTON_NEGATIVE).requestFocus();
+        rewardDialog.getButton(AlertDialog.BUTTON_POSITIVE).setOnClickListener(v->{
+            try{
+                requireSession();
+                Spinner chooser=findViewById(R.id.journey_friend);
+                if(friend!=confirmedFriend||!confirmedDay.equals(day)
+                        ||!confirmedDay.equals(LocalDate.now().toString())
+                        ||chooser.getSelectedItemPosition()!=friends.indexOf(confirmedFriend)){
+                    rewardDialog.setMessage(getString(R.string.journey_reward_changed));return;
+                }
+                rewards.claim(confirmedFriend,confirmedDay);
+                rewardDialog.dismiss();render();
+            }catch(IllegalArgumentException failure){rewardDialog.setMessage(failure.getMessage());}
+            catch(SQLiteException failure){rewardDialog.setMessage(getString(R.string.journey_reward_failed));}
+        });
     }
 
     private void confirmDelete(JourneyStore.Entry entry){
@@ -328,6 +385,7 @@ public final class JourneyActivity extends FeatureActivity {
         destroyed=true;
         if(editor!=null)editor.dismiss();if(prompt!=null)prompt.dismiss();
         if(suggestions!=null)suggestions.dismiss();
+        if(rewardDialog!=null)rewardDialog.dismiss();
         if(helper!=null)helper.close();super.onDestroy();
     }
 

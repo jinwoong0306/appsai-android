@@ -36,6 +36,10 @@
                         android:text="@string/journey_plan"/>
                     <Button android:id="@+id/journey_review" style="@style/SecondaryButton"
                         android:text="@string/journey_review" android:visibility="gone"/>
+                    <TextView android:id="@+id/journey_reward_status" style="@style/BodyText"
+                        android:layout_marginTop="12dp" android:accessibilityLiveRegion="polite"/>
+                    <Button android:id="@+id/journey_reward" style="@style/SecondaryButton"
+                        android:text="@string/journey_reward" android:enabled="false"/>
                 </LinearLayout>
                 <Button android:id="@+id/journey_goals" style="@style/SecondaryButton"
                     android:text="@string/journey_goals"/>

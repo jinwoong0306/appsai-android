@@ -78,7 +78,7 @@ public final class GoalNotificationsTest extends InstrumentationTestCase {
             db.execSQL("INSERT INTO goals(id,friend,title,due_at,completed,created) VALUES(11,7,'Fixture',?,?,0)",
                     new Object[]{due, completed ? 1 : 0});
         }
-        db.setVersion(11);
+        db.setVersion(12);
         return db;
     }
 
@@ -112,7 +112,7 @@ public final class GoalNotificationsTest extends InstrumentationTestCase {
                 db.execSQL("INSERT INTO goals(id,friend,title,due_at,completed,created) VALUES(11,7,'Fixture',?,?,0)",
                         new Object[]{due,completed?1:0});
             }
-            db.setVersion(11);
+            db.setVersion(12);
         }
     }
     private void reschedule() {
