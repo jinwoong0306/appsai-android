@@ -1,8 +1,15 @@
 <?xml version="1.0" encoding="utf-8"?>
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
     style="@style/Page" android:orientation="vertical">
-    <Button android:id="@+id/goals_back" style="@style/SecondaryButton" android:text="@string/goals_back" />
-    <TextView android:id="@+id/goals_title" style="@style/SectionTitle" android:text="@string/goals_title" />
+    <LinearLayout android:layout_width="match_parent" android:layout_height="wrap_content"
+        android:orientation="horizontal" android:gravity="center_vertical">
+        <Button android:id="@+id/goals_back" style="@style/CompactAction" android:text="@string/goals_back"/>
+        <TextView android:id="@+id/goals_title" style="@style/SectionTitle" android:layout_width="0dp"
+            android:layout_weight="1" android:layout_marginStart="12dp" android:layout_marginTop="8dp"
+            android:layout_marginBottom="8dp" android:text="@string/goals_title"/>
+        <ImageButton android:id="@+id/feature_help" style="@style/IconButton"
+            android:src="@drawable/ic_help" android:contentDescription="@string/help_open"/>
+    </LinearLayout>
     <ScrollView android:layout_width="match_parent" android:layout_height="0dp"
         android:layout_weight="1" android:fillViewport="true">
         <LinearLayout android:layout_width="match_parent" android:layout_height="wrap_content"
@@ -12,7 +19,8 @@
             <TextView android:id="@+id/purpose_summary" style="@style/BodyText" />
             <CheckBox android:id="@+id/share_goals" style="@style/BodyText"
                 android:minHeight="48dp" android:text="@string/goals_share" />
-            <TextView style="@style/SecondaryText" android:text="@string/goals_share_notice" />
+            <TextView style="@style/SecondaryText"
+                android:text="@string/goals_share_notice" />
             <TextView android:id="@+id/goals_notification_status" style="@style/SecondaryText"
                 android:layout_marginTop="12dp" />
             <Button android:id="@+id/goals_notification_settings" style="@style/SecondaryButton"

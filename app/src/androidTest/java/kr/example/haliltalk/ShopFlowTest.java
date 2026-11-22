@@ -36,7 +36,9 @@ public final class ShopFlowTest extends GuestActivityTestCase {
                 getInstrumentation().waitForIdleSync();
                 runTestOnUiThread(()->{
                     assertEquals(410,store.balance());assertTrue(store.owns("crown"));
-                    assertFalse(activity.findViewById(R.id.shop_buy).isEnabled());
+                    assertTrue(activity.findViewById(R.id.shop_buy).isEnabled());
+                    assertEquals(activity.getString(R.string.shop_try_on),
+                            ((android.widget.Button)activity.findViewById(R.id.shop_buy)).getText().toString());
                     activity.confirmPurchase();
                     assertEquals(410,store.balance());
                     activity.selected="rocket_pack";activity.refresh();

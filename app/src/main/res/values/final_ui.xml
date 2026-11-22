@@ -1,0 +1,24 @@
+<resources>
+    <dimen name="scene_height">160dp</dimen>
+    <dimen name="content_max_width">760dp</dimen>
+    <dimen name="wardrobe_stage_height">176dp</dimen>
+    <dimen name="chat_avatar_size">64dp</dimen>
+    <string name="help_open">사용 방법과 도움말</string>
+    <string name="home_guide_title">앱사이가 처음인가요?</string>
+    <string name="home_guide_start">그림으로 알아보기</string>
+    <string name="home_guide_skip">안내 닫기</string>
+    <string name="home_friends_heading">나의 친구들</string>
+    <string name="home_today_heading">오늘의 한 걸음</string>
+    <style name="CompactAction" parent="SecondaryButton">
+        <item name="android:layout_width">wrap_content</item>
+        <item name="android:layout_marginTop">0dp</item>
+        <item name="android:layout_marginBottom">0dp</item>
+        <item name="android:minHeight">48dp</item>
+    </style>
+    <string name="font_licenses">사용한 글꼴</string>
+    <string name="shop_help">상점 도움말</string>
+    <string name="shop_try_on">꾸미기에서 입어보기</string>
+    <string name="shop_add_friend">친구 추가하고 입어보기</string>
+    <string name="shop_add_friend_notice">입어볼 친구가 없어요. 앱 찾기에서 친구를 추가한 뒤 꾸미기를 열어 주세요.</string>
+    <string name="shop_friendless_body">%1$s\n\n%2$s</string>
+</resources>

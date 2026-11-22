@@ -1,0 +1,5 @@
+<resources>
+    <string name="scene_library_label">도서관</string>
+    <string name="scene_cafe_label">창가 카페</string>
+    <color name="scene_night_overlay">#70302445</color>
+</resources>

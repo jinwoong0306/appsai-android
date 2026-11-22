@@ -1,0 +1,66 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    style="@style/Page">
+    <ScrollView android:id="@+id/chat_sidebar" android:layout_width="180dp" android:layout_height="match_parent"
+        android:layout_alignParentStart="true">
+        <LinearLayout android:layout_width="match_parent" android:layout_height="wrap_content"
+            android:orientation="vertical">
+            <LinearLayout android:layout_width="match_parent" android:layout_height="wrap_content"
+                android:orientation="horizontal" android:gravity="center_vertical">
+                <Button android:id="@+id/back_home" style="@style/IconButton"
+                    android:drawableStart="@drawable/ic_back" android:contentDescription="@string/back_to_friends"/>
+                <kr.example.haliltalk.character.CharacterView android:id="@+id/chat_character"
+                    android:layout_width="0dp" android:layout_weight="1" android:layout_height="56dp"
+                    android:importantForAccessibility="no"/>
+                <ImageButton android:id="@+id/chat_help" style="@style/IconButton"
+                    android:src="@drawable/ic_help" android:contentDescription="@string/help_open"/>
+            </LinearLayout>
+            <TextView android:id="@+id/chat_title" style="@style/SectionTitle"
+                android:layout_marginTop="0dp" android:layout_marginBottom="4dp"/>
+            <TextView android:id="@+id/chat_personality" style="@style/SecondaryText"/>
+            <Button android:id="@+id/check_usage" style="@style/SecondaryButton" android:text="@string/check_usage"/>
+            <Button android:id="@+id/open_goals" style="@style/SecondaryButton" android:text="@string/goals_open"/>
+            <TextView android:id="@+id/ai_notice" style="@style/SecondaryText"
+                android:minHeight="48dp" android:gravity="center" android:clickable="true"
+                android:focusable="true" android:text="@string/ai_notice"/>
+        </LinearLayout>
+    </ScrollView>
+    <LinearLayout android:layout_width="match_parent" android:layout_toEndOf="@id/chat_sidebar"
+        android:layout_marginStart="16dp" android:layout_height="match_parent" android:orientation="vertical">
+        <TextView android:id="@+id/ai_status" style="@style/SecondaryText"
+            android:accessibilityLiveRegion="polite" android:text="@string/ai_ready"/>
+        <ProgressBar android:id="@+id/ai_progress" android:layout_width="24dp"
+            android:layout_height="24dp" android:contentDescription="@string/ai_loading"
+            android:visibility="gone"/>
+        <LinearLayout android:layout_width="match_parent" android:layout_height="wrap_content"
+            android:orientation="horizontal">
+            <Button android:id="@+id/retry_message" style="@style/SecondaryButton"
+                android:layout_width="0dp" android:layout_weight="1" android:text="@string/ai_retry"
+                android:visibility="gone"/>
+            <Button android:id="@+id/cancel_request" style="@style/SecondaryButton"
+                android:layout_width="0dp" android:layout_weight="1" android:text="@string/ai_cancel_request"
+                android:visibility="gone"/>
+        </LinearLayout>
+        <FrameLayout android:layout_width="match_parent" android:layout_height="0dp" android:layout_weight="1">
+        <ImageView android:layout_width="match_parent" android:layout_height="match_parent"
+            android:src="@drawable/scene_chat" android:scaleType="centerCrop" android:importantForAccessibility="no"/>
+        <ScrollView android:id="@+id/chat_scroll" android:layout_width="match_parent"
+            android:layout_height="match_parent" android:fillViewport="true"
+            android:defaultFocusHighlightEnabled="false">
+            <LinearLayout android:id="@+id/message_list" android:layout_width="match_parent"
+                android:layout_height="wrap_content" android:orientation="vertical"
+                android:paddingTop="8dp" android:paddingBottom="8dp"/>
+        </ScrollView>
+        </FrameLayout>
+        <LinearLayout android:layout_width="match_parent" android:layout_height="wrap_content"
+            android:orientation="horizontal" android:gravity="center_vertical">
+            <EditText android:id="@+id/message_input" style="@style/InputField"
+                android:layout_width="0dp" android:layout_weight="1" android:layout_marginEnd="8dp"
+                android:singleLine="false" android:maxLines="2" android:inputType="textCapSentences|textMultiLine"
+                android:imeOptions="actionSend" android:hint="@string/message_hint"
+                android:autofillHints=""/>
+            <Button android:id="@+id/send_message" style="@style/CompactAction"
+                android:text="@string/send_message"/>
+        </LinearLayout>
+    </LinearLayout>
+</RelativeLayout>

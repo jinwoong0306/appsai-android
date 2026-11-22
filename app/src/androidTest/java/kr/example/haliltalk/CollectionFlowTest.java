@@ -77,7 +77,9 @@ public final class CollectionFlowTest extends ShopFixtureTest {
         clickHeader(R.id.collection_reveal);
         runTestOnUiThread(()->{
             assertEquals("beret",activity.selected);
-            assertFalse(activity.findViewById(R.id.shop_buy).isEnabled());
+            assertTrue(activity.findViewById(R.id.shop_buy).isEnabled());
+            assertEquals(activity.getString(R.string.shop_try_on),
+                    ((android.widget.Button)activity.findViewById(R.id.shop_buy)).getText().toString());
             assertEquals(500,wallet.balance());
         });
     }

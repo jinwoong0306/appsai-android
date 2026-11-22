@@ -34,6 +34,15 @@ public final class SettingsActivity extends FeatureActivity {
                 startActivity(new Intent(this, TransferActivity.class)));
         findViewById(R.id.auth_cloud_save).setOnClickListener(view -> confirmCloud(false));
         findViewById(R.id.auth_cloud_restore).setOnClickListener(view -> confirmCloud(true));
+        findViewById(R.id.font_licenses).setOnClickListener(view->{
+            StringBuilder notice=new StringBuilder("제목·버튼: 주아\n대화·본문: 고운돋움\n\n");
+            try(java.io.BufferedReader reader=new java.io.BufferedReader(new java.io.InputStreamReader(
+                    getAssets().open("font_licenses.txt"),java.nio.charset.StandardCharsets.UTF_8))){
+                String line;while((line=reader.readLine())!=null)notice.append(line).append('\n');
+                new AlertDialog.Builder(this).setTitle(R.string.font_licenses)
+                        .setMessage(notice.toString()).setPositiveButton("닫기",null).show();
+            }catch(java.io.IOException error){Toast.makeText(this,"글꼴 정보를 불러오지 못했어요.",Toast.LENGTH_LONG).show();}
+        });
         findViewById(R.id.mock_logout).setOnClickListener(view ->
                 new AlertDialog.Builder(this).setTitle(R.string.auth_logout)
                         .setMessage(R.string.auth_logout_confirm)
@@ -68,6 +77,7 @@ public final class SettingsActivity extends FeatureActivity {
                 status.setText(CloudBackup.errorMessage(result.getException()));
             } else if (Boolean.TRUE.equals(result.getResult())) {
                 Toast.makeText(this, R.string.auth_cloud_restored, Toast.LENGTH_LONG).show();
+                // 복원 전 MainActivity가 쥔 DB·컨트롤러를 재사용하지 않는다.
                 ((ChatApplication)getApplication()).resetChat();
                 startActivity(new Intent(this, MainActivity.class)
                         .addFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK));

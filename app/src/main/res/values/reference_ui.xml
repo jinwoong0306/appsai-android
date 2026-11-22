@@ -1,0 +1,36 @@
+<resources>
+    <color name="reference_surface">@color/surface</color>
+    <color name="reference_ink">@color/ink</color>
+    <color name="reference_muted">@color/muted</color>
+    <color name="reference_border">@color/border</color>
+    <color name="reference_danger">#9C2635</color>
+    <color name="reference_thumbnail">#FFF2E7</color>
+    <color name="reference_thumbnail_ink">#75645D</color>
+    <color name="reference_preview">#F3EDF7</color>
+    <color name="reference_lavender">@color/lavender</color>
+    <color name="reference_purple_ink">#4D2566</color>
+    <color name="reference_primary">#C84950</color>
+    <color name="reference_action_start">#E96761</color>
+    <color name="reference_action_end">#E56570</color>
+    <color name="reference_ripple">#24C84950</color>
+
+    <string name="home_new_friend">친구 추가</string>
+    <string name="home_empty_friends">아직 친구가 없어요.\n위 버튼으로 친구 만들기</string>
+    <string name="home_own_preview">나: %1$s</string>
+
+    <style name="ReferenceCopyBase" parent="BodyText">
+        <item name="android:breakStrategy">balanced</item>
+        <item name="android:hyphenationFrequency">none</item>
+    </style>
+    <style name="ReferenceCopy" parent="ReferenceCopyBase"/>
+    <style name="ReferenceAction" parent="PrimaryButton">
+        <item name="android:background">@drawable/bg_reference_action</item>
+        <item name="android:textColor">@color/reference_action_text</item>
+        <item name="android:textSize">20sp</item>
+        <item name="android:textStyle">normal</item>
+        <item name="android:fontFamily">@font/jua_regular</item>
+        <item name="android:minHeight">56dp</item>
+        <item name="android:paddingStart">16dp</item>
+        <item name="android:paddingEnd">16dp</item>
+    </style>
+</resources>

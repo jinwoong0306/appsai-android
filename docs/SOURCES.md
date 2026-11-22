@@ -1,5 +1,61 @@
 # 외부 자료 및 오픈소스 기록
 
+## 2026-11-22 후속 UI 통합 출처
+
+- 공개 `1104e26` 위에 원본 작업 폴더의 한국어 UI·공간·글꼴·이미지 안내를 구간별로 통합했다. DB v12와 공개 계정·목표 파일·모험·코인 저장소는 유지한다.
+- 아래 원화·글꼴은 기존 로컬 작업에서 인계한 자산이다. 글꼴은 원본 TTF와 OFL 고지를 함께 배포한다. 외부 앱 UI와 타사 캐릭터는 포함하지 않는다.
+- 안내 이미지는 통합 화면의 합성 기록을 사용하는 읽기 전용 설명이며, 실제 사용자 데이터·계정·서버 응답 검증을 의미하지 않는다. 이번 재촬영과 확인 결과는 `STATUS.md`에만 실제 실행 결과로 기록한다.
+
+## 2026-11-09 한글 글꼴
+
+캐릭터와 어울리는 둥근 제목에는 **주아(Jua)**, 긴 대화·설명·입력에는
+손글씨 느낌을 절제한 **고운돋움(Gowun Dodum)**을 사용한다.
+제목용 글꼴을 모든 본문에 반복하기보다 화면 역할별로 가독성을 구분했다.
+Google Fonts 공식 저장소의 TTF 원본을 수정 없이 앱 `res/font/`에 포함한다.
+실행 중 폰트 다운로드나 외부 폰트 제공자 연결은 없다.
+
+| 글꼴 | 제작 | 적용 | 원본·라이선스 |
+|---|---|---|---|
+| Jua Regular | Woowahan Brothers | 브랜드·제목·친구 이름·버튼·탐색 | [공식 원본](https://github.com/google/fonts/tree/main/ofl/jua), SIL OFL 1.1 |
+| Gowun Dodum Regular | Yanghee Ryu | 대화·본문·입력·날짜 | [공식 원본](https://github.com/google/fonts/tree/main/ofl/gowundodum), SIL OFL 1.1 |
+
+- `jua_regular.ttf`: 2,119,352 bytes, SHA-256
+  `769677aef240bfc3b9965f2b50748075bff885e6c6992fc591a3fb268279f898`
+- `gowun_dodum_regular.ttf`: 7,229,088 bytes, SHA-256
+  `a6e457933227483a11758fd0947bc74422a106d46f0bf057fdaa5af94a30067d`
+- 확인한 저작권 고지와 라이선스 전문은 `app/src/main/assets/font_licenses.txt`에
+  포함하며 앱 설정의 **사용한 글꼴**에서 확인할 수 있다.
+- 기기의 글꼴 크기 설정을 유지하며 한글·숫자·라틴 글리프와 실제 화면에서 검증한다.
+
+## 2026-11-16 이미지 사용 안내와 추가 공간
+
+- 공원과 통일된 새 공부방·침실·도서관·창가 카페·채팅 원화를 생성했다.
+  기존 캐릭터를 별도 합성할 빈 공간, 말풍선이 읽히는 낮은 대비의 채팅 중심부를
+  유지했다. 외부 앱 UI나 다른 작가의 그림을 복사하지 않았다.
+- 원본은 `generated-images/`의 다음 파일이다.
+  - 공부방: `ig_0572d82a925a8e94016afb2c91f52487d0ba488b46232c0973.png`
+  - 침실: `ig_0572d82a925a8e94016afb2f44993887d0a33383c79c0b8a76.png`
+  - 도서관: `ig_0572d82a925a8e94016afb2f8377c487d09141393c3ea1addb.png`
+  - 창가 카페: `ig_0572d82a925a8e94016afb2fca1e1087d0ac00a9eaa022dab1.png`
+  - 채팅: `ig_0572d82a925a8e94016afb300a608087d0b82c1b943328d818.png`
+- 앱의 `art_study/bedroom/library/cafe/chat.webp`는 크기 최적화한 원화다.
+  다크 모드는 네이티브 레이어 색상으로 처리한다. 기존 배경 원본은 삭제하지 않았다.
+## 2026-11-16 정원·소품 상점 배경
+
+- 이번 UI 요청에 따라 생성한 고유 배경 일러스트 두 종. 외부 앱 화면·로고·
+  캐릭터를 복사하지 않았으며 기존 실제 캐릭터는 앱에서 별도로 합성한다.
+- 원본: `generated-images/ig_0572d82a925a8e94016afb0ba16ae087d08957a379cec1f66e.png`
+  (정원), `ig_0572d82a925a8e94016afb0c9a2abc87d09491296d07d6b5d9.png` (상점).
+- 앱 자산: `res/drawable-nodpi/scene_garden.webp`, `scene_shop.webp`, 같은 이름의
+  `drawable-night-nodpi` 야간 처리본. 1200×800, 총 약529KB. 비율 유지 중앙 자름.
+- 재현: `AI/scratch/appsai/2026-11-16/final-ui/prepare-scenes.py`.
+  기존 설치 Pillow로 크기 최적화·WebP 인코딩·야간 색 처리를 수행한다.
+- Android 공식 Views 적응형 레이아웃 문서의 가용 너비·wrap_content·리소스
+  한정자 원칙을 적용했다. Web/Compose 라이브러리는 추가하지 않았다.
+  https://developer.android.com/develop/ui/views/layout/responsive-adaptive-design-with-views
+
+
+
 ## 2026-11-02 추가 액세서리 제작 자료
 
 - 저장 위치: `../캐릭터_에셋/07_액세서리_30종/`. 짚모자·선글라스 등을 포함한 30종이며 기존 앱사이 팔레트와 64px 장착 좌표에 맞춰 직접 좌표 기반으로 제작했다.

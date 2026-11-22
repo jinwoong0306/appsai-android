@@ -4,9 +4,6 @@
     <string name="app_search_hint">앱 이름 또는 패키지명 검색</string>
     <string name="brand_name">앱사이</string>
     <string name="navigate_back">돌아가기</string>
-    <string name="home_title">앱과 친구가 되는\n작은 일상</string>
-    <string name="home_description">자주 만나는 앱에 이름과 성격을 더해요.</string>
-    <string name="my_app_friends">나의 앱 친구</string>
     <string name="add_app_friend">새로운 앱 친구 만들기</string>
     <string name="usage_settings">사용 정보 접근 설정</string>
     <string name="usage_optional">권한 없이도 대화할 수 있어요.</string>
@@ -28,7 +25,6 @@
     <string name="asset_preview_note">캐릭터와 소품은 미리보기 버전이에요.</string>
     <string name="create_friend">친구 만들기</string>
     <string name="character_preview_description">꾸미는 친구 미리보기</string>
-    <string name="friend_detail_format">%1$s · 경험치 %2$d</string>
     <string name="selected_choice_format">✓ %1$s</string>
     <string name="message_format">%1$s\n%2$s</string>
     <string name="message_sender_me">나</string>

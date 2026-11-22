@@ -1,0 +1,11 @@
+<resources>
+    <color name="reference_surface">@color/surface</color>
+    <color name="reference_ink">@color/ink</color>
+    <color name="reference_muted">@color/muted</color>
+    <color name="reference_border">@color/border</color>
+    <color name="reference_danger">#FFB4BC</color>
+    <color name="reference_thumbnail">#EADFD5</color>
+    <color name="reference_preview">#352840</color>
+    <color name="reference_lavender">@color/lavender</color>
+    <color name="reference_purple_ink">#F1D9FF</color>
+</resources>

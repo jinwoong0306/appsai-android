@@ -55,9 +55,15 @@ public final class ShopActivity extends FeatureActivity {
         else if(CharacterCatalog.slotFor(getIntent().getStringExtra("item_id"))!=null)selected=getIntent().getStringExtra("item_id");
         setContentView(R.layout.screen_shop);
         findViewById(R.id.open_settings).setOnClickListener(v->openSettings());
-        BottomNavigation.bind(this,R.id.nav_shop,this::navigateFeature);
+        findViewById(R.id.shop_help).setOnClickListener(v->HelpGuide.show(this,"shop"));
+        findViewById(R.id.shop_back).setOnClickListener(v->finish());
+        BottomNavigation.bind(this,R.id.nav_shop,destination->{
+            if(destination==R.id.nav_customize&&getIntent().getBooleanExtra("wardrobe_return",false))finish();
+            else navigateFeature(destination);
+        });
         ListView list=findViewById(R.id.shop_list);
         header=getLayoutInflater().inflate(R.layout.view_shop_header,list,false);
+        header.findViewById(R.id.shop_stage).setClipToOutline(true);
         list.addHeaderView(header,null,false);
         Button history=new Button(this,null,0,R.style.SecondaryButton);
         history.setId(R.id.shop_history);history.setText(R.string.shop_history_title);
@@ -67,7 +73,9 @@ public final class ShopActivity extends FeatureActivity {
                 .setTitle(R.string.character_selection).setItems(CharacterCatalog.CHARACTER_NAMES,(dialog,index)->{
                     base=CharacterCatalog.CHARACTER_IDS[index];refresh();
                 }).setNegativeButton(android.R.string.cancel,null).show());
-        findViewById(R.id.shop_buy).setOnClickListener(v->confirmPurchase());
+        findViewById(R.id.shop_buy).setOnClickListener(v->{
+            if(selected!=null&&store.owns(selected))tryOn();else confirmPurchase();
+        });
         header.findViewById(R.id.shop_filters_toggle).setOnClickListener(v->{
             filtersOpen=!filtersOpen;renderFilters();
         });
@@ -159,8 +167,8 @@ public final class ShopActivity extends FeatureActivity {
         Button buy=findViewById(R.id.shop_buy);
         if(selected==null){buy.setEnabled(false);buy.setText(R.string.shop_select_item);return;}
         boolean owned=store.owns(selected),affordable=store.balance()>=store.price(selected);
-        buy.setEnabled(!owned&&affordable);
-        buy.setText(owned?getString(R.string.shop_owned):!affordable?getString(R.string.shop_insufficient):
+        buy.setEnabled(owned||affordable);
+        buy.setText(owned?getString(R.string.shop_try_on):!affordable?getString(R.string.shop_insufficient):
                 getString(R.string.shop_buy,store.price(selected)));
     }
 
@@ -238,7 +246,7 @@ public final class ShopActivity extends FeatureActivity {
         ((Spinner)header.findViewById(R.id.shop_theme)).setSelection(0);
         ((Spinner)header.findViewById(R.id.shop_filter)).setSelection(0);
         renderCategories();refresh();
-        ((ListView)findViewById(R.id.shop_list)).setSelection(0);
+        ((ListView)findViewById(R.id.shop_list)).smoothScrollToPosition(0);
     }
 
     void collectionMessage(int text){
@@ -298,7 +306,8 @@ public final class ShopActivity extends FeatureActivity {
         final DemoShopStore confirmedStore=store;
         final SQLiteDatabase confirmedDatabase=db;
         purchaseDialog=new AlertDialog.Builder(this).setTitle(R.string.shop_confirm_title)
-                .setMessage(getString(R.string.shop_confirm,CharacterCatalog.itemName(item),store.price(item)))
+                .setMessage(getString(R.string.shop_confirm,CharacterCatalog.itemName(item),
+                        store.price(item),store.balance(),store.balance()-store.price(item)))
                 .setNegativeButton(android.R.string.cancel,null)
                 .setPositiveButton(R.string.shop_confirm_buy,(dialog,which)->{
                     if(!currentAccount()||confirmedDatabase!=db||confirmedStore!=store){
@@ -316,6 +325,18 @@ public final class ShopActivity extends FeatureActivity {
                     }
                 }).show();
     }
+    void tryOn(){
+        if(!currentAccount()||selected==null||!visibleItems.contains(selected)||!store.owns(selected))return;
+        int friend=getIntent().getIntExtra("friend_id",0);
+        if(getIntent().getBooleanExtra("wardrobe_return",false)){
+            setResult(RESULT_OK,new android.content.Intent().putExtra("item_id",selected).putExtra("friend_id",friend)
+                    .putExtra("shop_database",openedDatabase).putExtra("shop_generation",openedGeneration));
+            finish();return;
+        }
+        startActivity(new android.content.Intent(this,CustomizationActivity.class)
+                .putExtra("item_id",selected).putExtra("friend_id",friend));
+    }
+
     @Override protected void onResume(){
         super.onResume();if(adapter!=null&&currentAccount())refresh();
     }

@@ -1,0 +1,199 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <style name="HelpGuideTheme" parent="android:style/Theme.Material.Light.Dialog">
+        <item name="android:fontFamily">@font/gowun_dodum_regular</item>
+        <item name="android:colorAccent">@color/primary</item>
+        <item name="android:colorBackground">@color/surface</item>
+        <item name="android:textColorPrimary">@color/ink</item>
+        <item name="android:textColorSecondary">@color/muted</item>
+        <item name="android:windowMinWidthMajor">0dp</item>
+        <item name="android:windowMinWidthMinor">0dp</item>
+        <item name="android:windowNoTitle">true</item>
+    </style>
+    <style name="HelpGuideSmallAction" parent="SecondaryButton">
+        <item name="android:layout_marginTop">2dp</item>
+        <item name="android:layout_marginBottom">2dp</item>
+        <item name="android:padding">8dp</item>
+        <item name="android:textSize">16sp</item>
+    </style>
+    <string name="help_progress">%1$d / %2$d 단계</string>
+    <string name="help_previous">이전</string>
+    <string name="help_next">다음</string>
+    <string name="help_done">완료 · 질문 목록</string>
+    <string name="help_skip">첫 안내 건너뛰기</string>
+    <string name="help_back">뒤로</string>
+    <string name="help_menu">질문 목록</string>
+    <string name="help_close">안내 닫기</string>
+    <string name="help_details_show">자세한 설명 펼치기</string>
+    <string name="help_details_hide">자세한 설명 접기</string>
+    <string name="help_image_hint">빨간 테두리 안을 확인해요 · 그림을 누르면 확대</string>
+    <string name="help_image_description">실제 앱 예시 화면. 빨간 테두리: %1$s. 누르면 크게 볼 수 있어요.</string>
+    <string name="help_zoom_hint">두 손가락으로 확대하고, 끌어서 이동해요</string>
+    <string name="help_zoom_close">확대 닫기</string>
+    <string name="help_zoom_reset">원래 크기</string>
+    <string name="help_zoom_in">확대</string>
+    <string name="help_zoom_out">축소</string>
+    <string name="help_pan_left">이미지 왼쪽 보기</string>
+    <string name="help_pan_right">이미지 오른쪽 보기</string>
+    <string name="help_pan_up">이미지 위쪽 보기</string>
+    <string name="help_pan_down">이미지 아래쪽 보기</string>
+    <string name="help_home_title">무엇이 궁금한가요?</string>
+    <string name="help_journey_title">한 걸음, 무엇이 궁금한가요?</string>
+    <string name="help_adventure_title">모험, 무엇이 궁금한가요?</string>
+    <string name="help_shop_title">상점, 무엇이 궁금한가요?</string>
+    <string name="help_wardrobe_title">꾸미기, 무엇이 궁금한가요?</string>
+    <string name="help_goals_title">목표, 무엇이 궁금한가요?</string>
+    <string name="help_chat_title">대화, 무엇이 궁금한가요?</string>
+    <string name="help_settings_title">설정, 무엇이 궁금한가요?</string>
+    <string name="help_action_question">작은 행동은 어떻게 정하나요?</string>
+    <string name="help_review_question">해본 행동은 어떻게 기록하나요?</string>
+    <string name="help_friend_question">앱을 친구로 어떻게 추가하나요?</string>
+    <string name="help_chat_question">친구와 어떻게 대화하나요?</string>
+    <string name="help_unread_question">친구 옆 숫자는 무엇인가요?</string>
+    <string name="help_adventure_question">모험은 어떻게 시작하나요?</string>
+    <string name="help_coins_question">앱 코인은 어떻게 받나요?</string>
+    <string name="help_purchase_question">소품은 어떻게 사고 입히나요?</string>
+    <string name="help_background_question">친구의 배경은 어떻게 바꾸나요?</string>
+    <string name="help_goals_question">목표는 어떻게 관리하나요?</string>
+    <string name="help_history_question">코인 내역은 어디서 보나요?</string>
+    <string name="help_files_question">목표 파일은 어떻게 옮기나요?</string>
+    <!-- Each step has a headline, short caption, and the red target's accessible name. -->
+    <string-array name="help_action_steps">
+        <item>홈에서 작은 행동을 시작해요</item>
+        <item>빨간 테두리의 작은 행동 정하기를 눌러요.</item>
+        <item>홈의 작은 행동 정하기 버튼</item>
+        <item>함께할 친구와 오늘 행동을 정해요</item>
+        <item>한 걸음 화면에서 계획을 여세요. 오늘 할 수 있는 작은 행동 하나면 충분해요.</item>
+        <item>한 걸음의 오늘 계획 버튼</item>
+        <item>직접 저장하면 계획이 생겨요</item>
+        <item>행동을 적고 저장을 눌러요. 예시를 고르기만 해서는 저장되지 않아요.</item>
+        <item>행동 편집기의 저장 버튼</item>
+    </string-array>
+    <string-array name="help_review_steps">
+        <item>계획에서 돌아보기를 열어요</item>
+        <item>직접 시도한 뒤 오늘 계획의 돌아보기를 눌러요.</item>
+        <item>저장된 계획의 돌아보기 버튼</item>
+        <item>실제로 해본 만큼 골라요</item>
+        <item>해냈어요·조금 했어요·쉬었어요 중 결과를 골라 저장해요. 한 줄 회고는 선택이에요.</item>
+        <item>회고 창의 결과 선택과 저장</item>
+        <item>오늘 기록을 확인해요</item>
+        <item>저장된 날짜와 결과를 확인해요. 기록은 나중에 수정하거나 삭제할 수 있어요.</item>
+        <item>오늘 저장된 회고 기록</item>
+    </string-array>
+    <string-array name="help_friend_steps">
+        <item>홈에서 친구 추가를 눌러요</item>
+        <item>함께할 앱을 새 친구로 만들 수 있어요.</item>
+        <item>홈의 친구 추가 버튼</item>
+        <item>친구로 만들 앱을 골라요</item>
+        <item>앱 목록에서 원하는 앱을 찾아 선택해요.</item>
+        <item>설치 앱 목록의 앱 선택 행</item>
+        <item>모습과 성격을 정하고 저장해요</item>
+        <item>미리보기를 확인한 뒤 저장해요. 저장한 친구는 홈 목록에 나타나요.</item>
+        <item>친구 만들기의 저장 버튼</item>
+    </string-array>
+    <string-array name="help_chat_steps">
+        <item>대화할 친구를 눌러요</item>
+        <item>친구 목록에서 원하는 친구를 선택하면 대화가 열려요.</item>
+        <item>홈 친구 목록의 대화할 친구</item>
+        <item>메시지를 쓰고 보내요</item>
+        <item>아래 입력칸에 메시지를 적고 전송을 눌러요. AI 대화는 별도 안내와 동의가 필요해요.</item>
+        <item>대화의 메시지 입력칸과 전송 버튼</item>
+        <item>친구의 답장을 확인해요</item>
+        <item>도착한 답장은 이 대화 화면에서 읽어요. 실패 안내가 나오면 직접 재시도하거나 취소할 수 있어요.</item>
+        <item>대화에 표시된 받은 답장</item>
+    </string-array>
+    <string-array name="help_unread_steps">
+        <item>숫자는 안 읽은 받은 메시지 수예요</item>
+        <item>친구 옆 배지는 새로 받은 메시지 중 아직 읽지 않은 수예요.</item>
+        <item>친구 행의 읽지 않은 메시지 배지</item>
+        <item>해당 대화를 열어 읽어요</item>
+        <item>실제로 화면에 보인 받은 메시지만 읽음으로 바뀌어요. 다른 화면을 보거나 안내를 여는 것만으로 읽히지 않아요.</item>
+        <item>열린 대화의 받은 메시지</item>
+    </string-array>
+    <string-array name="help_adventure_steps">
+        <item>모험길 선택을 열어요</item>
+        <item>친구의 모험 화면에서 경로 선택 영역을 열어요.</item>
+        <item>모험길 선택 영역</item>
+        <item>3·7·14 시도일 중 골라요</item>
+        <item>실제로 시도한 날을 모으는 길이에요. 연속 출석이나 달력 마감이 아니에요.</item>
+        <item>3일·7일·14일 모험길 선택</item>
+        <item>확인해야 선택이 반영돼요</item>
+        <item>시작 또는 변경 안내를 읽고 확인해요. 길을 바꾸면 오늘부터 진행도를 세어요.</item>
+        <item>모험길 확인 창의 확인 버튼</item>
+    </string-array>
+    <string-array name="help_coins_steps">
+        <item>오늘 실제 시도를 먼저 기록해요</item>
+        <item>오늘 회고가 해냈어요 또는 조금 했어요이면 코인 받기를 열 수 있어요.</item>
+        <item>한 걸음의 코인 받기 버튼</item>
+        <item>20코인 받기를 직접 확인해요</item>
+        <item>지급 안내를 읽고 확인을 눌러요. 회고만 저장하면 자동 지급되지는 않아요.</item>
+        <item>20 앱 코인 지급 확인 버튼</item>
+        <item>늘어난 잔액을 확인해요</item>
+        <item>현재 계정·기기의 모든 친구를 합쳐 날짜별 한 번 받아요. 적립은 코인 내역에도 남아요.</item>
+        <item>적립 후 앱 코인 잔액</item>
+    </string-array>
+    <string-array name="help_purchase_steps">
+        <item>상점에서 소품을 골라요</item>
+        <item>그림과 가격을 확인하고 원하는 소품의 구매를 눌러요.</item>
+        <item>선택한 소품과 구매 버튼</item>
+        <item>가격과 남을 코인을 확인해요</item>
+        <item>구매 확인에서 비용과 잔액을 읽고 직접 구매를 확정해요.</item>
+        <item>구매 확인 창의 구매 확정 버튼</item>
+        <item>꾸미기에서 직접 저장해요</item>
+        <item>산 소품을 입어본 뒤 저장을 눌러요. 구매와 실제 착용은 별개예요.</item>
+        <item>소품을 입어본 꾸미기의 저장 버튼</item>
+    </string-array>
+    <string-array name="help_background_steps">
+        <item>꾸미기에서 배경을 열어요</item>
+        <item>꾸밀 친구를 고른 뒤 배경 선택 영역을 찾아요.</item>
+        <item>꾸미기의 배경 선택 영역</item>
+        <item>배경을 골라 미리 봐요</item>
+        <item>원하는 배경을 눌러 친구와 어울리는지 확인해요.</item>
+        <item>선택한 배경과 친구 미리보기</item>
+        <item>저장해야 실제로 바뀌어요</item>
+        <item>마음에 들면 저장을 눌러요. 미리보기만으로 저장된 배경은 바뀌지 않아요.</item>
+        <item>배경 변경을 반영하는 저장 버튼</item>
+    </string-array>
+    <string-array name="help_goals_steps">
+        <item>친구의 목표에서 추가를 눌러요</item>
+        <item>목표 화면을 열고 새 목표 추가를 선택해요.</item>
+        <item>목표 화면의 목표 추가 버튼</item>
+        <item>제목과 필요한 항목을 적어요</item>
+        <item>제목을 입력하고 기한 등 선택 항목을 정한 뒤 저장해요.</item>
+        <item>목표 편집 창의 입력 항목과 저장</item>
+        <item>목록에서 저장된 목표를 확인해요</item>
+        <item>완료·다시 진행·삭제는 직접 확인해요. 목표 완료만으로 코인이나 XP를 주지는 않아요.</item>
+        <item>목표 목록에 저장된 목표</item>
+    </string-array>
+    <string-array name="help_history_steps">
+        <item>상점에서 코인 내역을 눌러요</item>
+        <item>코인이 어디서 들어오고 쓰였는지 확인할 수 있어요.</item>
+        <item>상점의 코인 내역 버튼</item>
+        <item>항목별 금액과 잔액을 확인해요</item>
+        <item>시작 선물·이전 잔액·적립·구매 기록이 표시돼요. 내역을 읽는 것만으로 잔액은 변하지 않아요.</item>
+        <item>코인 내역의 거래 항목</item>
+    </string-array>
+    <string-array name="help_files_steps">
+        <item>설정에서 목표 파일을 찾아요</item>
+        <item>설정의 목표 파일 영역에서 내보내기 또는 가져오기를 선택해요.</item>
+        <item>설정의 목표 파일 영역</item>
+        <item>내보낼 위치 또는 가져올 파일을 골라요</item>
+        <item>시스템 문서 선택기에서 저장 위치나 목표 JSON 파일을 직접 선택해요.</item>
+        <item>목표 파일 내보내기·가져오기 버튼</item>
+        <item>가져오기는 미리보기 후 확인해요</item>
+        <item>검증된 목표와 추가 내용을 확인하고 확정해요. 파일을 고르기만 해서는 목표가 추가되지 않아요.</item>
+        <item>가져오기 미리보기 창의 추가 확인 버튼</item>
+    </string-array>
+    <string name="help_action_details">친구별로 오늘 계획을 직접 저장해요. 시작할 때와 연결할 목표는 선택 사항이에요. 작은 행동·회고·모험 기록은 현재 계정·기기에 남고 AI·클라우드 백업·목표 파일에는 자동 전송하지 않아요.</string>
+    <string name="help_review_details">쉬었어요·미기록에는 실패나 휴식 벌점이 없어요. 회고가 목표 완료나 XP를 대신 바꾸지 않아요. 코인은 오늘 해냈어요·조금 했어요 기록 후 별도로 지급을 확인해야 해요.</string>
+    <string name="help_friend_details">앱을 친구로 추가해도 사용 목적을 자동으로 확정하지 않아요. 사용량은 설명과 동의 후 선택한 앱 범위에서만 이용해요. 게스트와 로그인 계정의 데이터는 분리돼요.</string>
+    <string name="help_chat_details">AI 대화는 연결 설정과 별도 동의가 필요하며 안내에서 전송 범위를 확인하고 동의를 철회할 수 있어요. 목표와 사용 목적은 직접 공유를 선택한 범위만 다뤄요. 사용량 기록 전체나 키를 보내지 않으며 AI가 실제 행동·목표 완료를 대신 확정하지 않아요.</string>
+    <string name="help_unread_details">0개이면 배지가 숨고, 100개 이상이면 화면에는 99+로 보여요. 접근성 안내에는 실제 개수를 알려줘요. 대화가 전경에 실제로 보일 때 표시된 받은 메시지만 읽음 처리하며, 가려진 화면과 다른 화면의 메시지는 읽음 처리하지 않아요.</string>
+    <string name="help_adventure_details">3·7·14일은 연속 출석이 아닌 시도일 수예요. 경로를 바꾸어도 이전 기록과 누적 엽서는 남아요. 쉬어도 벌점이 없고 누적 1·3·7·14일에 엽서가 열려요. 기록은 현재 계정·기기에만 남아요.</string>
+    <string name="help_coins_details">처음 한 번만 500 앱 코인과 기본 소품 8개를 받아요. 오늘 해냈어요·조금 했어요 회고 후 직접 확인하는 20코인은 현재 계정·기기의 모든 친구를 합쳐 날짜별 1회예요. 친구나 기록을 삭제해도 같은 날짜에 다시 받지 못해요. 접속·계획·휴식·목표 완료·AI 대화는 지급 대상이 아니며 추가 XP 보상도 없어요. 현금 결제·환전이나 서버 재화가 아닌 로컬 코인이에요.</string>
+    <string name="help_purchase_details">구매는 코인 차감과 소유권 저장이고, 착용은 꾸미기의 별도 저장이에요. 미리보기·찜만으로 구매하거나 착용되지 않아요. 코인은 현재 계정·기기의 로컬 기록으로 관리하며 현금 결제·충전·환전은 없어요.</string>
+    <string name="help_background_details">친구별 배경과 소품은 저장 전까지 초안이에요. 되돌리면 저장 전 모습으로 돌아가며, 변경한 채 나가면 확인해요. 구매한 소품도 꾸미기에서 저장해야 실제 모습에 반영돼요.</string>
+    <string name="help_goals_details">목표 완료·다시 진행·삭제는 확인 후 반영돼요. 목표 완료 보상이나 추가 XP는 없어요. AI 공유는 직접 선택하며, 기한 알림은 알림 허용과 기기 상태에 따라 늦을 수 있어요.</string>
+    <string name="help_history_details">코인 원장은 현재 계정·기기의 오프라인 기록이에요. 지급·구매와 같은 트랜잭션으로 금액과 결과 잔액을 기록해요. 기존 잔액은 증액 없이 이전 잔액으로 옮기며 확인하지 못한 과거 시각을 만들지 않아요. 클라우드 백업이나 목표 파일로 코인과 소품 구매 권한을 옮기지 않아요.</string>
+    <string name="help_files_details">목표 JSON 파일은 직접 고른 범위를 내보내고, 가져오기는 검증과 미리보기 뒤 확인한 목표를 추가해요. 기존 목표를 자동 덮어쓰지 않아요. 대화·사용량·XP·코인·소품 구매 권한·작은 행동·모험 기록은 목표 파일에 포함하지 않아요. 목표 내용이 담긴 파일은 공유할 대상을 직접 확인해요.</string>
+</resources>

@@ -1,0 +1,4 @@
+<layer-list xmlns:android="http://schemas.android.com/apk/res/android">
+    <item><bitmap android:src="@drawable/art_cafe" android:gravity="fill"/></item>
+    <item><shape><solid android:color="@color/scene_night_overlay"/></shape></item>
+</layer-list>

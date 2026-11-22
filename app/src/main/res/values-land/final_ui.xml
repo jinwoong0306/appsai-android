@@ -1,0 +1,5 @@
+<resources>
+    <dimen name="scene_height">108dp</dimen>
+    <dimen name="wardrobe_stage_height">80dp</dimen>
+    <dimen name="chat_avatar_size">40dp</dimen>
+</resources>

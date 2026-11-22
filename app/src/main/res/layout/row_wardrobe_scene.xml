@@ -1,0 +1,17 @@
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent" android:layout_height="wrap_content"
+    android:minHeight="104dp" android:orientation="vertical" android:padding="8dp"
+    android:background="@drawable/wardrobe_choice" android:clickable="true" android:focusable="true">
+    <FrameLayout android:layout_width="match_parent" android:layout_height="56dp"
+        android:background="@drawable/bg_reference_thumbnail">
+        <ImageView android:id="@+id/wardrobe_scene_image" android:layout_width="match_parent"
+            android:layout_height="match_parent" android:scaleType="fitXY"
+            android:importantForAccessibility="no"/>
+        <ImageView android:id="@+id/choice_check" android:layout_width="24dp"
+            android:layout_height="24dp" android:layout_gravity="top|end"
+            android:src="@drawable/wardrobe_check" android:importantForAccessibility="no"
+            android:visibility="invisible"/>
+    </FrameLayout>
+    <TextView android:id="@+id/choice_label" style="@style/WardrobeReferenceText"
+        android:layout_marginTop="4dp" android:gravity="center"/>
+</LinearLayout>

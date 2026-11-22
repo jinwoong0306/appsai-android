@@ -10,20 +10,22 @@ import android.view.WindowInsets;
 
 /** Insets and return routing shared by the settings, wardrobe and shop screens. */
 public abstract class FeatureActivity extends Activity {
+    @Override protected void attachBaseContext(android.content.Context base){
+        super.attachBaseContext(KoreanUi.context(base));
+    }
     private String openedDatabase;
     @Override public void onCreate(Bundle state) {
         setTheme(R.style.AppTheme);
         super.onCreate(state);
-        openedDatabase = kr.example.haliltalk.auth.AccountSession.databaseName(this);
+        openedDatabase=kr.example.haliltalk.auth.AccountSession.databaseName(this);
         if (Build.VERSION.SDK_INT >= 30) getWindow().setDecorFitsSystemWindows(false);
     }
     @Override protected void onStart() {
         super.onStart();
-        if (!(this instanceof LoginActivity)
-                && (!kr.example.haliltalk.auth.AccountSession.isEntered(this)
-                || !openedDatabase.equals(kr.example.haliltalk.auth.AccountSession.databaseName(this)))) {
-            startActivity(new Intent(this, LoginActivity.class)
-                    .addFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK));
+        if(!(this instanceof LoginActivity)&&(!kr.example.haliltalk.auth.AccountSession.isEntered(this)
+                ||!openedDatabase.equals(kr.example.haliltalk.auth.AccountSession.databaseName(this)))) {
+            startActivity(new Intent(this,LoginActivity.class)
+                    .addFlags(Intent.FLAG_ACTIVITY_NEW_TASK|Intent.FLAG_ACTIVITY_CLEAR_TASK));
             finish();
         }
     }
@@ -31,20 +33,14 @@ public abstract class FeatureActivity extends Activity {
     @Override public void setContentView(int layout) {
         super.setContentView(layout);
         View root = ((ViewGroup)findViewById(android.R.id.content)).getChildAt(0);
-        int left=root.getPaddingLeft(), top=root.getPaddingTop();
-        int right=root.getPaddingRight(), bottom=root.getPaddingBottom();
-        root.setOnApplyWindowInsetsListener((view,insets)->{
-            if(Build.VERSION.SDK_INT>=30){
-                android.graphics.Insets safe=insets.getInsets(WindowInsets.Type.systemBars()
-                        |WindowInsets.Type.displayCutout()|WindowInsets.Type.ime());
-                view.setPadding(left+safe.left,top+safe.top,right+safe.right,bottom+safe.bottom);
-                return WindowInsets.CONSUMED;
-            }
-            view.setPadding(left+insets.getSystemWindowInsetLeft(),top+insets.getSystemWindowInsetTop(),
-                    right+insets.getSystemWindowInsetRight(),bottom+insets.getSystemWindowInsetBottom());
-            return insets.consumeSystemWindowInsets();
-        });
-        root.post(root::requestApplyInsets);
+        AdaptiveLayout.bind(root,findViewById(R.id.bottom_navigation));
+        View help=findViewById(R.id.feature_help);
+        if(help!=null){
+            String topic=layout==R.layout.screen_customization?"wardrobe":
+                    layout==R.layout.screen_goals?"goals":layout==R.layout.screen_journey?"journey":
+                    layout==R.layout.screen_adventure?"adventure":"settings";
+            help.setOnClickListener(v->HelpGuide.show(this,topic));
+        }
     }
 
     void openMain(boolean apps) {

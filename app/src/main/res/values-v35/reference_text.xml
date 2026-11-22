@@ -1,0 +1,10 @@
+<resources>
+    <style name="BodyText" parent="BodyTextBase">
+        <item name="android:textLocale">ko-KR</item>
+        <item name="android:lineBreakWordStyle">phrase</item>
+    </style>
+    <style name="ReferenceCopy" parent="ReferenceCopyBase">
+        <item name="android:textLocale">ko-KR</item>
+        <item name="android:lineBreakWordStyle">phrase</item>
+    </style>
+</resources>

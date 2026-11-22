@@ -18,13 +18,16 @@ final class BottomNavigation {
 
     static void bind(Activity activity, int selected, OnDestinationSelected listener) {
         LinearLayout bar = activity.findViewById(R.id.bottom_navigation);
+        boolean reference = "reference".equals(bar.getTag());
         for (int[] item : ITEMS) {
             TextView tab = (TextView) activity.getLayoutInflater()
-                    .inflate(R.layout.item_navigation, bar, false);
+                    .inflate(reference ? R.layout.item_reference_navigation : R.layout.item_navigation, bar, false);
             tab.setId(item[0]);
             tab.setText(item[1]);
             tab.setSelected(item[0] == selected);
-            int color = activity.getColor(tab.isSelected() ? R.color.ink : R.color.muted);
+            int color = activity.getColor(reference ? (tab.isSelected() ?
+                    android.R.color.white : R.color.reference_ink) :
+                    (tab.isSelected() ? R.color.ink : R.color.muted));
             tab.setTextColor(color);
             Drawable icon = activity.getDrawable(item[2]).mutate();
             icon.setTint(color);

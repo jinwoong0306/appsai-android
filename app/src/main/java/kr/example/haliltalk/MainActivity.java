@@ -21,11 +21,13 @@ import kr.example.haliltalk.ai.ChatController;
 import kr.example.haliltalk.shop.DemoShopStore;
 
 public class MainActivity extends Activity {
+    @Override protected void attachBaseContext(Context base){super.attachBaseContext(KoreanUi.context(base));}
     private String openedDatabase;
     private boolean resumed;
     private long displayedMessageId;
     SQLiteDatabase db; LinearLayout root, body; int friendId; String friendName; boolean showingHome, showingApps;
     final List<ResolveInfo> allApps=new ArrayList<>(), visibleApps=new ArrayList<>();
+    final Map<String,String> appNames=new HashMap<>();
     BaseAdapter appsAdapter;
     AlertDialog personalityDialog;
     boolean showingCharacter;
@@ -41,7 +43,7 @@ public class MainActivity extends Activity {
     final String[] personalities={"다정한 친구","장난기 많은 친구","차분한 친구"};
     @Override public void onCreate(Bundle b){
         setTheme(R.style.AppTheme);super.onCreate(b);
-        if (!kr.example.haliltalk.auth.AccountSession.isEntered(this)) {
+        if(!kr.example.haliltalk.auth.AccountSession.isEntered(this)){
             requireSession();return;
         }
         openedDatabase=kr.example.haliltalk.auth.AccountSession.databaseName(this);
@@ -71,21 +73,9 @@ public class MainActivity extends Activity {
     @Override public void setContentView(int layout){
         super.setContentView(layout);
         View content=((ViewGroup)findViewById(android.R.id.content)).getChildAt(0);
-        int left=content.getPaddingLeft(),top=content.getPaddingTop(),right=content.getPaddingRight(),bottom=content.getPaddingBottom();
-        content.setOnApplyWindowInsetsListener((view,insets)->{
-            if(android.os.Build.VERSION.SDK_INT>=30){
-                android.graphics.Insets safe=insets.getInsets(WindowInsets.Type.systemBars()
-                        |WindowInsets.Type.displayCutout()|WindowInsets.Type.ime());
-                view.setPadding(left+safe.left,top+safe.top,right+safe.right,bottom+safe.bottom);
-                View navigation=findViewById(R.id.bottom_navigation);
-                if(navigation!=null)navigation.setVisibility(insets.isVisible(WindowInsets.Type.ime())?View.GONE:View.VISIBLE);
-                return WindowInsets.CONSUMED;
-            }
-            view.setPadding(left+insets.getSystemWindowInsetLeft(),top+insets.getSystemWindowInsetTop(),
-                    right+insets.getSystemWindowInsetRight(),bottom+insets.getSystemWindowInsetBottom());
-            return insets.consumeSystemWindowInsets();
-        });
-        content.post(content::requestApplyInsets);
+        AdaptiveLayout.bind(content,findViewById(R.id.bottom_navigation));
+        View help=findViewById(R.id.chat_help);
+        if(help!=null)help.setOnClickListener(v->HelpGuide.show(this,"chat"));
     }
     @Override protected void onSaveInstanceState(Bundle state){
         if(db==null){super.onSaveInstanceState(state);return;}
@@ -107,9 +97,23 @@ public class MainActivity extends Activity {
     void screen(String title){showingHome=false;setContentView(R.layout.activity_main);root=findViewById(R.id.screen_root);body=findViewById(R.id.screen_body);TextView heading=findViewById(R.id.screen_title);heading.setText(title);}
     void home(){
         showingHome=true;showingApps=false;showingCharacter=false;setContentView(R.layout.screen_home);
+        findViewById(R.id.home_reference_header).setClipToOutline(true);
+        findViewById(R.id.bottom_navigation).setTag("reference");
         BottomNavigation.bind(this,R.id.nav_friends,this::navigateTo);
         ((CharacterView)findViewById(R.id.home_character)).setAppearance("chat","beret","none","none");
+        ((CharacterView)findViewById(R.id.home_hero_reading)).setAppearance("reading","none","none","none");
+        ((CharacterView)findViewById(R.id.home_hero_video)).setAppearance("video","none","none","none");
+        ((CharacterView)findViewById(R.id.home_hero_fitness)).setAppearance("fitness","none","none","none");
         findViewById(R.id.open_settings).setOnClickListener(v->startActivity(new Intent(this,SettingsActivity.class)));
+        findViewById(R.id.home_help).setOnClickListener(v->HelpGuide.show(this,"home"));
+        findViewById(R.id.home_guide_start).setOnClickListener(v->HelpGuide.show(this,"home"));
+        findViewById(R.id.home_guide_skip).setOnClickListener(v->{
+            HelpGuide.skipHome(this);showWelcomeIfNeeded();
+        });
+        Button addFriend=findViewById(R.id.home_new_friend);
+        ReferenceActions.label(addFriend,R.string.home_new_friend,R.drawable.ic_reference_add);
+        addFriend.setOnClickListener(v->startNewFriend());
+        // [U3/U6 | 지속 사용 진입] 현재 계정의 실제 기록만 표시한다.
         findViewById(R.id.home_journey).setOnClickListener(v->{
             renderJourneySummary();
             int next=(Integer)v.getTag();
@@ -121,32 +125,11 @@ public class MainActivity extends Activity {
             startActivity(new Intent(this,AdventureActivity.class)
                     .putExtra("friend_id",(Integer)findViewById(R.id.home_journey).getTag()));
         });
+        View navigation=findViewById(R.id.bottom_navigation);
+        navigation.setBackgroundResource(R.drawable.bg_reference_navbar);
+        navigation.setPadding(dp(4),dp(4),dp(4),dp(4));
         renderHomeFriends();
-    }
-    void renderHomeFriends(){
-        renderJourneySummary();
-        LinearLayout friends=findViewById(R.id.friend_list);
-        if(friends==null||db==null||!db.isOpen())return;
-        friends.removeAllViews();
-        try(Cursor c=db.rawQuery("SELECT f.id,f.name,f.personality,f.xp,"
-                +"(SELECT COUNT(*) FROM messages m WHERE m.friend=f.id AND m.is_user=0"
-                +" AND NOT EXISTS(SELECT 1 FROM message_reads r WHERE r.message=m.id)) FROM friends f ORDER BY f.id DESC",null)){
-            if(c.getCount()==0)friends.addView(text("아직 친구가 없어요. 앱을 선택해 첫 친구를 만들어봐요!",15));
-            while(c.moveToNext()){
-                int id=c.getInt(0),xp=c.getInt(3),unread=c.getInt(4);
-                String name=c.getString(1),person=c.getString(2);
-                View row=getLayoutInflater().inflate(R.layout.row_friend,friends,false);
-                row.setTag(id);
-                ((TextView)row.findViewById(R.id.friend_label)).setText(name);
-                ((TextView)row.findViewById(R.id.friend_detail)).setText(getString(R.string.friend_detail_format,person,xp));
-                TextView badge=row.findViewById(R.id.friend_unread);
-                badge.setVisibility(unread==0?View.GONE:View.VISIBLE);
-                badge.setText(unread>99?"99+":Integer.toString(unread));
-                badge.setContentDescription(getString(R.string.home_unread_description,unread));
-                showAppearance(row.findViewById(R.id.friend_character),id);
-                row.setOnClickListener(v->chat(id,name));friends.addView(row);
-            }
-        }
+        showWelcomeIfNeeded();
     }
     void renderJourneySummary(){
         TextView summary=findViewById(R.id.home_journey_summary);
@@ -190,17 +173,59 @@ public class MainActivity extends Activity {
         }
         open.setTag(nextFriend);
     }
+    void renderHomeFriends(){
+        renderJourneySummary();
+        LinearLayout friends=findViewById(R.id.friend_list);
+        if(friends==null||db==null||!db.isOpen())return;
+        friends.removeAllViews();
+        // [U3/U6 | 읽음 표시] 실제 받은 메시지와 현재 계정의 읽음 기록으로만 집계한다.
+        try(Cursor c=db.rawQuery("SELECT f.id,f.name,f.personality,f.xp,m.content,m.created,m.is_user,"
+                +"(SELECT COUNT(*) FROM messages u WHERE u.friend=f.id AND u.is_user=0"
+                +" AND NOT EXISTS(SELECT 1 FROM message_reads r WHERE r.message=u.id))"
+                +" FROM friends f LEFT JOIN messages m ON m.id=(SELECT id FROM messages"
+                +" WHERE friend=f.id ORDER BY created DESC,id DESC LIMIT 1)"
+                +" ORDER BY COALESCE(m.created,0) DESC,f.id DESC",null)){
+            if(c.getCount()==0){
+                TextView empty=new TextView(this,null,0,R.style.ReferenceCopy);
+                empty.setText(R.string.home_empty_friends);
+                empty.setTextColor(getColor(R.color.reference_muted));empty.setGravity(Gravity.CENTER);
+                empty.setPadding(dp(16),dp(24),dp(16),dp(24));friends.addView(empty);
+            }
+            while(c.moveToNext()){
+                int id=c.getInt(0);String name=c.getString(1),person=c.getString(2);
+                String preview=c.isNull(4)?person:c.getInt(6)==1?
+                        getString(R.string.home_own_preview,c.getString(4)):c.getString(4);
+                View row=getLayoutInflater().inflate(R.layout.row_friend,friends,false);
+                row.setTag(id);
+                ((TextView)row.findViewById(R.id.friend_label)).setText(name);
+                ((TextView)row.findViewById(R.id.friend_preview)).setText(preview);
+                TextView time=row.findViewById(R.id.friend_time);
+                if(!c.isNull(5)&&c.getLong(5)>0)time.setText(homeMessageTime(c.getLong(5)));
+                else time.setVisibility(View.GONE);
+                int unread=c.getInt(7);
+                TextView unreadBadge=row.findViewById(R.id.friend_unread);
+                unreadBadge.setVisibility(unread==0?View.GONE:View.VISIBLE);
+                unreadBadge.setText(unread>99?"99+":Integer.toString(unread));
+                unreadBadge.setContentDescription(getString(R.string.home_unread_description,unread));
+                showAppearance(row.findViewById(R.id.friend_character),id);
+                row.setContentDescription(getString(R.string.home_conversation_description,name,person,preview)
+                        +". "+getString(R.string.home_unread_description,unread));
+                row.setOnClickListener(v->chat(id,name));friends.addView(row);
+            }
+        }
+    }
+    String homeMessageTime(long created){
+        return KoreanUi.messageTime(created,System.currentTimeMillis(),java.time.ZoneId.systemDefault(),
+                android.text.format.DateFormat.is24HourFormat(this));
+    }
     @Override public void onWindowFocusChanged(boolean focused){
         super.onWindowFocusChanged(focused);
-        if(focused&&showingHome)renderJourneySummary();
+        if(focused&&showingHome){ReferenceActions.systemBars(this);renderJourneySummary();showWelcomeIfNeeded();}
         else if(focused&&!showingApps&&!showingCharacter)markVisibleChatRead();
     }
     void showWelcomeIfNeeded(){
-        if(getPreferences(MODE_PRIVATE).getBoolean("welcome_done",false)) return;
-        new AlertDialog.Builder(this).setTitle("앱사이에 온 걸 환영해요!")
-            .setMessage("설치된 실행 앱을 친구로 추가하고 성격을 골라보세요.\n\n사용 시간 조회는 설정에서 사용 정보 접근을 허용한 경우에만 가능해요. 어떤 콘텐츠를 봤는지는 알 수 없어요.\n\nAI 대화는 별도 동의 후 Google Gemini에 전송돼요. 개인정보 대신 가상 내용으로 테스트해 주세요.")
-            .setPositiveButton("시작하기",(dialog,which)->getPreferences(MODE_PRIVATE).edit().putBoolean("welcome_done",true).apply())
-            .setCancelable(false).show();
+        View card=findViewById(R.id.home_guide_card);
+        if(card!=null)card.setVisibility(HelpGuide.isHomeComplete(this)?View.GONE:View.VISIBLE);
     }
     void apps(){
         showingHome=false;showingApps=true;showingCharacter=false;setContentView(R.layout.screen_apps);
@@ -213,13 +238,15 @@ public class MainActivity extends Activity {
         ListView appList=findViewById(R.id.app_list);
         Intent intent=new Intent(Intent.ACTION_MAIN);intent.addCategory(Intent.CATEGORY_LAUNCHER);
         List<ResolveInfo> results=getPackageManager().queryIntentActivities(intent,0);
-        results.sort(Comparator.comparing(x->x.loadLabel(getPackageManager()).toString(),String.CASE_INSENSITIVE_ORDER));
-        allApps.clear();Set<String> seen=new HashSet<>();
+        allApps.clear();appNames.clear();Set<String> seen=new HashSet<>();
         for(ResolveInfo info:results){
             String pkg=info.activityInfo.packageName;
             if(pkg.equals(getPackageName())||!seen.add(pkg))continue;
+            appNames.put(pkg,KoreanUi.appName(this,info));
             allApps.add(info);
         }
+        allApps.sort(Comparator.comparing(x->appNames.get(x.activityInfo.packageName),
+                java.text.Collator.getInstance(Locale.KOREAN)));
         appsAdapter=new BaseAdapter(){
             @Override public int getCount(){return visibleApps.size();}
             @Override public ResolveInfo getItem(int position){return visibleApps.get(position);}
@@ -228,20 +255,19 @@ public class MainActivity extends Activity {
                 View row=recycled==null?getLayoutInflater().inflate(R.layout.row_app,parent,false):recycled;
                 ResolveInfo info=getItem(position);
                 ((ImageView)row.findViewById(R.id.app_icon)).setImageDrawable(info.loadIcon(getPackageManager()));
-                ((TextView)row.findViewById(R.id.app_label)).setText(info.loadLabel(getPackageManager()));
-                ((TextView)row.findViewById(R.id.app_package)).setText(info.activityInfo.packageName);
+                ((TextView)row.findViewById(R.id.app_label)).setText(appNames.get(info.activityInfo.packageName));
                 boolean selected=info.activityInfo.packageName.equals(selectedPackage);
                 row.setSelected(selected);
                 row.setBackgroundResource(selected?R.drawable.bg_selected_card:R.drawable.bg_card);
                 ((ImageView)row.findViewById(R.id.app_selected)).setImageResource(selected?R.drawable.ic_check:R.drawable.ic_circle);
-                row.setContentDescription(info.loadLabel(getPackageManager())+(selected?" 선택됨":""));
+                row.setContentDescription(appNames.get(info.activityInfo.packageName)+(selected?" 선택됨":""));
                 return row;
             }
         };
         appList.setAdapter(appsAdapter);appList.setEmptyView(findViewById(R.id.apps_empty));
         appList.setOnItemClickListener((parent,row,position,id)->{
             ResolveInfo info=visibleApps.get(position);
-            selectedPackage=info.activityInfo.packageName;selectedLabel=info.loadLabel(getPackageManager()).toString();
+            selectedPackage=info.activityInfo.packageName;selectedLabel=appNames.get(selectedPackage);
             appsAdapter.notifyDataSetChanged();findViewById(R.id.apps_continue).setEnabled(true);
         });
         EditText search=findViewById(R.id.app_search);
@@ -256,7 +282,8 @@ public class MainActivity extends Activity {
         this.query=query;
         String term=query.trim().toLowerCase(Locale.ROOT);visibleApps.clear();
         for(ResolveInfo info:allApps){
-            if(info.loadLabel(getPackageManager()).toString().toLowerCase(Locale.ROOT).contains(term)
+            if(appNames.get(info.activityInfo.packageName).toLowerCase(Locale.KOREAN).contains(term)
+                    ||info.loadLabel(getPackageManager()).toString().toLowerCase(Locale.ROOT).contains(term)
                     ||info.activityInfo.packageName.toLowerCase(Locale.ROOT).contains(term))visibleApps.add(info);
         }
         appsAdapter.notifyDataSetChanged();
@@ -300,12 +327,12 @@ public class MainActivity extends Activity {
     }
     void renderChoices(){
         ((CharacterView)findViewById(R.id.character_preview)).setAppearance(character,hat,face,prop);
-        LinearLayout bases=findViewById(R.id.character_choices);bases.removeAllViews();
+        LinearLayout bases=findViewById(R.id.character_choices);
         for(int i=0;i<CharacterCatalog.CHARACTER_IDS.length;i++){
             String id=CharacterCatalog.CHARACTER_IDS[i];
             addChoice(bases,id,CharacterCatalog.CHARACTER_NAMES[i],id.equals(character),id,hat,face,prop,()->{character=id;renderChoices();});
         }
-        LinearLayout tabs=findViewById(R.id.accessory_tabs);tabs.removeAllViews();
+        LinearLayout tabs=findViewById(R.id.accessory_tabs);
         String[] tabNames={"모자","안경","소품"};
         for(int i=0;i<tabNames.length;i++){
             final int index=i;addChip(tabs,tabNames[i],accessoryTab==i,()->{accessoryTab=index;renderChoices();});
@@ -322,17 +349,21 @@ public class MainActivity extends Activity {
                         if(accessoryTab==0)hat=id;else if(accessoryTab==1)face=id;else prop=id;renderChoices();
                     });
         }
-        LinearLayout people=findViewById(R.id.personality_choices);people.removeAllViews();
+        LinearLayout people=findViewById(R.id.personality_choices);
         for(int i=0;i<personalities.length;i++){
             final int index=i;addChip(people,personalities[i],personality==i,()->{personality=index;renderChoices();});
         }
     }
     void addChip(LinearLayout parent,String label,boolean selected,Runnable action){
-        Button chip=new Button(this,null,0,R.style.SecondaryButton);
+        Button chip=(Button)parent.findViewWithTag(label);
+        if(chip==null){
+            chip=new Button(this,null,0,R.style.SecondaryButton);chip.setTag(label);
+            LinearLayout.LayoutParams params=new LinearLayout.LayoutParams(ViewGroup.LayoutParams.WRAP_CONTENT,ViewGroup.LayoutParams.WRAP_CONTENT);
+            params.setMarginEnd(dp(8));chip.setLayoutParams(params);parent.addView(chip);
+        }
         chip.setText(selected?getString(R.string.selected_choice_format,label):label);chip.setSelected(selected);
         chip.setTextColor(getColor(selected?R.color.on_primary:R.color.ink));
-        LinearLayout.LayoutParams params=new LinearLayout.LayoutParams(ViewGroup.LayoutParams.WRAP_CONTENT,ViewGroup.LayoutParams.WRAP_CONTENT);
-        params.setMarginEnd(dp(8));chip.setLayoutParams(params);chip.setOnClickListener(v->action.run());parent.addView(chip);
+        chip.setOnClickListener(v->action.run());
     }
     void addChoice(ViewGroup parent,String id,String label,boolean selected,String base,String h,String f,String p,Runnable action){
         View row=parent.findViewWithTag(id);
@@ -410,10 +441,9 @@ public class MainActivity extends Activity {
             if(person.moveToFirst())((TextView)findViewById(R.id.chat_personality)).setText(person.getString(0));
         }
         findViewById(R.id.back_home).setOnClickListener(v->home());
-        // [U2] Open only the selected friend's local goals.
+        findViewById(R.id.check_usage).setOnClickListener(v->usage());
         findViewById(R.id.open_goals).setOnClickListener(v->startActivity(
                 new Intent(this,GoalsActivity.class).putExtra("friend_id",id)));
-        findViewById(R.id.check_usage).setOnClickListener(v->usage());
         findViewById(R.id.ai_notice).setOnClickListener(v->showAiConsent(null));
         findViewById(R.id.retry_message).setOnClickListener(v->withAiConsent(()->chatController.retry(id)));
         findViewById(R.id.cancel_request).setOnClickListener(v->chatController.cancelFailed(id));

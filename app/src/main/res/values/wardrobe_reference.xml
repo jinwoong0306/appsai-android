@@ -1,0 +1,37 @@
+<resources>
+    <string name="wardrobe_reference_equipped">미리보기</string>
+    <string name="wardrobe_reference_slot_item">%1$s · %2$s</string>
+    <string name="wardrobe_reference_inventory">%1$s 인벤토리</string>
+    <string name="wardrobe_reference_owned">보유 %1$d개 · 없음 제외</string>
+    <string name="wardrobe_reference_background">배경</string>
+    <string name="wardrobe_reference_backgrounds">배경 인벤토리</string>
+    <string name="wardrobe_reference_starters">기본 제공 · 모두 무료</string>
+    <string name="wardrobe_reference_empty">아직 친구가 없어요.\n아래 앱 찾기로 추가해요.</string>
+    <string name="wardrobe_reference_discard_title">변경 사항을 버릴까요?</string>
+    <string name="wardrobe_reference_locked_title">보유하지 않은 소품</string>
+    <string name="wardrobe_reference_none">없음</string>
+    <string name="wardrobe_reference_study">공부방</string>
+    <string name="wardrobe_reference_park">공원</string>
+    <string name="wardrobe_reference_bedroom">침실</string>
+    <string name="wardrobe_reference_save">저장하기</string>
+    <string name="wardrobe_reference_saved">저장됨</string>
+    <string name="wardrobe_reference_save_failed">기기에 꾸미기 기록을 쓰지 못했어요.\n변경은 남아 있어요. 다시 저장해 주세요.</string>
+    <string name="wardrobe_reference_scene_selected">선택한 배경: %1$s</string>
+    <style name="WardrobeReferenceText" parent="ReferenceCopy">
+        <item name="android:textColor">@color/reference_ink</item>
+        <item name="android:textSize">15sp</item>
+    </style>
+    <style name="WardrobeReferenceSection" parent="WardrobeReferenceText">
+        <item name="android:textStyle">bold</item>
+        <item name="android:textSize">17sp</item>
+        <item name="android:layout_marginTop">12dp</item>
+        <item name="android:layout_marginBottom">8dp</item>
+    </style>
+    <style name="WardrobeReferenceTab" parent="SecondaryButton">
+        <item name="android:background">@drawable/wardrobe_tab</item>
+        <item name="android:textColor">@color/reference_tab_text</item>
+        <item name="android:layout_marginTop">0dp</item>
+        <item name="android:layout_marginBottom">0dp</item>
+        <item name="android:padding">8dp</item>
+    </style>
+</resources>

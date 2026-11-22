@@ -3,8 +3,13 @@
     android:orientation="vertical" android:paddingBottom="8dp">
     <TextView android:id="@+id/shop_balance" style="@style/BodyText" android:textStyle="bold" android:gravity="end"/>
     <TextView style="@style/SecondaryText" android:text="@string/shop_demo_notice"/>
-    <kr.example.haliltalk.character.CharacterView android:id="@+id/shop_preview"
-        android:layout_width="match_parent" android:layout_height="144dp"/>
+    <FrameLayout android:id="@+id/shop_stage" android:layout_width="match_parent"
+        android:layout_height="144dp" android:background="@drawable/bg_scene_frame">
+        <ImageView android:layout_width="match_parent" android:layout_height="match_parent"
+            android:src="@drawable/scene_shop" android:scaleType="centerCrop" android:importantForAccessibility="no"/>
+        <kr.example.haliltalk.character.CharacterView android:id="@+id/shop_preview"
+            android:layout_width="match_parent" android:layout_height="match_parent"/>
+    </FrameLayout>
     <TextView android:id="@+id/shop_selected_name" style="@style/SectionTitle" android:layout_marginTop="0dp"/>
     <Button android:id="@+id/shop_character" style="@style/SecondaryButton"/>
     <Button android:id="@+id/collection_set" style="@style/SecondaryButton" android:text="@string/collection_set"/>

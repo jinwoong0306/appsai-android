@@ -116,9 +116,40 @@ public final class AccessoryGridTest extends GuestActivityTestCase {
                     .addFlags(Intent.FLAG_ACTIVITY_NEW_TASK));
             CustomizationActivity wardrobe=activity;
             runTestOnUiThread(()->{wardrobe.appearance[1]="beret";wardrobe.render();});
-            assertScrollingScreen(wardrobe,R.id.wardrobe_items,R.id.wardrobe_scroll,
-                    R.id.wardrobe_preview,R.id.wardrobe_actions);
+            View root=wardrobe.findViewById(android.R.id.content);
+            AccessoryGrid grid=wardrobe.findViewById(R.id.wardrobe_items);
+            ScrollView scroll=wardrobe.findViewById(R.id.wardrobe_scroll);
+            android.widget.HorizontalScrollView inventory=wardrobe.findViewById(R.id.wardrobe_inventory_scroll);
+            Rect preview=new Rect(),actions=new Rect();
+            afterLayout(root,()->{scroll.setFocusableInTouchMode(true);scroll.requestFocus();scroll.scrollTo(0,0);});
             runTestOnUiThread(()->{
+                assertSame(inventory,grid.getParent());
+                assertEquals(CharacterCatalog.HAT_IDS.length,grid.getChildCount());
+                assertEquals(grid.getChildCount(),firstRowCount(grid));
+                assertTrue(grid.getWidth()>inventory.getWidth());
+                assertTrue(wardrobe.findViewById(R.id.wardrobe_preview).getGlobalVisibleRect(preview));
+                assertTrue(wardrobe.findViewById(R.id.wardrobe_actions).getGlobalVisibleRect(actions));
+            });
+            afterLayout(root,()->inventory.scrollTo(grid.getWidth(),0));
+            runTestOnUiThread(()->{
+                assertTrue(inventory.getScrollX()>0);
+                assertTrue("Last accessory is horizontally reachable",
+                        grid.getChildAt(grid.getChildCount()-1).getGlobalVisibleRect(new Rect()));
+            });
+            afterLayout(root,()->scroll.scrollTo(0,scroll.getChildAt(0).getHeight()));
+            int[] position={0,0};
+            runTestOnUiThread(()->{position[0]=scroll.getScrollY();position[1]=inventory.getScrollX();});
+            View none=grid.findViewWithTag("none");
+            afterLayout(root,()->assertTrue(none.performClick()));
+            runTestOnUiThread(()->{
+                assertSame(none,grid.findViewWithTag("none"));assertTrue(none.isSelected());
+                assertEquals(position[0],scroll.getScrollY());
+                assertEquals(position[1],inventory.getScrollX());
+                Rect actual=new Rect();
+                assertTrue(wardrobe.findViewById(R.id.wardrobe_preview).getGlobalVisibleRect(actual));
+                assertEquals(preview,actual);
+                assertTrue(wardrobe.findViewById(R.id.wardrobe_actions).getGlobalVisibleRect(actual));
+                assertEquals(actions,actual);
                 assertEquals("none",wardrobe.appearance[1]);
                 assertFalse(wardrobe.findViewById(R.id.wardrobe_save).isEnabled());
                 assertFalse(wardrobe.findViewById(R.id.wardrobe_cancel).isEnabled());

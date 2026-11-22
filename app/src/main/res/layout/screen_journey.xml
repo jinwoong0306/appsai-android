@@ -2,8 +2,13 @@
 <!-- [U3 | 필수 XML] 한 스크롤 안에 오늘 행동, 최근 변화, 실제 기록을 배치한다. -->
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
     style="@style/Page" android:orientation="vertical">
-    <Button android:id="@+id/journey_back" style="@style/SecondaryButton"
-        android:text="@string/journey_back" />
+    <LinearLayout android:layout_width="match_parent" android:layout_height="wrap_content"
+        android:orientation="horizontal" android:gravity="center_vertical">
+        <Button android:id="@+id/journey_back" style="@style/CompactAction" android:text="@string/journey_back"/>
+        <Space android:layout_width="0dp" android:layout_height="1dp" android:layout_weight="1"/>
+        <ImageButton android:id="@+id/feature_help" style="@style/IconButton"
+            android:src="@drawable/ic_help" android:contentDescription="@string/help_open"/>
+    </LinearLayout>
     <ScrollView android:id="@+id/journey_scroll" android:layout_width="match_parent"
         android:layout_height="0dp" android:layout_weight="1" android:fillViewport="true">
         <LinearLayout android:layout_width="match_parent" android:layout_height="wrap_content"

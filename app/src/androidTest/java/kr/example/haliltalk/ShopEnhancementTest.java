@@ -156,12 +156,63 @@ abstract class ShopFixtureTest extends GuestActivityTestCase {
     }
 
     void filter(int id,int value) throws Throwable {
+        ListView list=activity.findViewById(R.id.shop_list);
+        View root=activity.getWindow().getDecorView();
         runTestOnUiThread(()->{
             if(!activity.filtersOpen)activity.header.findViewById(R.id.shop_filters_toggle).performClick();
-            ((ListView)activity.findViewById(R.id.shop_list)).setSelection(0);
         });
-        getInstrumentation().waitForIdleSync();
-        runTestOnUiThread(()->((Spinner)activity.header.findViewById(id)).setSelection(value));
+        EnhancementCapture.awaitFrame(getInstrumentation(),activity.getWindow());
+        java.util.concurrent.CountDownLatch headerShown=new java.util.concurrent.CountDownLatch(1);
+        android.view.ViewTreeObserver.OnPreDrawListener headerLayout=()->{
+            if(list.getFirstVisiblePosition()==0&&activity.header.isAttachedToWindow()
+                    &&activity.header.getWidth()>0)headerShown.countDown();
+            return true;
+        };
+        runTestOnUiThread(()->{
+            root.getViewTreeObserver().addOnPreDrawListener(headerLayout);
+            list.smoothScrollToPosition(0);root.requestLayout();
+        });
+        try {
+            assertTrue("The non-selectable header must be attached before filtering",
+                    headerShown.await(5,java.util.concurrent.TimeUnit.SECONDS));
+        } finally {
+            runTestOnUiThread(()->root.getViewTreeObserver().removeOnPreDrawListener(headerLayout));
+        }
+        EnhancementCapture.awaitFrame(getInstrumentation(),activity.getWindow());
+        java.util.concurrent.CountDownLatch selected=new java.util.concurrent.CountDownLatch(1);
+        Spinner spinner=activity.header.findViewById(id);
+        android.widget.AdapterView.OnItemSelectedListener original=spinner.getOnItemSelectedListener();
+        StringBuilder events=new StringBuilder();
+        runTestOnUiThread(()->{
+            spinner.setOnItemSelectedListener(new android.widget.AdapterView.OnItemSelectedListener(){
+                public void onItemSelected(android.widget.AdapterView<?> parent,View view,int position,long item){
+                    events.append(position).append(',');
+                    original.onItemSelected(parent,view,position,item);
+                    if(position==value&&(id==R.id.shop_theme?activity.theme:activity.ownership)==value)
+                        selected.countDown();
+                }
+                public void onNothingSelected(android.widget.AdapterView<?> parent){
+                    original.onNothingSelected(parent);
+                }
+            });
+            if(spinner.getSelectedItemPosition()==value
+                    &&(id==R.id.shop_theme?activity.theme:activity.ownership)==value)selected.countDown();
+            else spinner.setSelection(value);
+        });
+        try {
+            boolean applied=selected.await(5,java.util.concurrent.TimeUnit.SECONDS);
+            String[] state={""};
+            runTestOnUiThread(()->state[0]=" selected="+spinner.getSelectedItemPosition()
+                    +" theme="+activity.theme+" ownership="+activity.ownership+" open="+activity.filtersOpen
+                    +" attached="+spinner.isAttachedToWindow()+" shown="+spinner.isShown()
+                    +" size="+spinner.getWidth()+"x"+spinner.getHeight()
+                    +" layout="+spinner.isLayoutRequested()+" callbacks="+events);
+            if(!applied)EnhancementCapture.captureDisplay(getInstrumentation(),activity.getWindow(),
+                    "filter-failure-"+id,"filter-diagnostic");
+            assertTrue("The filter callback must apply before the next action: "+id+" -> "+value+state[0],applied);
+        } finally {
+            runTestOnUiThread(()->spinner.setOnItemSelectedListener(original));
+        }
         getInstrumentation().waitForIdleSync();
     }
 

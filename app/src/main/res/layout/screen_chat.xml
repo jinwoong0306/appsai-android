@@ -24,9 +24,8 @@
             android:gravity="center"
             android:text="@string/brand_name" />
 
-        <Space
-            android:layout_width="48dp"
-            android:layout_height="1dp" />
+        <ImageButton android:id="@+id/chat_help" style="@style/IconButton"
+            android:src="@drawable/ic_help" android:contentDescription="@string/help_open"/>
     </LinearLayout>
 
     <LinearLayout
@@ -41,8 +40,8 @@
 
         <kr.example.haliltalk.character.CharacterView
             android:id="@+id/chat_character"
-            android:layout_width="80dp"
-            android:layout_height="80dp"
+            android:layout_width="@dimen/chat_avatar_size"
+            android:layout_height="@dimen/chat_avatar_size"
             android:importantForAccessibility="no" />
 
         <LinearLayout
@@ -56,7 +55,8 @@
                 android:id="@+id/chat_title"
                 style="@style/PageTitle"
                 android:layout_marginTop="0dp"
-                android:layout_marginBottom="4dp" />
+                android:layout_marginBottom="4dp"
+                android:maxLines="1" android:ellipsize="end" />
 
             <TextView
                 android:id="@+id/chat_personality"
@@ -64,22 +64,20 @@
         </LinearLayout>
     </LinearLayout>
 
-    <Button
-        android:id="@+id/open_goals"
-        style="@style/SecondaryButton"
-        android:layout_marginTop="0dp"
-        android:text="@string/goals_open" />
-
-    <Button
-        android:id="@+id/check_usage"
-        style="@style/SecondaryButton"
-        android:layout_marginTop="0dp"
-        android:text="@string/check_usage" />
+    <LinearLayout android:layout_width="match_parent" android:layout_height="wrap_content"
+        android:orientation="horizontal" android:baselineAligned="false">
+        <Button android:id="@+id/check_usage" style="@style/SecondaryButton"
+            android:layout_width="0dp" android:layout_weight="1" android:layout_marginEnd="4dp"
+            android:layout_marginTop="0dp" android:text="@string/check_usage" />
+        <Button android:id="@+id/open_goals" style="@style/SecondaryButton"
+            android:layout_width="0dp" android:layout_weight="1" android:layout_marginStart="4dp"
+            android:layout_marginTop="0dp" android:text="@string/goals_open" />
+    </LinearLayout>
 
     <TextView
         android:id="@+id/ai_notice"
         style="@style/SecondaryText"
-        android:layout_marginBottom="12dp"
+        android:layout_marginBottom="0dp"
         android:minHeight="48dp"
         android:gravity="center"
         android:clickable="true"
@@ -121,11 +119,17 @@
             android:visibility="gone" />
     </LinearLayout>
 
+    <FrameLayout
+        android:layout_width="match_parent" android:layout_height="0dp" android:layout_weight="1"
+        android:layout_marginTop="8dp">
+    <ImageView android:layout_width="match_parent" android:layout_height="match_parent"
+        android:src="@drawable/scene_chat" android:scaleType="centerCrop"
+        android:importantForAccessibility="no"/>
     <ScrollView
         android:id="@+id/chat_scroll"
         android:layout_width="match_parent"
-        android:layout_height="0dp"
-        android:layout_weight="1"
+        android:layout_height="match_parent"
+        android:defaultFocusHighlightEnabled="false"
         android:fillViewport="true"
         android:clipToPadding="false">
 
@@ -137,12 +141,12 @@
             android:paddingBottom="8dp"
             android:orientation="vertical" />
     </ScrollView>
+    </FrameLayout>
 
     <TextView
         style="@style/SecondaryText"
         android:layout_marginTop="8dp"
         android:layout_marginBottom="8dp"
-        android:labelFor="@id/message_input"
         android:text="@string/message_label" />
 
     <LinearLayout

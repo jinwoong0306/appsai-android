@@ -6,6 +6,8 @@
         <Button android:id="@+id/adventure_back" style="@style/SecondaryButton" android:layout_width="wrap_content"
             android:text="@string/journey_back"/>
         <TextView style="@style/AdventureToolbarTitle" android:text="@string/adventure_title"/>
+        <ImageButton android:id="@+id/feature_help" style="@style/IconButton"
+            android:src="@drawable/ic_help" android:contentDescription="@string/help_open"/>
     </LinearLayout>
     <ScrollView android:id="@+id/adventure_scroll" android:layout_width="match_parent"
         android:layout_height="0dp" android:layout_weight="1" android:fillViewport="true">
@@ -24,7 +26,7 @@
                 <FrameLayout android:layout_width="match_parent" android:layout_height="144dp"
                     android:importantForAccessibility="noHideDescendants">
                     <ImageView android:layout_width="match_parent" android:layout_height="match_parent"
-                        android:src="@drawable/bg_hero" android:scaleType="centerCrop" android:importantForAccessibility="no"/>
+                        android:src="@drawable/scene_garden" android:scaleType="centerCrop" android:importantForAccessibility="no"/>
                     <kr.example.haliltalk.character.CharacterView android:id="@+id/adventure_character"
                         android:layout_width="match_parent" android:layout_height="match_parent"/>
                 </FrameLayout>

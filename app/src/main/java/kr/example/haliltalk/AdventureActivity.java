@@ -29,8 +29,8 @@ import kr.example.haliltalk.data.JourneyStore;
 /** Explicit route choices and local daily records; no automatic completion or coin rewards. */
 public final class AdventureActivity extends FeatureActivity {
     private static final int[] STAMPS={1,3,7,14};
-    private static final int[] SCENES={R.drawable.bg_hero,R.drawable.bg_card,
-            R.drawable.bg_selected_card,R.drawable.bg_hero};
+    private static final int[] SCENES={R.drawable.scene_garden,R.drawable.scene_study,
+            R.drawable.scene_bedroom,R.drawable.scene_library};
     private static final int[] SUGGESTIONS={R.id.adventure_suggestion_one,
             R.id.adventure_suggestion_two,R.id.adventure_suggestion_three};
     private FriendsDatabase helper;
